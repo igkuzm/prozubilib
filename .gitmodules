@@ -1,0 +1,3 @@
+[submodule "kdata2"]
+	path = kdata2
+	url = https://github.com/igkuzm/kdata2
