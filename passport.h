@@ -2,7 +2,7 @@
  * File              : passport.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 21.04.2023
+ * Last Modified Date: 23.04.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -72,7 +72,7 @@ static void
 prozubi_passport_foreach(
 		kdata2_t *kdata,
 		void     *user_data,
-		int      *(callback)(void *user_data, struct passport_t *p)
+		int      (*callback)(void *user_data, struct passport_t *p)
 		)
 {
 	/* check kdata */
