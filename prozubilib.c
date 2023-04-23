@@ -9,6 +9,8 @@
 #include "prozubilib.h"
 #include "log.h"
 
+#include "kdata2/kdata2.h"
+
 #include <pthread.h>
 #include <signal.h>
 
