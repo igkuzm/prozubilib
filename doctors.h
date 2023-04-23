@@ -170,8 +170,10 @@ prozubi_doctor_foreach(
 				case number:\
 				{\
 					const unsigned char *value = sqlite3_column_text(stmt, i);\
-					strncpy(d.member, (const char *)value, size - 1);\
-					d.member[size - 1] = 0;\
+					if (value){\
+						strncpy(d.member, (const char *)value, size - 1);\
+						d.member[size - 1] = 0;\
+					}\
 					break;\
 				}; 
 

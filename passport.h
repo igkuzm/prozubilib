@@ -133,8 +133,10 @@ PASSPORT_COLUMNS
 				case number:\
 				{\
 					const unsigned char *value = sqlite3_column_text(stmt, i);\
-					strncpy(p.member, (const char *)value, sizeof(p.member) - 1);\
-					p.member[sizeof(p.member) - 1] = 0;\
+					if (value){\
+						strncpy(p.member, (const char *)value, sizeof(p.member) - 1);\
+						p.member[sizeof(p.member) - 1] = 0;\
+					}\
 					break;\
 				}; 
 

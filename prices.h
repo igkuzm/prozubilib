@@ -144,8 +144,10 @@ prozubi_price_foreach(
 				case number:\
 				{\
 					const unsigned char *value = sqlite3_column_text(stmt, i);\
-					strncpy(p.member, (const char *)value, size - 1);\
-					p.member[size - 1] = 0;\
+					if (value){\
+						strncpy(p.member, (const char *)value, size - 1);\
+						p.member[size - 1] = 0;\
+					}\
 					break;\
 				}; 
 

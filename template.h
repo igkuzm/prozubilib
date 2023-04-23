@@ -160,8 +160,10 @@ prozubi_template_foreach(
 				case number:\
 				{\
 					const unsigned char *value = sqlite3_column_text(stmt, i);\
-					strncpy(t.member, (const char *)value, size - 1);\
-					t.member[size - 1] = 0;\
+					if (value){\
+						strncpy(t.member, (const char *)value, size - 1);\
+						t.member[size - 1] = 0;\
+					}\
 					break;\
 				}; 
 #define TEMPLATES_COLUMN_TEXT_P(member, number, title) \
@@ -170,7 +172,9 @@ prozubi_template_foreach(
 					size_t len = sqlite3_column_bytes(stmt, i);\
 					const unsigned char *value = sqlite3_column_text(stmt, i);\
 					t.member = (char *)value;\
-					t.member[len - 1] = 0;\
+					if (t.member){\
+						t.member[len - 1] = 0;\
+					}\
 					t.len_##member = len;\
 					break;\
 				};				

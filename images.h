@@ -198,8 +198,10 @@ prozubi_image_foreach(
 				case number:\
 				{\
 					const unsigned char *value = sqlite3_column_text(stmt, i);\
-					strncpy(image.member, (const char *)value, size - 1);\
-					image.member[size - 1] = 0;\
+					if (value){\
+						strncpy(image.member, (const char *)value, size - 1);\
+						image.member[size - 1] = 0;\
+					}\
 					break;\
 				}; 
 

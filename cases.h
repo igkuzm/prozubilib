@@ -313,14 +313,16 @@ prozubi_case_get(
 				{\
 					size_t len = sqlite3_column_bytes(stmt, i);\
 					const unsigned char *value = sqlite3_column_text(stmt, i);\
-					char *str = malloc(len);\
-					if (!str){\
-						ERR("can't allocate string with len: %ld", len);\
-						break;\
+					if (value){\
+						char *str = malloc(len);\
+						if (!str){\
+							ERR("can't allocate string with len: %ld", len);\
+							break;\
+						}\
+						strncpy(str, (const char *)value, len - 1);\
+						str[len - 1] = 0;\
+						c->member = str;\
 					}\
-					strncpy(str, (const char *)value, len - 1);\
-					str[len - 1] = 0;\
-					c->member = str;\
 					break;\
 				}; 
 
