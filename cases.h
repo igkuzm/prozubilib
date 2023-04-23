@@ -2,7 +2,7 @@
  * File              : cases.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 21.04.2023
+ * Last Modified Date: 23.04.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -137,7 +137,7 @@ prozubi_cases_foreach(
 		kdata2_t   *kdata,
 		const char *patientid,
 		void       *user_data,
-		int        *(callback)(void *user_data, struct case_id *c)
+		int        (*callback)(void *user_data, struct case_id *c)
 		)
 {
 	/* check kdata */

@@ -2,7 +2,7 @@
  * File              : doctors.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 21.04.2023
+ * Last Modified Date: 23.04.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -122,7 +122,7 @@ static void
 prozubi_doctor_foreach(
 		kdata2_t   *kdata,
 		void       *user_data,
-		int        *(callback)(void *user_data, struct doctor_t *d)
+		int        (*callback)(void *user_data, struct doctor_t *d)
 		)
 {
 	/* check kdata */

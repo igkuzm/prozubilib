@@ -2,7 +2,7 @@
  * File              : template.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 21.04.2023
+ * Last Modified Date: 23.04.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -110,7 +110,7 @@ prozubi_template_foreach(
 		kdata2_t   *kdata,
 		const char *templatename,
 		void       *user_data,
-		int        *(callback)(void *user_data, struct template_t *p)
+		int        (*callback)(void *user_data, struct template_t *p)
 		)
 {
 	/* check kdata */
