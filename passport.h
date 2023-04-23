@@ -94,7 +94,7 @@ PASSPORT_COLUMNS
 #undef PASSPORT_COLUMN_DATE
 #undef PASSPORT_COLUMN_TEXT			
 	
-	strcat(SQL, "RECORDNAME FROM ");
+	strcat(SQL, "ZRECORDNAME FROM ");
 	strcat(SQL, PASSPORT_TABLENAME);
 
 	/* passort struct */
