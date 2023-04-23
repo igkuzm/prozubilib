@@ -274,7 +274,7 @@ prozubi_case_get(
 #undef CASES_COLUMN_TEXT			
 #undef CASES_COLUMN_DATA			
 	
-	strcat(SQL, "RECORDNAME FROM ");
+	strcat(SQL, "ZRECORDNAME FROM ");
 	strcat(SQL, CASES_TABLENAME);
 	strcat(SQL, STR(" WHERE ZRECORDNAME = '%s'", id));
 

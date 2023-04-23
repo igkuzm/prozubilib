@@ -146,7 +146,7 @@ prozubi_doctor_foreach(
 #undef DOCTORS_COLUMN_TEXT			
 #undef DOCTORS_COLUMN_DATA			
 	
-	strcat(SQL, "RECORDNAME FROM ");
+	strcat(SQL, "ZRECORDNAME FROM ");
 	strcat(SQL, DOCTORS_TABLENAME);
 
 	/* start SQLite request */

@@ -134,7 +134,7 @@ prozubi_template_foreach(
 #undef TEMPLATES_COLUMN_TEXT			
 #undef TEMPLATES_COLUMN_TEXT_P			
 	
-	strcat(SQL, "RECORDNAME FROM ");
+	strcat(SQL, "ZRECORDNAME FROM ");
 	strcat(SQL, TEMPLATES_TABLENAME);
 	if (templatename)
 		strcat(SQL, STR(" WHERE ZTEMPLATENAME = '%s'", templatename));

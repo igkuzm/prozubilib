@@ -120,7 +120,7 @@ prozubi_price_foreach(
 	PRICES_COLUMNS
 #undef PRICES_COLUMN_TEXT			
 	
-	strcat(SQL, "RECORDNAME FROM ");
+	strcat(SQL, "ZRECORDNAME FROM ");
 	strcat(SQL, PRICES_TABLENAME);
 
 	/* start SQLite request */

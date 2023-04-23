@@ -160,7 +160,7 @@ prozubi_image_foreach(
 #undef IMAGES_COLUMN_TEXT			
 #undef IMAGES_COLUMN_DATA			
 	
-	strcat(SQL, "RECORDNAME FROM ");
+	strcat(SQL, "ZRECORDNAME FROM ");
 	strcat(SQL, IMAGES_TABLENAME);
 	if (caseid)
 		strcat(SQL, STR(" WHERE ZCASEID = '%s'", caseid));
