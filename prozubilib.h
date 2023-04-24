@@ -2,7 +2,7 @@
  * File              : prozubilib.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 23.04.2023
+ * Last Modified Date: 25.04.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -48,6 +48,5 @@ int
 prozubi_stop_sync(
 		prozubi_t *p
 		);
-
 
 #endif /* ifndef PROZUBILIB_H */

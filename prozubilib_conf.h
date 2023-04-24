@@ -2,7 +2,7 @@
  * File              : prozubilib_conf.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 17.04.2023
- * Last Modified Date: 21.04.2023
+ * Last Modified Date: 24.04.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -24,4 +24,3 @@ typedef char uuid4_str[37];
 #ifndef NSTimeIntervalSince1970
 #define NSTimeIntervalSince1970  978307200.0
 #endif /* ifndef NSTimeIntervalSince1970 */
-

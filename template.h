@@ -2,7 +2,7 @@
  * File              : template.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 23.04.2023
+ * Last Modified Date: 24.04.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -10,6 +10,8 @@
 #define TEMPLATES_H
 
 #include "prozubilib_conf.h"
+
+#include "enum.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -36,15 +38,27 @@ struct template_t {
 };
 
 
-enum template_column_number {
-#define TEMPLATES_COLUMN_TEXT(member, number, title, size) number, 
-#define TEMPLATES_COLUMN_TEXT_P(member, number, title) number, 
+BEGIN_ENUM(TEMPLATES) 
+{
+#define TEMPLATES_COLUMN_TEXT(member, number, title, size) DECL_ENUM_ELEMENT(number), 
+#define TEMPLATES_COLUMN_TEXT_P(member, number, title) DECL_ENUM_ELEMENT(number), 
 	TEMPLATES_COLUMNS
 #undef TEMPLATES_COLUMN_TEXT
 #undef TEMPLATES_COLUMN_TEXT_P
 
-	TEMPLATES_COLS_NUM,
-};
+	TEMPLATES_COLS_NUM
+}
+END_ENUM(TEMPLATES)
+
+BEGIN_ENUM_STRING(TEMPLATES) 
+{
+#define TEMPLATES_COLUMN_TEXT(member, number, title, size) DECL_ENUM_STRING_ELEMENT(number), 
+#define TEMPLATES_COLUMN_TEXT_P(member, number, title) DECL_ENUM_STRING_ELEMENT(number), 
+	TEMPLATES_COLUMNS
+#undef TEMPLATES_COLUMN_TEXT
+#undef TEMPLATES_COLUMN_TEXT_P
+}
+END_ENUM_STRING(TEMPLATES)	
 
 static void	
 prozubi_templates_table_init(struct kdata2_table **templates){

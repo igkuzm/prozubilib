@@ -2,7 +2,7 @@
  * File              : images.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 23.04.2023
+ * Last Modified Date: 24.04.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -10,6 +10,8 @@
 #define IMAGES_H
 
 #include "prozubilib_conf.h"
+
+#include "enum.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -51,17 +53,31 @@ struct image_t {
 };
 
 
-enum images_column_number {
-#define IMAGES_COLUMN_DATE(member, number, title) number, 
-#define IMAGES_COLUMN_TEXT(member, number, title, size) number, 
-#define IMAGES_COLUMN_DATA(member, number, title, type) number, 
+BEGIN_ENUM(IMAGES) 
+{
+#define IMAGES_COLUMN_DATE(member, number, title) DECL_ENUM_ELEMENT(number), 
+#define IMAGES_COLUMN_TEXT(member, number, title, size) DECL_ENUM_ELEMENT(number), 
+#define IMAGES_COLUMN_DATA(member, number, title, type) DECL_ENUM_ELEMENT(number), 
 	IMAGES_COLUMNS
 #undef IMAGES_COLUMN_DATE
 #undef IMAGES_COLUMN_TEXT
 #undef IMAGES_COLUMN_DATA
 
 	IMAGES_COLS_NUM,
-};
+}
+END_ENUM(IMAGES)
+
+BEGIN_ENUM_STRING(IMAGES) 
+{
+#define IMAGES_COLUMN_DATE(member, number, title) DECL_ENUM_STRING_ELEMENT(number), 
+#define IMAGES_COLUMN_TEXT(member, number, title, size) DECL_ENUM_STRING_ELEMENT(number), 
+#define IMAGES_COLUMN_DATA(member, number, title, type) DECL_ENUM_STRING_ELEMENT(number), 
+	IMAGES_COLUMNS
+#undef IMAGES_COLUMN_DATE
+#undef IMAGES_COLUMN_TEXT
+#undef IMAGES_COLUMN_DATA
+}
+END_ENUM_STRING(IMAGES)	
 
 static void	
 prozubi_images_table_init(struct kdata2_table **images){

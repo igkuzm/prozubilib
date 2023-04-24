@@ -2,7 +2,7 @@
  * File              : passport.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 23.04.2023
+ * Last Modified Date: 24.04.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -10,6 +10,8 @@
 #define PASSPORT_H
 
 #include "prozubilib_conf.h"
+
+#include "enum.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -43,16 +45,27 @@ struct passport_t {
 };
 
 
-enum passport_column_number {
-
-#define PASSPORT_COLUMN_DATE(member, number, title) number, 
-#define PASSPORT_COLUMN_TEXT(member, number, title, size) number, 
+BEGIN_ENUM(PASSPORT) 
+{
+#define PASSPORT_COLUMN_DATE(member, number, title) DECL_ENUM_ELEMENT(number), 
+#define PASSPORT_COLUMN_TEXT(member, number, title, size) DECL_ENUM_ELEMENT(number), 
 	PASSPORT_COLUMNS
 #undef PASSPORT_COLUMN_DATE
 #undef PASSPORT_COLUMN_TEXT	
 
 	PASSPORT_COLS_NUM,
-};
+}
+END_ENUM(PASSPORT)
+
+BEGIN_ENUM_STRING(PASSPORT) 
+{
+#define PASSPORT_COLUMN_DATE(member, number, title) DECL_ENUM_STRING_ELEMENT(number), 
+#define PASSPORT_COLUMN_TEXT(member, number, title, size) DECL_ENUM_STRING_ELEMENT(number), 
+	PASSPORT_COLUMNS
+#undef PASSPORT_COLUMN_DATE
+#undef PASSPORT_COLUMN_TEXT	
+}
+END_ENUM_STRING(PASSPORT)	
 
 static void	
 prozubi_passport_table_init(struct kdata2_table **passport){

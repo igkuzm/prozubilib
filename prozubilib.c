@@ -2,11 +2,12 @@
  * File              : prozubilib.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 17.04.2023
- * Last Modified Date: 23.04.2023
+ * Last Modified Date: 25.04.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
 #include "prozubilib.h"
+#include "Users/kuzmich/src/prozubilib/cases.h"
 #include "log.h"
 
 #include "kdata2/kdata2.h"
@@ -120,4 +121,5 @@ prozubi_start_sync(
 	
 	_yd_daemon_init(p);	
 	return 0;
+
 }

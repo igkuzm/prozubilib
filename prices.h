@@ -2,7 +2,7 @@
  * File              : prices.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 23.04.2023
+ * Last Modified Date: 24.04.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -10,6 +10,8 @@
 #define PRICES_H
 
 #include "prozubilib_conf.h"
+
+#include "enum.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -35,13 +37,21 @@ struct price_t {
 };
 
 
-enum price_column_number {
-#define PRICES_COLUMN_TEXT(member, number, title, size) number, 
+BEGIN_ENUM(PRICES) {
+#define PRICES_COLUMN_TEXT(member, number, title, size) DECL_ENUM_ELEMENT(number), 
 	PRICES_COLUMNS
 #undef PRICES_COLUMN_TEXT
 
 	PRICES_COLS_NUM,
-};
+}
+END_ENUM(PRICES)
+
+BEGIN_ENUM_STRING(PRICES) {
+#define PRICES_COLUMN_TEXT(member, number, title, size) DECL_ENUM_STRING_ELEMENT(number), 
+	PRICES_COLUMNS
+#undef PRICES_COLUMN_TEXT
+}
+END_ENUM_STRING(PRICES)	
 
 static void	
 prozubi_prices_table_init(struct kdata2_table **prices){

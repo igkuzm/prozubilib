@@ -2,7 +2,7 @@
  * File              : cases.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 23.04.2023
+ * Last Modified Date: 25.04.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -11,17 +11,96 @@
 
 #include "prozubilib_conf.h"
 
+#include "enum.h"
+#include "alloc.h"
+#include "date-time/time_local.h"
+
 #include <string.h>
 #include <stdlib.h>
 
 #define CASES_TABLENAME "ZCASES"
 
-struct case_id {
-	uuid4_str id;            /* uuid of the case */
-	time_t    date;          /* date and time of visit */
-	char      name[128];     /* name of case */
-	char      patientid[37]; /* patient uuid recordname */
-};
+#define TO_STR_(X) #X
+#define TO_STR(X) TO_STR_(X)
+
+/* case_list */
+static const char *
+_prozubi_cases_list_string =
+"["
+	"["
+		"\"Вид осмотра\", " TO_STR("CASENAME")", \"comboBox\","
+			"[\"Первичный приём\", \"Текущий приём\", \"Этапный осмотр\"]"
+	"],"
+	"["
+		"\"дата\", " TO_STR("CASEDATE")", \"date\""
+	"],"
+	"["
+		"\"жалобы\", " TO_STR("CASEZHALOBI")", \"text\""
+	"],"	
+	"["
+		"\"анамнез жизни\", " TO_STR("CASEANAMNEZVITAE")", \"text\""
+	"],"		
+	"["
+		"\"анамнез заболевания\", " TO_STR("CASEANAMNEZMORBI")", \"text\""
+	"],"	
+	"["
+		"\"аллергический анамнез\", " TO_STR("CASEALLERGANAMNEZ")", \"text\""
+	"],"	
+	"{"
+		"\"parent\": \"Общий осмотр\","
+		"\"children\": "
+			"["
+				"["
+					"\"состояние\", " TO_STR("CASESOSTOYANIYE")", \"comboBox\"," 
+						"[\"удовлетворительное\", \"средней степени тяжести\", \"тяжёлое\"]"
+					
+				"],"
+				"["
+					"\"сознание\", " TO_STR("CASESOSOZNANIYE")", \"comboBox\"," 
+						"[\"ясное\", \"спутанное\", \"изменённое\", \"ступор\", \"сопор\"]"
+					
+				"],"			
+				"["
+					"\"положение\", " TO_STR("CASEPOLOZHENIYE")", \"comboBox\"," 
+						"[\"активное\", \"пассивное\", \"вынужденное\"]"
+					
+				"],"				
+				"["
+					"\"со стороны внутренних органов\",  " TO_STR("CASESOSTORONIVNUTRENNIHORGANOV")", \"text\""
+				"]"	
+			"]"
+	"},"
+	"["
+		"\"местно\", " TO_STR("CASEMESTNO")", \"text\""
+	"],"	
+	"["
+		"\"зубная формула\", \"\", \"zubnayaFormula\""
+	"],"
+	"["
+		"\"инструментальные и рентгенологические методы исследования\",  " TO_STR("CASEINSTRUMENTANDRENTGEN")", \"text\""
+	"],"		
+	"["
+		"\"прикрепить фото/рентген\", \"\", \"xray\""
+	"],"		
+	"["
+		"\"диагноз\",  " TO_STR("CASEDIAGNOZIS")", \"text\""
+	"],"		
+	"["
+		"\"план лечения\",  " TO_STR("CASEPLANLECHENIYA")", \"planLecheniya\""
+	"],"		
+	"["
+		"\"проведено лечение\", " TO_STR("CASELECHENIYE")", \"text\""
+	"],"		
+	"["
+		"\"рекомендации\",  " TO_STR("CASERECOMENDACII")", \"text\""
+	"],"		
+	"["
+		"\"Следующий визит\", " TO_STR("CASEDATEOFNEXT")", \"date\""
+	"],"		
+	"["
+		"\"Выставить счёт\",  " TO_STR("CASEBILL")", \"bill\""
+	"]"		
+"]";
 
 /*
  * CASES_COLUMN_DATE(struct member, enum number, SQLite column title)
@@ -76,6 +155,7 @@ struct case_id {
 	CASES_COLUMN_TEXT(recomendacii, CASERECOMENDACII, "ZRECOMENDACII")\
 	CASES_COLUMN_TEXT(sostoyanievnutrennihorganov, CASESOSTORONIVNUTRENNIHORGANOV, "ZSOSTORONIVNUTRENNIHORGANOV")\
 	CASES_COLUMN_TEXT(sostoyanie, CASESOSTOYANIYE, "ZSOSTOYANIYE")\
+	CASES_COLUMN_TEXT(soznaniye, CASESOSOZNANIYE, "ZSOZNANIYE")\
 	CASES_COLUMN_TEXT(zhalobi, CASEZHALOBI, "ZZHALOBI")\
 	CASES_COLUMN_DATA(bill, CASEBILL, "ZBILL", cJSON)\
 	CASES_COLUMN_DATA(planlecheniya, CASEPLANLECHENIYA, "ZPLANLECHENIYADATA", cJSON)
@@ -93,9 +173,10 @@ enum cases_data_types {
 
 struct case_t {
 	uuid4_str id;         /* uuid of the case */
+	cJSON     *case_list; /* case structure */ 
 
 #define CASES_COLUMN_DATE(member, number, title) time_t member; 
-#define CASES_COLUMN_TEXT(member, number, title) char * member; 
+#define CASES_COLUMN_TEXT(member, number, title) char * member; size_t len_##member; 
 #define CASES_COLUMN_DATA(member, number, title, type) type * member; size_t len_##member; 
 	CASES_COLUMNS
 #undef CASES_COLUMN_DATE
@@ -104,17 +185,31 @@ struct case_t {
 };
 
 
-enum cases_column_number {
-#define CASES_COLUMN_DATE(member, number, title) number, 
-#define CASES_COLUMN_TEXT(member, number, title) number, 
-#define CASES_COLUMN_DATA(member, number, title, type) number, 
+BEGIN_ENUM(CASES) 
+{
+#define CASES_COLUMN_DATE(member, number, title) DECL_ENUM_ELEMENT(number), 
+#define CASES_COLUMN_TEXT(member, number, title) DECL_ENUM_ELEMENT(number), 
+#define CASES_COLUMN_DATA(member, number, title, type) DECL_ENUM_ELEMENT(number), 
 	CASES_COLUMNS
 #undef CASES_COLUMN_DATE
 #undef CASES_COLUMN_TEXT
 #undef CASES_COLUMN_DATA
 
-	CASES_COLS_NUM,
-};
+	DECL_ENUM_ELEMENT(CASES_COLS_NUM),
+} 
+END_ENUM(CASES)
+
+BEGIN_ENUM_STRING(CASES)
+{	
+#define CASES_COLUMN_DATE(member, number, title) DECL_ENUM_STRING_ELEMENT(number), 
+#define CASES_COLUMN_TEXT(member, number, title) DECL_ENUM_STRING_ELEMENT(number), 
+#define CASES_COLUMN_DATA(member, number, title, type) DECL_ENUM_STRING_ELEMENT(number), 
+	CASES_COLUMNS
+#undef CASES_COLUMN_DATE
+#undef CASES_COLUMN_TEXT
+#undef CASES_COLUMN_DATA
+}
+END_ENUM_STRING(CASES)	
 
 static void	
 prozubi_cases_table_init(struct kdata2_table **cases){
@@ -131,99 +226,61 @@ prozubi_cases_table_init(struct kdata2_table **cases){
 			NULL); 
 } 
 
-/* do callback for each case for patientid in database; set patientid to NULL to get all */
-static void 
-prozubi_cases_foreach(
-		kdata2_t   *kdata,
-		const char *patientid,
-		void       *user_data,
-		int        (*callback)(void *user_data, struct case_id *c)
+static cJSON *
+_prozubi_cases_list_new(
+		struct case_t *c,
+		cJSON *cases_list_children
 		)
 {
-	/* check kdata */
-	if (!kdata){
-		ERR("%s", "kdata is NULL");
-		return;
-	}
-	if (!kdata->db){
-		ERR("%s", "kdata->db is NULL");
-		return;
-	}
-
-	char SQL[BUFSIZ] = "SELECT ZRECORDNAME, ZDATE, ZNAME, ZPATIENTID FROM ";
-		strcat(SQL, CASES_TABLENAME);
-	/* check patient id */
-	if (patientid)
-		strcat(SQL, STR(" WHERE ZPATIENTID = '%s'", patientid));
-
-	/* case id */
-	struct case_id c;
-
-	/* start SQLite request */
-	int res;
-	sqlite3_stmt *stmt;
 	
-	res = sqlite3_prepare_v2(kdata->db, SQL, -1, &stmt, NULL);
-	if (res != SQLITE_OK) {
-		ERR("sqlite3_prepare_v2: %s: %s", SQL, sqlite3_errmsg(kdata->db));	
-		return;
+	if (!c){
+		ERR("%s", "case_t is NULL");
+		return NULL;
 	}	
 
-	while (sqlite3_step(stmt) != SQLITE_DONE) {
-		/* ZRECORDNAME */
-		strncpy(c.id, (const char *)sqlite3_column_text(stmt, 0), sizeof(c.id) - 1); 
-		c.id[sizeof(c.id) - 1] = 0;
-
-		/* ZDATE */
-		int col_type = sqlite3_column_type(stmt, 1);
-		if (col_type == SQLITE_INTEGER) {
-			c.date = sqlite3_column_int64(stmt, 1);
-		} else if (col_type == SQLITE_FLOAT) {
-			//NSDate stores timestamp as double from 2001-01-01 00:00:00 (+978307200)
-			c.date = sqlite3_column_double(stmt, 1) + NSTimeIntervalSince1970; 
-		}
-
-		/* ZNAME */
-		strncpy(c.name, (const char *)sqlite3_column_text(stmt, 2), 
-				sizeof(c.name) - 1); 
-		c.name[sizeof(c.name) - 1] = 0;
-		
-		/* ZPATIENTID */
-		strncpy(c.patientid, (const char *)sqlite3_column_text(stmt, 0), 
-					sizeof(c.patientid) - 1); 
-		c.patientid[sizeof(c.patientid) - 1] = 0;		
-
-		/* callback */
-		if (callback)
-			if (callback(user_data, &c))
-				break;
-	}	
+	cJSON *json = cJSON_CreateObject();
+	if (!json){
+		ERR("%s", "can't create cJSON");
+		return NULL;
+	}
 	
-	sqlite3_finalize(stmt);
+	/* add case id */
+	cJSON_AddItemToObject(json, "id", cJSON_CreateString(c->id));
+
+	/* get date */
+	struct tm tm;
+	sec_to_tm(c->date, &tm);
+	char date[11];
+	strftime(date, 11, "%m.%d.%Y", &tm);
+
+	/* set title */
+	char title[BUFSIZ] = "";
+	strcat(title, date);
+	if (c->name){
+		strcat(title, " - ");
+		strncat(title, c->name, 128);
+	}
+	if (c->diagnozis){
+		strcat(title, " - ");
+		strncat(title, c->diagnozis, 512);
+	}	
+
+	/* add title to json */
+	cJSON_AddItemToObject(json, "parent", cJSON_CreateString(title));
+
+	/* add cases_list_string */
+	cJSON_AddItemToObject(json, "children", cases_list_children);
+
+	return json;
 }
 
 /* allocate and init new case */
 static struct case_t *
-prozubi_case_new(const char *id){
+prozubi_case_new(){
 	/* allocate case_t */
-	struct case_t *c = malloc(sizeof(struct case_t));
-	if (!c){
-		ERR("%s", "can't allocate struct case_t");
-		return NULL;
-	}
-
-	if (!id){
-		/* create new uuid */
-		UUID4_STATE_T state; UUID4_T identifier;
-		uuid4_seed(&state);
-		uuid4_gen(&state, &identifier);
-		if (!uuid4_to_s(identifier, c->id, 37)){
-			ERR("%s", "can't generate uuid");
-			return NULL;
-		}
-	} else
-		strcpy(c->id, id);
-
+	struct case_t *c = NEW(struct case_t, 
+			ERR("%s", "can't allocate struct case_t"), NULL);
+	
 	/* init values to NULL */
 #define CASES_COLUMN_DATE(member, number, title) c->member = time(NULL); 
 #define CASES_COLUMN_TEXT(member, number, title) c->member = NULL; 
@@ -236,32 +293,36 @@ prozubi_case_new(const char *id){
 	return c;
 }
 
-/* get case with id */
-static struct case_t * 
-prozubi_case_get(
+/* callback all cases with patientid (set patient id to NULL to get all cases from database) */
+static void 
+prozubi_cases_foreach(
 		kdata2_t   *kdata,
-		const char *id)
+		const char *patient_id,
+		void       *user_data,
+		int        (*callback)(void *user_data, struct case_t *c)
+		)
 {
 	/* check kdata */
 	if (!kdata){
 		ERR("%s", "kdata is NULL");
-		return NULL;
+		return;
 	}
 	if (!kdata->db){
 		ERR("%s", "kdata->db is NULL");
-		return NULL;
+		return;
 	}
 
-	/* check id */
-	if (!id){
-		ERR("%s", "id is NULL");
-		return NULL;
-	}
-	
 	/* allocate and init case_t */
-	struct case_t *c = prozubi_case_new(id);
+	struct case_t *c = prozubi_case_new();
 	if (!c)
-		return NULL;
+		return;
+
+	/* get cases list children */
+	cJSON *cases_list_children = cJSON_Parse(_prozubi_cases_list_string);
+	if (!cases_list_children) {
+		ERR("%s", "can't get cJSON from _prozubi_cases_list_string");
+		return;
+	}
 	
 	/* create SQL string */
 	char SQL[BUFSIZ] = "SELECT ";
@@ -276,7 +337,8 @@ prozubi_case_get(
 	
 	strcat(SQL, "ZRECORDNAME FROM ");
 	strcat(SQL, CASES_TABLENAME);
-	strcat(SQL, STR(" WHERE ZRECORDNAME = '%s'", id));
+	if (patient_id)
+		strcat(SQL, STR(" WHERE ZPATIENTID = '%s'", patient_id));
 
 	/* start SQLite request */
 	int res;
@@ -286,7 +348,7 @@ prozubi_case_get(
 	if (res != SQLITE_OK) {
 		ERR("sqlite3_prepare_v2: %s: %s", SQL, sqlite3_errmsg(kdata->db));	
 		free(c);
-		return NULL;
+		return;
 	}	
 
 	while (sqlite3_step(stmt) != SQLITE_DONE) {
@@ -314,14 +376,15 @@ prozubi_case_get(
 					size_t len = sqlite3_column_bytes(stmt, i);\
 					const unsigned char *value = sqlite3_column_text(stmt, i);\
 					if (value){\
-						char *str = malloc(len);\
+						char *str = malloc(len + 1);\
 						if (!str){\
-							ERR("can't allocate string with len: %ld", len);\
+							ERR("can't allocate string with len: %ld", len+1);\
 							break;\
 						}\
-						strncpy(str, (const char *)value, len - 1);\
-						str[len - 1] = 0;\
+						strncpy(str, (const char *)value, len);\
+						str[len] = 0;\
 						c->member = str;\
+						c->len_##member = len;\
 					}\
 					break;\
 				}; 
@@ -349,10 +412,28 @@ prozubi_case_get(
 					break;					
 			}
 		}		
+		
+		/* handle case id */
+		const unsigned char *value = sqlite3_column_text(stmt, i);				
+		if (value){
+			strncpy(c->id, (const char *)value, sizeof(c->id) - 1);
+			c->id[sizeof(c->id) - 1] = 0;		
+		}
+
+		/* handle cases list */
+		c->case_list = _prozubi_cases_list_new(c, cases_list_children);
+		if (!c->case_list){
+			ERR("%s", "can't get _prozubi_cases_list_new");
+			break;
+		}
+
+		/* callback */
+		if (callback)
+			if (callback(user_data, c))
+				break;		
 	}	
 	
 	sqlite3_finalize(stmt);
-	return c;
 }
 
 static void
@@ -370,5 +451,30 @@ prozubi_case_free(struct case_t *c){
 		free(c);
 	}
 }
+
+
+#define CASES_COLUMN_DATE(member, number, title)\
+	time_t prozubi_case_get_##number(struct case_t *c, size_t *len){\
+		*len = 0;\
+		return c->member;\
+	}
+#define CASES_COLUMN_TEXT(member, number, title)\
+	char * prozubi_case_get_##number(struct case_t *c, size_t *len){\
+		*len = c->len_##member;\
+		return c->member;\
+	}
+   	
+#define CASES_COLUMN_DATA(member, number, title, type)\
+	void * prozubi_case_get_##number(struct case_t *c, size_t *len){\
+		*len = c->len_##member;\
+		return c->member;\
+	}\
+	CASES_COLUMNS
+#undef CASES_COLUMN_DATE
+#undef CASES_COLUMN_TEXT
+#undef CASES_COLUMN_DATA
+
+#define PROZUBI_CASE_GET(c, name)\
+		prozubi_case_get_##name(c)
 
 #endif /* ifndef CASES_H */
