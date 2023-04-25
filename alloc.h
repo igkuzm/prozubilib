@@ -15,7 +15,36 @@ extern "C" {
 
 #include <stdlib.h>
 
-#define NEW(T) ((T *)malloc(sizeof(T)))
+// memory allocation helpers
+#define MALLOC(size, message, ret)	\
+({\
+void *const ___p = malloc(size);\
+if (!___p) {\
+  message;\
+  return ret;\
+}\
+___p;\
+})
+
+#define REALLOC(ptr, size, message, ret)	\
+({	\
+void* const ___s = ptr;\
+void *const ___p = realloc(___s, size);\
+if (!___p) {\
+  message;\
+  return ret;\
+}\
+___p;\
+})
+
+#define FREE(ptr) \
+({\
+	if (ptr)\
+		free(ptr);\
+	ptr = NULL;\
+})
+
+#define NEW(T, message, ret) ((T *)MALLOC(sizeof(T), message, ret))
 
 #ifdef __cplusplus
 }

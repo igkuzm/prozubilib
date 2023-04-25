@@ -186,7 +186,6 @@ struct case_t {
 
 
 BEGIN_ENUM(CASES) 
-{
 #define CASES_COLUMN_DATE(member, number, title) DECL_ENUM_ELEMENT(number), 
 #define CASES_COLUMN_TEXT(member, number, title) DECL_ENUM_ELEMENT(number), 
 #define CASES_COLUMN_DATA(member, number, title, type) DECL_ENUM_ELEMENT(number), 
@@ -196,11 +195,9 @@ BEGIN_ENUM(CASES)
 #undef CASES_COLUMN_DATA
 
 	DECL_ENUM_ELEMENT(CASES_COLS_NUM),
-} 
 END_ENUM(CASES)
 
 BEGIN_ENUM_STRING(CASES)
-{	
 #define CASES_COLUMN_DATE(member, number, title) DECL_ENUM_STRING_ELEMENT(number), 
 #define CASES_COLUMN_TEXT(member, number, title) DECL_ENUM_STRING_ELEMENT(number), 
 #define CASES_COLUMN_DATA(member, number, title, type) DECL_ENUM_STRING_ELEMENT(number), 
@@ -208,7 +205,6 @@ BEGIN_ENUM_STRING(CASES)
 #undef CASES_COLUMN_DATE
 #undef CASES_COLUMN_TEXT
 #undef CASES_COLUMN_DATA
-}
 END_ENUM_STRING(CASES)	
 
 static void	
@@ -454,27 +450,91 @@ prozubi_case_free(struct case_t *c){
 
 
 #define CASES_COLUMN_DATE(member, number, title)\
-	time_t prozubi_case_get_##number(struct case_t *c, size_t *len){\
-		*len = 0;\
+	static time_t prozubi_case_get_##number(struct case_t *c){\
 		return c->member;\
 	}
 #define CASES_COLUMN_TEXT(member, number, title)\
-	char * prozubi_case_get_##number(struct case_t *c, size_t *len){\
-		*len = c->len_##member;\
-		return c->member;\
-	}
-   	
-#define CASES_COLUMN_DATA(member, number, title, type)\
-	void * prozubi_case_get_##number(struct case_t *c, size_t *len){\
-		*len = c->len_##member;\
+	static char * prozubi_case_get_##number(struct case_t *c){\
 		return c->member;\
 	}\
+	static size_t prozubi_case_get_len_##number(struct case_t *c){\
+		return c->len_##member;\
+	}	
+   	
+#define CASES_COLUMN_DATA(member, number, title, type)\
+	static void * prozubi_case_get_##number(struct case_t *c){\
+		return c->member;\
+	}\
+	static size_t prozubi_case_get_len_##number(struct case_t *c){\
+		return c->len_##member;\
+	}	
+	
 	CASES_COLUMNS
 #undef CASES_COLUMN_DATE
 #undef CASES_COLUMN_TEXT
 #undef CASES_COLUMN_DATA
 
-#define PROZUBI_CASE_GET(c, name)\
-		prozubi_case_get_##name(c)
+
+void * 
+prozubi_case_get(struct case_t *c, const char *name){
+	int index = getIndexCASES(name);	
+	if (index == -1)
+		return NULL;
+
+	switch (index) {
+#define CASES_COLUMN_DATA(member, number, title, type)\
+		case number:\
+			{\
+				return c->member;\
+			}		
+#define CASES_COLUMN_DATE(member, number, title)\
+		case number:\
+			{\
+				return &(c->member);\
+			}		
+#define CASES_COLUMN_TEXT(member, number, title)\
+		case number:\
+			{\
+				return c->member;\
+			}
+		CASES_COLUMNS
+#undef CASES_COLUMN_DATE
+#undef CASES_COLUMN_TEXT			
+#undef CASES_COLUMN_DATA			
+	}
+	
+	return NULL;
+}
+
+size_t 
+prozubi_case_get_len(struct case_t *c, const char *name){
+	int index = getIndexCASES(name);	
+	if (index == -1)
+		return 0;
+
+	switch (index) {
+#define CASES_COLUMN_DATA(member, number, title, type)\
+		case number:\
+			{\
+				return c->len_##member;\
+			}		
+#define CASES_COLUMN_DATE(member, number, title)\
+		case number:\
+			{\
+				return 0;\
+			}		
+#define CASES_COLUMN_TEXT(member, number, title)\
+		case number:\
+			{\
+				return c->len_##member;\
+			}
+		CASES_COLUMNS
+#undef CASES_COLUMN_DATE
+#undef CASES_COLUMN_TEXT			
+#undef CASES_COLUMN_DATA			
+	}
+	
+	return 0;
+}
 
 #endif /* ifndef CASES_H */
