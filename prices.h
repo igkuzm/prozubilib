@@ -2,7 +2,7 @@
  * File              : prices.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 24.04.2023
+ * Last Modified Date: 27.04.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -37,20 +37,18 @@ struct price_t {
 };
 
 
-BEGIN_ENUM(PRICES) {
+BEGIN_ENUM(PRICES)
 #define PRICES_COLUMN_TEXT(member, number, title, size) DECL_ENUM_ELEMENT(number), 
 	PRICES_COLUMNS
 #undef PRICES_COLUMN_TEXT
 
 	PRICES_COLS_NUM,
-}
 END_ENUM(PRICES)
 
-BEGIN_ENUM_STRING(PRICES) {
+BEGIN_ENUM_STRING(PRICES)
 #define PRICES_COLUMN_TEXT(member, number, title, size) DECL_ENUM_STRING_ELEMENT(number), 
 	PRICES_COLUMNS
 #undef PRICES_COLUMN_TEXT
-}
 END_ENUM_STRING(PRICES)	
 
 static void	

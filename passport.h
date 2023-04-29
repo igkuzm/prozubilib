@@ -2,7 +2,7 @@
  * File              : passport.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 24.04.2023
+ * Last Modified Date: 27.04.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -46,7 +46,6 @@ struct passport_t {
 
 
 BEGIN_ENUM(PASSPORT) 
-{
 #define PASSPORT_COLUMN_DATE(member, number, title) DECL_ENUM_ELEMENT(number), 
 #define PASSPORT_COLUMN_TEXT(member, number, title, size) DECL_ENUM_ELEMENT(number), 
 	PASSPORT_COLUMNS
@@ -54,17 +53,14 @@ BEGIN_ENUM(PASSPORT)
 #undef PASSPORT_COLUMN_TEXT	
 
 	PASSPORT_COLS_NUM,
-}
 END_ENUM(PASSPORT)
 
 BEGIN_ENUM_STRING(PASSPORT) 
-{
 #define PASSPORT_COLUMN_DATE(member, number, title) DECL_ENUM_STRING_ELEMENT(number), 
 #define PASSPORT_COLUMN_TEXT(member, number, title, size) DECL_ENUM_STRING_ELEMENT(number), 
 	PASSPORT_COLUMNS
 #undef PASSPORT_COLUMN_DATE
 #undef PASSPORT_COLUMN_TEXT	
-}
 END_ENUM_STRING(PASSPORT)	
 
 static void	

@@ -2,7 +2,7 @@
  * File              : images.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 24.04.2023
+ * Last Modified Date: 27.04.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -54,7 +54,6 @@ struct image_t {
 
 
 BEGIN_ENUM(IMAGES) 
-{
 #define IMAGES_COLUMN_DATE(member, number, title) DECL_ENUM_ELEMENT(number), 
 #define IMAGES_COLUMN_TEXT(member, number, title, size) DECL_ENUM_ELEMENT(number), 
 #define IMAGES_COLUMN_DATA(member, number, title, type) DECL_ENUM_ELEMENT(number), 
@@ -64,11 +63,9 @@ BEGIN_ENUM(IMAGES)
 #undef IMAGES_COLUMN_DATA
 
 	IMAGES_COLS_NUM,
-}
 END_ENUM(IMAGES)
 
 BEGIN_ENUM_STRING(IMAGES) 
-{
 #define IMAGES_COLUMN_DATE(member, number, title) DECL_ENUM_STRING_ELEMENT(number), 
 #define IMAGES_COLUMN_TEXT(member, number, title, size) DECL_ENUM_STRING_ELEMENT(number), 
 #define IMAGES_COLUMN_DATA(member, number, title, type) DECL_ENUM_STRING_ELEMENT(number), 
@@ -76,7 +73,6 @@ BEGIN_ENUM_STRING(IMAGES)
 #undef IMAGES_COLUMN_DATE
 #undef IMAGES_COLUMN_TEXT
 #undef IMAGES_COLUMN_DATA
-}
 END_ENUM_STRING(IMAGES)	
 
 static void	

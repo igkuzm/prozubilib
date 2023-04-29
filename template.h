@@ -2,7 +2,7 @@
  * File              : template.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 24.04.2023
+ * Last Modified Date: 29.04.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -23,15 +23,15 @@
  * TEMPLATES_COLUMN_TEXT_P(struct member, enum number, SQLite column title)
  */
 #define TEMPLATES_COLUMNS \
-	TEMPLATES_COLUMN_TEXT(name,   TEMPLATENAME,  "ZTEMPLATENAME", 256)\
-	TEMPLATES_COLUMN_TEXT(title,  TEMPLATETITLE, "ZTITLE",        128)\
+	TEMPLATES_COLUMN_TEXT(name,     TEMPLATENAME,  "ZTEMPLATENAME", 256)\
+	TEMPLATES_COLUMN_TEXT(title,    TEMPLATETITLE, "ZTITLE",        128)\
 	TEMPLATES_COLUMN_TEXT_P(text,   TEMPLATETEXT,  "ZTEXT")
 
 struct template_t {
 	uuid4_str id;         /* uuid of the template */
 
-#define TEMPLATES_COLUMN_TEXT(member, number, title, size) char member[size]; 
-#define TEMPLATES_COLUMN_TEXT_P(member, number, title) char * member; size_t len_##member; 	
+#define TEMPLATES_COLUMN_TEXT(member, number, title, size) char   member[size]; 
+#define TEMPLATES_COLUMN_TEXT_P(member, number, title)     char * member; size_t len_##member; 	
 	TEMPLATES_COLUMNS
 #undef TEMPLATES_COLUMN_TEXT
 #undef TEMPLATES_COLUMN_TEXT_P
@@ -39,25 +39,21 @@ struct template_t {
 
 
 BEGIN_ENUM(TEMPLATES) 
-{
 #define TEMPLATES_COLUMN_TEXT(member, number, title, size) DECL_ENUM_ELEMENT(number), 
-#define TEMPLATES_COLUMN_TEXT_P(member, number, title) DECL_ENUM_ELEMENT(number), 
+#define TEMPLATES_COLUMN_TEXT_P(member, number, title)     DECL_ENUM_ELEMENT(number), 
 	TEMPLATES_COLUMNS
 #undef TEMPLATES_COLUMN_TEXT
 #undef TEMPLATES_COLUMN_TEXT_P
 
 	TEMPLATES_COLS_NUM
-}
 END_ENUM(TEMPLATES)
 
 BEGIN_ENUM_STRING(TEMPLATES) 
-{
 #define TEMPLATES_COLUMN_TEXT(member, number, title, size) DECL_ENUM_STRING_ELEMENT(number), 
-#define TEMPLATES_COLUMN_TEXT_P(member, number, title) DECL_ENUM_STRING_ELEMENT(number), 
+#define TEMPLATES_COLUMN_TEXT_P(member, number, title)     DECL_ENUM_STRING_ELEMENT(number), 
 	TEMPLATES_COLUMNS
 #undef TEMPLATES_COLUMN_TEXT
 #undef TEMPLATES_COLUMN_TEXT_P
-}
 END_ENUM_STRING(TEMPLATES)	
 
 static void	
@@ -65,7 +61,7 @@ prozubi_templates_table_init(struct kdata2_table **templates){
 	kdata2_table_init(templates, TEMPLATES_TABLENAME,
 
 #define TEMPLATES_COLUMN_TEXT(member, number, title, size) KDATA2_TYPE_TEXT, title, 
-#define TEMPLATES_COLUMN_TEXT_P(member, number, title) KDATA2_TYPE_TEXT, title, 
+#define TEMPLATES_COLUMN_TEXT_P(member, number, title)     KDATA2_TYPE_TEXT, title, 
 	TEMPLATES_COLUMNS
 #undef TEMPLATES_COLUMN_TEXT
 #undef TEMPLATES_COLUMN_TEXT_P
@@ -78,7 +74,7 @@ static struct template_t *
 prozubi_template_new(
 		kdata2_t *kdata,
 #define TEMPLATES_COLUMN_TEXT(member, number, title, size) const char * member, 
-#define TEMPLATES_COLUMN_TEXT_P(member, number, title) const char * member, 
+#define TEMPLATES_COLUMN_TEXT_P(member, number, title)     const char * member, 
 	TEMPLATES_COLUMNS
 #undef TEMPLATES_COLUMN_TEXT
 #undef TEMPLATES_COLUMN_TEXT_P
@@ -143,7 +139,7 @@ prozubi_template_foreach(
 	char SQL[BUFSIZ] = "SELECT ";
 
 #define TEMPLATES_COLUMN_TEXT(member, number, title, size) strcat(SQL, title); strcat(SQL, ", "); 
-#define TEMPLATES_COLUMN_TEXT_P(member, number, title) strcat(SQL, title); strcat(SQL, ", "); 
+#define TEMPLATES_COLUMN_TEXT_P(member, number, title)     strcat(SQL, title); strcat(SQL, ", "); 
 	TEMPLATES_COLUMNS
 #undef TEMPLATES_COLUMN_TEXT			
 #undef TEMPLATES_COLUMN_TEXT_P			

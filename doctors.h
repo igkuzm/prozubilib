@@ -2,7 +2,7 @@
  * File              : doctors.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 24.04.2023
+ * Last Modified Date: 27.04.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -52,7 +52,6 @@ struct doctor_t {
 
 
 BEGIN_ENUM(DOCTORS) 
-{
 #define DOCTORS_COLUMN_TEXT(member, number, title, size) DECL_ENUM_ELEMENT(number), 
 #define DOCTORS_COLUMN_DATA(member, number, title, type) DECL_ENUM_ELEMENT(number), 
 	DOCTORS_COLUMNS
@@ -60,17 +59,14 @@ BEGIN_ENUM(DOCTORS)
 #undef DOCTORS_COLUMN_DATA
 
 	DOCTORS_COLS_NUM,
-}
 END_ENUM(DOCTORS)
 
 BEGIN_ENUM_STRING(DOCTORS) 
-{
 #define DOCTORS_COLUMN_TEXT(member, number, title, size) DECL_ENUM_STRING_ELEMENT(number), 
 #define DOCTORS_COLUMN_DATA(member, number, title, type) DECL_ENUM_STRING_ELEMENT(number), 
 	DOCTORS_COLUMNS
 #undef DOCTORS_COLUMN_TEXT
 #undef DOCTORS_COLUMN_DATA
-}
 END_ENUM_STRING(DOCTORS)	
 
 static void	
