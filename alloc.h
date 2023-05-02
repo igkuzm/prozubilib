@@ -2,7 +2,7 @@
  * File              : alloc.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 22.02.2022
- * Last Modified Date: 25.04.2023
+ * Last Modified Date: 30.04.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -21,7 +21,7 @@ extern "C" {
 void *const ___p = malloc(size);\
 if (!___p) {\
   message;\
-  return ret;\
+  ret;\
 }\
 ___p;\
 })
@@ -32,7 +32,7 @@ void* const ___s = ptr;\
 void *const ___p = realloc(___s, size);\
 if (!___p) {\
   message;\
-  return ret;\
+  ret;\
 }\
 ___p;\
 })

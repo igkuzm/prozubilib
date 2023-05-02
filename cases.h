@@ -2,7 +2,7 @@
  * File              : cases.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 25.04.2023
+ * Last Modified Date: 01.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -10,11 +10,13 @@
 #define CASES_H
 
 #include "prozubilib_conf.h"
+#include "kdata2/cYandexDisk/cJSON.h"
 
 #include "enum.h"
 #include "alloc.h"
 #include "date-time/time_local.h"
 
+#include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -23,82 +25,103 @@
 #define TO_STR_(X) #X
 #define TO_STR(X) TO_STR_(X)
 
+#define CASES_LIST_TYPES \
+	CASES_LIST_TYPE_D(CASES_LIST_TYPE_COMBOBOX)\
+	CASES_LIST_TYPE_D(CASES_LIST_TYPE_DATE)\
+	CASES_LIST_TYPE_D(CASES_LIST_TYPE_TEXT)\
+	CASES_LIST_TYPE_D(CASES_LIST_TYPE_ZFORMULA)\
+	CASES_LIST_TYPE_D(CASES_LIST_TYPE_XRAY)\
+	CASES_LIST_TYPE_D(CASES_LIST_TYPE_PLANLECHENIYA)\
+	CASES_LIST_TYPE_D(CASES_LIST_TYPE_BILL)
+
+BEGIN_ENUM(CASES_LIST_TYPE) 
+#define CASES_LIST_TYPE_D(element) element, 
+	CASES_LIST_TYPES
+#undef CASES_LIST_TYPE_D 
+END_ENUM(CASES_LIST_TYPE)
+
+BEGIN_ENUM_STRING(CASES_LIST_TYPE) 
+#define CASES_LIST_TYPE_D(element) #element, 
+	CASES_LIST_TYPES
+#undef CASES_LIST_TYPE_D 
+END_ENUM_STRING(CASES_LIST_TYPE)	
+
 /* case_list */
 static const char *
 _prozubi_cases_list_string =
 "["
 	"["
-		"\"Вид осмотра\", " TO_STR("CASENAME")", \"comboBox\","
+		"\"Вид осмотра\", " TO_STR("CASENAME")", "TO_STR("CASES_LIST_TYPE_COMBOBOX")", "
 			"[\"Первичный приём\", \"Текущий приём\", \"Этапный осмотр\"]"
 	"],"
 	"["
-		"\"дата\", " TO_STR("CASEDATE")", \"date\""
+		"\"дата\", " TO_STR("CASEDATE")", "TO_STR("CASES_LIST_TYPE_DATE")
 	"],"
 	"["
-		"\"жалобы\", " TO_STR("CASEZHALOBI")", \"text\""
+		"\"жалобы\", " TO_STR("CASEZHALOBI")", "TO_STR("CASES_LIST_TYPE_TEXT")
 	"],"	
 	"["
-		"\"анамнез жизни\", " TO_STR("CASEANAMNEZVITAE")", \"text\""
+		"\"анамнез жизни\", " TO_STR("CASEANAMNEZVITAE")", "TO_STR("CASES_LIST_TYPE_TEXT")
 	"],"		
 	"["
-		"\"анамнез заболевания\", " TO_STR("CASEANAMNEZMORBI")", \"text\""
+		"\"анамнез заболевания\", " TO_STR("CASEANAMNEZMORBI")", "TO_STR("CASES_LIST_TYPE_TEXT")
 	"],"	
 	"["
-		"\"аллергический анамнез\", " TO_STR("CASEALLERGANAMNEZ")", \"text\""
+		"\"аллергический анамнез\", " TO_STR("CASEALLERGANAMNEZ")", "TO_STR("CASES_LIST_TYPE_TEXT")
 	"],"	
 	"{"
 		"\"parent\": \"Общий осмотр\","
 		"\"children\": "
 			"["
 				"["
-					"\"состояние\", " TO_STR("CASESOSTOYANIYE")", \"comboBox\"," 
+					"\"состояние\", " TO_STR("CASESOSTOYANIYE")", "TO_STR("CASES_LIST_TYPE_COMBOBOX")", " 
 						"[\"удовлетворительное\", \"средней степени тяжести\", \"тяжёлое\"]"
 					
 				"],"
 				"["
-					"\"сознание\", " TO_STR("CASESOSOZNANIYE")", \"comboBox\"," 
+					"\"сознание\", " TO_STR("CASESOSOZNANIYE")", "TO_STR("CASES_LIST_TYPE_COMBOBOX")", " 
 						"[\"ясное\", \"спутанное\", \"изменённое\", \"ступор\", \"сопор\"]"
 					
 				"],"			
 				"["
-					"\"положение\", " TO_STR("CASEPOLOZHENIYE")", \"comboBox\"," 
+					"\"положение\", " TO_STR("CASEPOLOZHENIYE")", "TO_STR("CASES_LIST_TYPE_COMBOBOX")", " 
 						"[\"активное\", \"пассивное\", \"вынужденное\"]"
 					
 				"],"				
 				"["
-					"\"со стороны внутренних органов\",  " TO_STR("CASESOSTORONIVNUTRENNIHORGANOV")", \"text\""
+					"\"со стороны внутренних органов\",  " TO_STR("CASESOSTORONIVNUTRENNIHORGANOV")", "TO_STR("CASES_LIST_TYPE_TEXT")
 				"]"	
 			"]"
 	"},"
 	"["
-		"\"местно\", " TO_STR("CASEMESTNO")", \"text\""
+		"\"местно\", " TO_STR("CASEMESTNO")", "TO_STR("CASES_LIST_TYPE_TEXT")
 	"],"	
 	"["
-		"\"зубная формула\", \"\", \"zubnayaFormula\""
+		"\"зубная формула\", \"\", "TO_STR("CASES_LIST_TYPE_ZFORMULA")
 	"],"
 	"["
-		"\"инструментальные и рентгенологические методы исследования\",  " TO_STR("CASEINSTRUMENTANDRENTGEN")", \"text\""
+		"\"инструментальные и рентгенологические методы исследования\",  " TO_STR("CASEINSTRUMENTANDRENTGEN")", "TO_STR("CASES_LIST_TYPE_TEXT")
 	"],"		
 	"["
-		"\"прикрепить фото/рентген\", \"\", \"xray\""
+		"\"прикрепить фото/рентген\", \"\", "TO_STR("CASES_LIST_TYPE_XRAY")
 	"],"		
 	"["
-		"\"диагноз\",  " TO_STR("CASEDIAGNOZIS")", \"text\""
+		"\"диагноз\",  " TO_STR("CASEDIAGNOZIS")", "TO_STR("CASES_LIST_TYPE_TEXT")
 	"],"		
 	"["
-		"\"план лечения\",  " TO_STR("CASEPLANLECHENIYA")", \"planLecheniya\""
+		"\"план лечения\",  " TO_STR("CASEPLANLECHENIYA")", "TO_STR("CASES_LIST_TYPE_PLANLECHENIYA")
 	"],"		
 	"["
-		"\"проведено лечение\", " TO_STR("CASELECHENIYE")", \"text\""
+		"\"проведено лечение\", " TO_STR("CASELECHENIYE")", "TO_STR("CASES_LIST_TYPE_TEXT")
 	"],"		
 	"["
-		"\"рекомендации\",  " TO_STR("CASERECOMENDACII")", \"text\""
+		"\"рекомендации\",  " TO_STR("CASERECOMENDACII")", "TO_STR("CASES_LIST_TYPE_TEXT")
 	"],"		
 	"["
-		"\"Следующий визит\", " TO_STR("CASEDATEOFNEXT")", \"date\""
+		"\"Следующий визит\", " TO_STR("CASEDATEOFNEXT")", "TO_STR("CASES_LIST_TYPE_DATE")
 	"],"		
 	"["
-		"\"Выставить счёт\",  " TO_STR("CASEBILL")", \"bill\""
+		"\"Выставить счёт\",  " TO_STR("CASEBILL")", "TO_STR("CASES_LIST_TYPE_BILL")
 	"]"		
 "]";
 
@@ -198,8 +221,8 @@ BEGIN_ENUM(CASES)
 END_ENUM(CASES)
 
 BEGIN_ENUM_STRING(CASES)
-#define CASES_COLUMN_DATE(member, number, title) DECL_ENUM_STRING_ELEMENT(number), 
-#define CASES_COLUMN_TEXT(member, number, title) DECL_ENUM_STRING_ELEMENT(number), 
+#define CASES_COLUMN_DATE(member, number, title      ) DECL_ENUM_STRING_ELEMENT(number), 
+#define CASES_COLUMN_TEXT(member, number, title      ) DECL_ENUM_STRING_ELEMENT(number), 
 #define CASES_COLUMN_DATA(member, number, title, type) DECL_ENUM_STRING_ELEMENT(number), 
 	CASES_COLUMNS
 #undef CASES_COLUMN_DATE
@@ -211,8 +234,8 @@ static void
 prozubi_cases_table_init(struct kdata2_table **cases){
 	kdata2_table_init(cases, CASES_TABLENAME,
 
-#define CASES_COLUMN_DATE(member, number, title) KDATA2_TYPE_NUMBER, title, 
-#define CASES_COLUMN_TEXT(member, number, title) KDATA2_TYPE_TEXT, title, 
+#define CASES_COLUMN_DATE(member, number, title      ) KDATA2_TYPE_NUMBER, title, 
+#define CASES_COLUMN_TEXT(member, number, title      ) KDATA2_TYPE_TEXT, title, 
 #define CASES_COLUMN_DATA(member, number, title, type) KDATA2_TYPE_DATA, title, 
 	CASES_COLUMNS
 #undef CASES_COLUMN_DATE
@@ -278,8 +301,8 @@ prozubi_case_new(){
 			ERR("%s", "can't allocate struct case_t"), NULL);
 	
 	/* init values to NULL */
-#define CASES_COLUMN_DATE(member, number, title) c->member = time(NULL); 
-#define CASES_COLUMN_TEXT(member, number, title) c->member = NULL; 
+#define CASES_COLUMN_DATE(member, number, title      ) c->member = time(NULL); 
+#define CASES_COLUMN_TEXT(member, number, title      ) c->member = NULL; 
 #define CASES_COLUMN_DATA(member, number, title, type) c->member = NULL; 
 	CASES_COLUMNS
 #undef CASES_COLUMN_DATE
@@ -308,11 +331,6 @@ prozubi_cases_foreach(
 		return;
 	}
 
-	/* allocate and init case_t */
-	struct case_t *c = prozubi_case_new();
-	if (!c)
-		return;
-
 	/* get cases list children */
 	cJSON *cases_list_children = cJSON_Parse(_prozubi_cases_list_string);
 	if (!cases_list_children) {
@@ -323,8 +341,8 @@ prozubi_cases_foreach(
 	/* create SQL string */
 	char SQL[BUFSIZ] = "SELECT ";
 
-#define CASES_COLUMN_DATE(member, number, title) strcat(SQL, title); strcat(SQL, ", "); 
-#define CASES_COLUMN_TEXT(member, number, title) strcat(SQL, title); strcat(SQL, ", "); 
+#define CASES_COLUMN_DATE(member, number, title      ) strcat(SQL, title); strcat(SQL, ", "); 
+#define CASES_COLUMN_TEXT(member, number, title      ) strcat(SQL, title); strcat(SQL, ", "); 
 #define CASES_COLUMN_DATA(member, number, title, type) strcat(SQL, title); strcat(SQL, ", "); 
 	CASES_COLUMNS
 #undef CASES_COLUMN_DATE
@@ -343,11 +361,16 @@ prozubi_cases_foreach(
 	res = sqlite3_prepare_v2(kdata->db, SQL, -1, &stmt, NULL);
 	if (res != SQLITE_OK) {
 		ERR("sqlite3_prepare_v2: %s: %s", SQL, sqlite3_errmsg(kdata->db));	
-		free(c);
 		return;
 	}	
 
 	while (sqlite3_step(stmt) != SQLITE_DONE) {
+	
+		/* allocate and init case_t */
+		struct case_t *c = prozubi_case_new();
+		if (!c)
+			return;
+
 		/* iterate columns */
 		int i;
 		for (i = 0; i < CASES_COLS_NUM; ++i) {
@@ -358,6 +381,7 @@ prozubi_cases_foreach(
 				case number:\
 				{\
 					int col_type = sqlite3_column_type(stmt, i);\
+					fprintf(stderr, "COLL_TYPE: %d\n", col_type);\
 					if (col_type == SQLITE_INTEGER) {\
 						c->member = sqlite3_column_int64(stmt, i);\
 					} else if (col_type == SQLITE_FLOAT) {\
@@ -372,11 +396,8 @@ prozubi_cases_foreach(
 					size_t len = sqlite3_column_bytes(stmt, i);\
 					const unsigned char *value = sqlite3_column_text(stmt, i);\
 					if (value){\
-						char *str = malloc(len + 1);\
-						if (!str){\
-							ERR("can't allocate string with len: %ld", len+1);\
-							break;\
-						}\
+						char *str = MALLOC(len + 1,\
+							ERR("can't allocate string with len: %ld", len+1), break);\
 						strncpy(str, (const char *)value, len);\
 						str[len] = 0;\
 						c->member = str;\
@@ -475,13 +496,9 @@ prozubi_case_free(struct case_t *c){
 #undef CASES_COLUMN_DATA
 
 
-void * 
-prozubi_case_get(struct case_t *c, const char *name){
-	int index = getIndexCASES(name);	
-	if (index == -1)
-		return NULL;
-
-	switch (index) {
+static void * 
+prozubi_case_get(struct case_t *c, CASES key){
+	switch (key) {
 #define CASES_COLUMN_DATA(member, number, title, type)\
 		case number:\
 			{\
@@ -501,12 +518,14 @@ prozubi_case_get(struct case_t *c, const char *name){
 #undef CASES_COLUMN_DATE
 #undef CASES_COLUMN_TEXT			
 #undef CASES_COLUMN_DATA			
+		default:
+			break;
 	}
 	
 	return NULL;
 }
 
-size_t 
+static size_t 
 prozubi_case_get_len(struct case_t *c, const char *name){
 	int index = getIndexCASES(name);	
 	if (index == -1)
@@ -535,6 +554,102 @@ prozubi_case_get_len(struct case_t *c, const char *name){
 	}
 	
 	return 0;
+}
+
+static void
+prozubi_cases_list_foreach(
+		struct case_t *c,
+		void * user_data,
+		void * (*item_callback)(
+			void *user_data,
+			struct case_t *c,
+			void * parent,
+			bool has_children,
+			char * title,
+			enum tagCASES key,
+			enum tagCASES_LIST_TYPE type,
+			char ** array
+			)	
+		)
+{
+	cJSON *json = c->case_list;
+	if (!cJSON_IsObject(json)){
+		ERR("%s", "error to read json");
+		return;
+	}	
+	cJSON *jparent = cJSON_GetObjectItem(json, "parent");
+	char *title = cJSON_GetStringValue(jparent); 
+	void *parent = item_callback(user_data, c, NULL, true, title, -1, -1, NULL);
+	
+	cJSON *root = cJSON_GetObjectItem(json, "children");
+	if (!cJSON_IsArray(root)){
+		ERR("%s", "error to read json");
+		return;
+	}
+
+	cJSON *element;
+	cJSON_ArrayForEach(element, root){
+		if (cJSON_IsArray(element)){
+			/* handle array */
+			cJSON *jtitle = cJSON_GetArrayItem(element, 0);
+			char *title = cJSON_GetStringValue(jtitle);
+
+			cJSON *jkey = cJSON_GetArrayItem(element, 1); 
+			char  *skey = cJSON_GetStringValue(jkey); 
+			int key = getIndexCASES(skey);	
+
+			cJSON *jtype = cJSON_GetArrayItem(element, 2); 
+			char  *stype = cJSON_GetStringValue(jtype); 
+			int type = getIndexCASES_LIST_TYPE(stype);	
+			
+			char ** array = NULL;
+			if (type == CASES_LIST_TYPE_COMBOBOX){
+				cJSON *jarray = cJSON_GetArrayItem(element, 3); 
+				array = MALLOC(8*10, ERR("%s", "can't allocate memory"), break);
+				cJSON *item; int i = 0;
+				cJSON_ArrayForEach(item, jarray){
+					array[i++] = cJSON_GetStringValue(item); 
+				}
+				array[i] = NULL; // NULL-terminate array
+			}
+			item_callback(user_data, c, parent, false, title, key, type, array);
+
+		} else if (cJSON_IsObject(element)){
+			/* handle object */
+			cJSON *jparent = cJSON_GetObjectItem(element, "parent");
+			char *title = cJSON_GetStringValue(jparent); 
+			void *new_parent = item_callback(user_data, c, parent, true, title, -1, -1, NULL);
+			
+			cJSON *child = cJSON_GetObjectItem(element, "children");
+			cJSON *child_element;
+			cJSON_ArrayForEach(child_element, child){
+				if (cJSON_IsArray(child_element)){
+					cJSON *jtitle = cJSON_GetArrayItem(child_element, 0);
+					char *title = cJSON_GetStringValue(jtitle);
+
+					cJSON *jkey = cJSON_GetArrayItem(child_element, 1); 
+					char  *skey = cJSON_GetStringValue(jkey); 
+					int key = getIndexCASES(skey);	
+
+					cJSON *jtype = cJSON_GetArrayItem(child_element, 2); 
+					char  *stype = cJSON_GetStringValue(jtype); 
+					int type = getIndexCASES_LIST_TYPE(stype);	
+					
+					char ** array = NULL;
+					if (type == CASES_LIST_TYPE_COMBOBOX){
+						cJSON *jarray = cJSON_GetArrayItem(child_element, 3); 
+						array = MALLOC(8*10, ERR("%s", "can't allocate memory"), break);
+						cJSON *item; int i = 0;
+						cJSON_ArrayForEach(item, jarray){
+							array[i++] = cJSON_GetStringValue(item); 
+						}
+						array[i] = NULL; // NULL-terminate array
+					}
+					item_callback(user_data, c, new_parent, false, title, key, type, array);
+				}
+			}
+		}
+	}
 }
 
 #endif /* ifndef CASES_H */

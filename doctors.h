@@ -2,7 +2,7 @@
  * File              : doctors.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 27.04.2023
+ * Last Modified Date: 01.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -12,6 +12,7 @@
 #include "prozubilib_conf.h"
 
 #include "enum.h"
+#include "alloc.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -19,14 +20,14 @@
 #define DOCTORS_TABLENAME "ZDOCTORS"
 
 /*
- * DOCTORS_COLUMN_TEXT(struct member, enum number, SQLite column title, size)
+ * DOCTORS_COLUMN_TEXT(struct member, enum number, SQLite column title)
  * DOCTORS_COLUMN_DATA(struct member, enum number, SQLite column title, type)
  */
 #define DOCTORS_COLUMNS \
-	DOCTORS_COLUMN_TEXT(fio,           DOCTORFIO,           "ZFIO",           128)\
-	DOCTORS_COLUMN_TEXT(eventcalendar, DOCTOREVENTCALENDAR, "ZEVENTCALENDAR", 128)\
-	DOCTORS_COLUMN_TEXT(email,         DOCTOREMAIL,         "ZICLOUDID",      128)\
-	DOCTORS_COLUMN_TEXT(tel,           DOCTORTEL,           "ZTEL",           32)\
+	DOCTORS_COLUMN_TEXT(fio,           DOCTORFIO,           "ZFIO"           )\
+	DOCTORS_COLUMN_TEXT(eventcalendar, DOCTOREVENTCALENDAR, "ZEVENTCALENDAR" )\
+	DOCTORS_COLUMN_TEXT(email,         DOCTOREMAIL,         "ZICLOUDID"      )\
+	DOCTORS_COLUMN_TEXT(tel,           DOCTORTEL,           "ZTEL"           )\
 	DOCTORS_COLUMN_DATA(zapis,         DOCTORZAPIS,         "ZZAPIS",         cJSON)
 
 #define DOCTORS_DATA_TYPES\
@@ -43,7 +44,7 @@ enum doctor_data_types {
 struct doctor_t {
 	uuid4_str id;         /* uuid of the doctor */
 
-#define DOCTORS_COLUMN_TEXT(member, number, title, size) char member[size]; 
+#define DOCTORS_COLUMN_TEXT(member, number, title      ) char * member; size_t len_##member; 
 #define DOCTORS_COLUMN_DATA(member, number, title, type) type * member; size_t len_##member; 
 	DOCTORS_COLUMNS
 #undef DOCTORS_COLUMN_TEXT
@@ -52,7 +53,7 @@ struct doctor_t {
 
 
 BEGIN_ENUM(DOCTORS) 
-#define DOCTORS_COLUMN_TEXT(member, number, title, size) DECL_ENUM_ELEMENT(number), 
+#define DOCTORS_COLUMN_TEXT(member, number, title      ) DECL_ENUM_ELEMENT(number), 
 #define DOCTORS_COLUMN_DATA(member, number, title, type) DECL_ENUM_ELEMENT(number), 
 	DOCTORS_COLUMNS
 #undef DOCTORS_COLUMN_TEXT
@@ -62,7 +63,7 @@ BEGIN_ENUM(DOCTORS)
 END_ENUM(DOCTORS)
 
 BEGIN_ENUM_STRING(DOCTORS) 
-#define DOCTORS_COLUMN_TEXT(member, number, title, size) DECL_ENUM_STRING_ELEMENT(number), 
+#define DOCTORS_COLUMN_TEXT(member, number, title      ) DECL_ENUM_STRING_ELEMENT(number), 
 #define DOCTORS_COLUMN_DATA(member, number, title, type) DECL_ENUM_STRING_ELEMENT(number), 
 	DOCTORS_COLUMNS
 #undef DOCTORS_COLUMN_TEXT
@@ -73,7 +74,7 @@ static void
 prozubi_doctors_table_init(struct kdata2_table **doctors){
 	kdata2_table_init(doctors, DOCTORS_TABLENAME,
 
-#define DOCTORS_COLUMN_TEXT(member, number, title, size) KDATA2_TYPE_TEXT, title, 
+#define DOCTORS_COLUMN_TEXT(member, number, title      ) KDATA2_TYPE_TEXT, title, 
 #define DOCTORS_COLUMN_DATA(member, number, title, type) KDATA2_TYPE_DATA, title, 
 	DOCTORS_COLUMNS
 #undef DOCTORS_COLUMN_TEXT
@@ -86,7 +87,7 @@ prozubi_doctors_table_init(struct kdata2_table **doctors){
 static struct doctor_t *
 prozubi_doctor_new(
 		kdata2_t *kdata,
-#define DOCTORS_COLUMN_TEXT(member, number, title, size) const char * member, 
+#define DOCTORS_COLUMN_TEXT(member, number, title      ) const char * member, 
 #define DOCTORS_COLUMN_DATA(member, number, title, type) void * member, size_t len_##member, 
 	DOCTORS_COLUMNS
 #undef DOCTORS_COLUMN_TEXT
@@ -95,12 +96,8 @@ prozubi_doctor_new(
 		)
 {
 	/* allocate case_t */
-	struct doctor_t *d = malloc(sizeof(struct doctor_t));
-	if (!d){
-		ERR("%s", "can't allocate struct doctor_t");
-		return NULL;
-	}
-
+	struct doctor_t *d = NEW(struct doctor_t, 
+			ERR("%s", "can't allocate struct doctor_t"), return NULL);
 	if (!id){
 		/* create new uuid */
 		UUID4_STATE_T state; UUID4_T identifier;
@@ -114,7 +111,7 @@ prozubi_doctor_new(
 		strcpy(d->id, id);
 
 	/* set values */
-#define DOCTORS_COLUMN_TEXT(member, number, title, size)\
+#define DOCTORS_COLUMN_TEXT(member, number, title)\
    	if (member)\
 		kdata2_set_text_for_uuid(kdata, DOCTORS_TABLENAME, title, member, d->id);	
 #define DOCTORS_COLUMN_DATA(member, number, title, type)\
@@ -145,12 +142,10 @@ prozubi_doctor_foreach(
 		return;
 	}
 
-	struct doctor_t d;
-	
 	/* create SQL string */
 	char SQL[BUFSIZ] = "SELECT ";
 
-#define DOCTORS_COLUMN_TEXT(member, number, title, size) strcat(SQL, title); strcat(SQL, ", "); 
+#define DOCTORS_COLUMN_TEXT(member, number, title      ) strcat(SQL, title); strcat(SQL, ", "); 
 #define DOCTORS_COLUMN_DATA(member, number, title, type) strcat(SQL, title); strcat(SQL, ", "); 
 	DOCTORS_COLUMNS
 #undef DOCTORS_COLUMN_TEXT			
@@ -170,19 +165,28 @@ prozubi_doctor_foreach(
 	}	
 
 	while (sqlite3_step(stmt) != SQLITE_DONE) {
+	
+		struct doctor_t *d = NEW(struct doctor_t, 
+				ERR("%s", "can't allocate struct doctor_t"), return);
+	
 		/* iterate columns */
 		int i;
 		for (i = 0; i < DOCTORS_COLS_NUM; ++i) {
 			/* handle values */
 			switch (i) {
 
-#define DOCTORS_COLUMN_TEXT(member, number, title, size) \
+#define DOCTORS_COLUMN_TEXT(member, number, title) \
 				case number:\
 				{\
+					size_t len = sqlite3_column_bytes(stmt, i);\
 					const unsigned char *value = sqlite3_column_text(stmt, i);\
 					if (value){\
-						strncpy(d.member, (const char *)value, size - 1);\
-						d.member[size - 1] = 0;\
+						char *str = MALLOC(len + 1,\
+							ERR("can't allocate string with len: %ld", len+1), break);\
+						strncpy(str, (const char *)value, len);\
+						str[len] = 0;\
+						d->member = str;\
+						d->len_##member = len;\
 					}\
 					break;\
 				}; 
@@ -194,8 +198,8 @@ prozubi_doctor_foreach(
 					const void *value = sqlite3_column_blob(stmt, i);\
 					if (DOCTORS_DATA_TYPE_##type == DOCTORS_DATA_TYPE_cJSON){\
 						cJSON *json = cJSON_Parse(value);\
-						d.member = json;\
-						d.len_##member = 0;\
+						d->member = json;\
+						d->len_##member = 0;\
 					}\
 					break;\
 				};
@@ -212,16 +216,30 @@ prozubi_doctor_foreach(
 
 		/* handle doctor id */
 		const unsigned char *value = sqlite3_column_text(stmt, i);				
-		strncpy(d.id, (const char *)value, sizeof(d.id) - 1);
-		d.id[sizeof(d.id) - 1] = 0;		
+		strncpy(d->id, (const char *)value, sizeof(d->id) - 1);
+		d->id[sizeof(d->id) - 1] = 0;		
 
 		/* callback */
 		if (callback)
-			if (callback(user_data, &d))
+			if (callback(user_data, d))
 				break;		
 	}	
 
 	sqlite3_finalize(stmt);
+}
+
+static void
+prozubi_doctor_free(struct doctor_t *d){
+	if (d){
+
+#define DOCTORS_COLUMN_TEXT(member, number, title) if(d->member) free(d->member); 
+#define DOCTORS_COLUMN_DATA(member, number, title, type) if(d->member) free(d->member); 
+		DOCTORS_COLUMNS
+#undef DOCTORS_COLUMN_TEXT			
+#undef DOCTORS_COLUMN_DATA			
+		
+		free(d);
+	}
 }
 
 #endif /* ifndef DOCTORS_H */

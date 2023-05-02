@@ -2,7 +2,7 @@
  * File              : enum.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 24.04.2023
- * Last Modified Date: 25.04.2023
+ * Last Modified Date: 01.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -28,7 +28,7 @@
 			int i = 0;\
 			while (ptr[i]){\
 				if (strcmp(ptr[i++], name) == 0)\
-					return i;\
+					return --i;\
 			}\
 		   	return -1;\
 		}

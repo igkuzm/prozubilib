@@ -2,7 +2,7 @@
  * File              : passport.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 27.04.2023
+ * Last Modified Date: 01.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -12,9 +12,11 @@
 #include "prozubilib_conf.h"
 
 #include "enum.h"
+#include "alloc.h"
 
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 
 #define PASSPORT_TABLENAME "ZPASSPORT"
 
@@ -24,20 +26,20 @@
  */
 #define PASSPORT_COLUMNS \
 	PASSPORT_COLUMN_DATE(dateofbirth, PASSPORTDATEOFBIRTH, "ZDATEOFBIRTH")\
-	PASSPORT_COLUMN_TEXT(familiya,    PASSPORTFAMILIYA,    "ZFAMILIYA",  128)\
-	PASSPORT_COLUMN_TEXT(imia,        PASSPOTIMIA,         "ZIMIA",      128)\
-	PASSPORT_COLUMN_TEXT(otchestvo,   PASSPORTOTCHESTVO,   "ZOTCHESTVO", 128)\
-	PASSPORT_COLUMN_TEXT(address,     PASSPORTADDRESS,     "ZADDRESS",   256)\
-	PASSPORT_COLUMN_TEXT(document,    PASSPORTDOCUMENT,    "ZDOCUMENT",  256)\
-	PASSPORT_COLUMN_TEXT(comment,     PASSPORTCOMMENT,     "ZCOMMENT",   256)\
-	PASSPORT_COLUMN_TEXT(tel,         PASSPORTTEL,         "ZTEL",       32)\
-	PASSPORT_COLUMN_TEXT(email,       PASSPORTEMAIL,       "ZEMAIL",     32)
+	PASSPORT_COLUMN_TEXT(familiya,    PASSPORTFAMILIYA,    "ZFAMILIYA"   )\
+	PASSPORT_COLUMN_TEXT(imia,        PASSPOTIMIA,         "ZIMIA"       )\
+	PASSPORT_COLUMN_TEXT(otchestvo,   PASSPORTOTCHESTVO,   "ZOTCHESTVO"  )\
+	PASSPORT_COLUMN_TEXT(address,     PASSPORTADDRESS,     "ZADDRESS"    )\
+	PASSPORT_COLUMN_TEXT(document,    PASSPORTDOCUMENT,    "ZDOCUMENT"   )\
+	PASSPORT_COLUMN_TEXT(comment,     PASSPORTCOMMENT,     "ZCOMMENT"    )\
+	PASSPORT_COLUMN_TEXT(tel,         PASSPORTTEL,         "ZTEL"        )\
+	PASSPORT_COLUMN_TEXT(email,       PASSPORTEMAIL,       "ZEMAIL"      )
 
 struct passport_t {
 	uuid4_str id;              /* uuid of the passport (patientid) */
 
 #define PASSPORT_COLUMN_DATE(member, number, title) time_t member; 
-#define PASSPORT_COLUMN_TEXT(member, number, title, size) char member[size]; 
+#define PASSPORT_COLUMN_TEXT(member, number, title) char * member; size_t len_##member; 
 	PASSPORT_COLUMNS
 #undef PASSPORT_COLUMN_DATE
 #undef PASSPORT_COLUMN_TEXT
@@ -47,7 +49,7 @@ struct passport_t {
 
 BEGIN_ENUM(PASSPORT) 
 #define PASSPORT_COLUMN_DATE(member, number, title) DECL_ENUM_ELEMENT(number), 
-#define PASSPORT_COLUMN_TEXT(member, number, title, size) DECL_ENUM_ELEMENT(number), 
+#define PASSPORT_COLUMN_TEXT(member, number, title) DECL_ENUM_ELEMENT(number), 
 	PASSPORT_COLUMNS
 #undef PASSPORT_COLUMN_DATE
 #undef PASSPORT_COLUMN_TEXT	
@@ -57,7 +59,7 @@ END_ENUM(PASSPORT)
 
 BEGIN_ENUM_STRING(PASSPORT) 
 #define PASSPORT_COLUMN_DATE(member, number, title) DECL_ENUM_STRING_ELEMENT(number), 
-#define PASSPORT_COLUMN_TEXT(member, number, title, size) DECL_ENUM_STRING_ELEMENT(number), 
+#define PASSPORT_COLUMN_TEXT(member, number, title) DECL_ENUM_STRING_ELEMENT(number), 
 	PASSPORT_COLUMNS
 #undef PASSPORT_COLUMN_DATE
 #undef PASSPORT_COLUMN_TEXT	
@@ -68,7 +70,7 @@ prozubi_passport_table_init(struct kdata2_table **passport){
 	kdata2_table_init(passport, PASSPORT_TABLENAME,
 
 #define PASSPORT_COLUMN_DATE(member, number, title) KDATA2_TYPE_NUMBER, title, 
-#define PASSPORT_COLUMN_TEXT(member, number, title, size) KDATA2_TYPE_TEXT, title, 
+#define PASSPORT_COLUMN_TEXT(member, number, title) KDATA2_TYPE_TEXT, title, 
 PASSPORT_COLUMNS
 #undef PASSPORT_COLUMN_DATE
 #undef PASSPORT_COLUMN_TEXT			
@@ -98,16 +100,13 @@ prozubi_passport_foreach(
 	char SQL[BUFSIZ] = "SELECT ";
 
 #define PASSPORT_COLUMN_DATE(member, number, title) strcat(SQL, title); strcat(SQL, ", "); 
-#define PASSPORT_COLUMN_TEXT(member, number, title, size) strcat(SQL, title); strcat(SQL, ", "); 
+#define PASSPORT_COLUMN_TEXT(member, number, title) strcat(SQL, title); strcat(SQL, ", "); 
 PASSPORT_COLUMNS
 #undef PASSPORT_COLUMN_DATE
 #undef PASSPORT_COLUMN_TEXT			
 	
 	strcat(SQL, "ZRECORDNAME FROM ");
 	strcat(SQL, PASSPORT_TABLENAME);
-
-	/* passort struct */
-	struct passport_t p;
 
 	/* start SQLite request */
 	int res;
@@ -120,6 +119,11 @@ PASSPORT_COLUMNS
 	}	
 
 	while (sqlite3_step(stmt) != SQLITE_DONE) {
+	
+		/* passort struct */
+		struct passport_t *p = NEW(struct passport_t, 
+				ERR("%s", "can't allocate struct passport_t"), return);
+
 		/* iterate columns */
 		int i;
 		for (i = 0; i < PASSPORT_COLS_NUM; ++i) {
@@ -131,20 +135,25 @@ PASSPORT_COLUMNS
 				{\
 					int col_type = sqlite3_column_type(stmt, i);\
 					if (col_type == SQLITE_INTEGER) {\
-						p.member = sqlite3_column_int64(stmt, i);\
+						p->member = sqlite3_column_int64(stmt, i);\
 					} else if (col_type == SQLITE_FLOAT) {\
-						p.member = sqlite3_column_double(stmt, i) + NSTimeIntervalSince1970;\
+						p->member = sqlite3_column_double(stmt, i) + NSTimeIntervalSince1970;\
 					}\
 					break;\
 				}; 
 				
-#define PASSPORT_COLUMN_TEXT(member, number, title, size) \
+#define PASSPORT_COLUMN_TEXT(member, number, title) \
 				case number:\
 				{\
+					size_t len = sqlite3_column_bytes(stmt, i);\
 					const unsigned char *value = sqlite3_column_text(stmt, i);\
 					if (value){\
-						strncpy(p.member, (const char *)value, sizeof(p.member) - 1);\
-						p.member[sizeof(p.member) - 1] = 0;\
+						char *str = MALLOC(len + 1,\
+							ERR("can't allocate string with len: %ld", len+1), break);\
+						strncpy(str, (const char *)value, len);\
+						str[len] = 0;\
+						p->member = str;\
+						p->len_##member = len;\
 					}\
 					break;\
 				}; 
@@ -161,12 +170,12 @@ PASSPORT_COLUMNS
 
 		/* handle passport id */
 		const unsigned char *value = sqlite3_column_text(stmt, i);				
-		strncpy(p.id, (const char *)value, sizeof(p.id) - 1);
-		p.id[sizeof(p.id) - 1] = 0;		
+		strncpy(p->id, (const char *)value, sizeof(p->id) - 1);
+		p->id[sizeof(p->id) - 1] = 0;		
 
 		/* callback */
 		if (callback)
-			if (callback(user_data, &p))
+			if (callback(user_data, p))
 				break;
 	}	
 	
@@ -178,8 +187,8 @@ static struct passport_t *
 prozubi_passport_new(
 		kdata2_t *kdata,
 
-#define PASSPORT_COLUMN_DATE(member, number, title)
-#define PASSPORT_COLUMN_TEXT(member, number, title, size) const char * member,
+#define PASSPORT_COLUMN_DATE(member, number, title) time_t member,
+#define PASSPORT_COLUMN_TEXT(member, number, title) const char * member,
 			
 		PASSPORT_COLUMNS
 
@@ -189,11 +198,8 @@ prozubi_passport_new(
 		)
 {
 	/* allocate case_t */
-	struct passport_t *p = malloc(sizeof(struct passport_t));
-	if (!p){
-		ERR("%s", "can't allocate struct passport_t");
-		return NULL;
-	}
+	struct passport_t *p = NEW(struct passport_t, 
+			ERR("%s", "can't allocate struct passport_t"), return NULL);
 
 	if (!id){
 		/* create new uuid */
@@ -210,8 +216,8 @@ prozubi_passport_new(
 	/* set values */
 
 #define PASSPORT_COLUMN_DATE(member, number, title)\
-   	kdata2_set_number_for_uuid(kdata, PASSPORT_TABLENAME, title, time(NULL), p->id); 
-#define PASSPORT_COLUMN_TEXT(member, number, title, size)\
+   	kdata2_set_number_for_uuid(kdata, PASSPORT_TABLENAME, title, member, p->id); 
+#define PASSPORT_COLUMN_TEXT(member, number, title)\
    	if (member) kdata2_set_text_for_uuid(kdata, PASSPORT_TABLENAME, title, member, p->id);
 			
 	PASSPORT_COLUMNS
@@ -220,6 +226,20 @@ prozubi_passport_new(
 #undef PASSPORT_COLUMN_TEXT	
 
 	return p;
+}
+
+static void
+prozubi_passport_free(struct passport_t *d){
+	if (d){
+
+#define PASSPORT_COLUMN_DATE(member, number, title)
+#define PASSPORT_COLUMN_TEXT(member, number, title) if(d->member) free(d->member); 
+		PASSPORT_COLUMNS
+#undef PASSPORT_COLUMN_TEXT			
+#undef PASSPORT_COLUMN_DATE			
+		
+		free(d);
+	}
 }
 
 #endif /* ifndef PASSPORT_H */
