@@ -2,12 +2,16 @@
  * File              : cases.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 01.05.2023
+ * Last Modified Date: 03.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
 #ifndef CASES_H
 #define CASES_H
+
+#ifndef UUIDCOLUMN
+#define UUIDCOLUMN "ZRECORDNAME"
+#endif /* ifndef UUIDCOLUMN */
 
 #include "prozubilib_conf.h"
 #include "kdata2/cYandexDisk/cJSON.h"
@@ -125,6 +129,44 @@ _prozubi_cases_list_string =
 	"]"		
 "]";
 
+#define ZUBFORMULA_TYPES \
+	ZUBFORMULA_TYPE_DEF(ZUBFORMULA_TYPE_N,  "норма",        "")\
+	ZUBFORMULA_TYPE_DEF(ZUBFORMULA_TYPE_C,  "кариес",      "C")\
+	ZUBFORMULA_TYPE_DEF(ZUBFORMULA_TYPE_P,  "пульпит",     "P")\
+	ZUBFORMULA_TYPE_DEF(ZUBFORMULA_TYPE_Pt, "периодонтит", "Pt")\
+	ZUBFORMULA_TYPE_DEF(ZUBFORMULA_TYPE_0,  "отсутствует", "0")\
+	ZUBFORMULA_TYPE_DEF(ZUBFORMULA_TYPE_Pl, "пломба",      "П")\
+	ZUBFORMULA_TYPE_DEF(ZUBFORMULA_TYPE_K,  "коронка",     "К")\
+	ZUBFORMULA_TYPE_DEF(ZUBFORMULA_TYPE_I,  "искусств",    "И")\
+	ZUBFORMULA_TYPE_DEF(ZUBFORMULA_TYPE_R,  "корень",      "R")
+
+BEGIN_ENUM(ZUBFORMULA_TYPE) 
+#define ZUBFORMULA_TYPE_DEF(name, title, abbr) DECL_ENUM_ELEMENT(name), 
+	ZUBFORMULA_TYPES
+#undef ZUBFORMULA_TYPE_DEF
+	DECL_ENUM_ELEMENT(ZUBFORMULA_TYPE_COLS_NUM),
+END_ENUM(ZUBFORMULA_TYPE)
+
+BEGIN_ENUM_STRING(ZUBFORMULA_TYPE)
+#define ZUBFORMULA_TYPE_DEF(name, title, abbr) DECL_ENUM_STRING_ELEMENT(name), 
+	ZUBFORMULA_TYPES
+#undef ZUBFORMULA_TYPE_DEF
+END_ENUM_STRING(ZUBFORMULA_TYPE)	
+
+struct ZUBFORMULA_TYPE_t {
+	ZUBFORMULA_TYPE type;
+	const char *title;
+	const char *attr;
+};
+
+static struct ZUBFORMULA_TYPE_t ZUBFORMULA_TYPE_ARRAY[] =
+{
+#define ZUBFORMULA_TYPE_DEF(name, title, abbr) {name, title, abbr}, 
+	ZUBFORMULA_TYPES
+#undef ZUBFORMULA_TYPES	
+	-1
+};
+	
 /*
  * CASES_COLUMN_DATE(struct member, enum number, SQLite column title)
  * CASES_COLUMN_TEXT(struct member, enum number, SQLite column title)
@@ -270,7 +312,7 @@ _prozubi_cases_list_new(
 	struct tm tm;
 	sec_to_tm(c->date, &tm);
 	char date[11];
-	strftime(date, 11, "%m.%d.%Y", &tm);
+	strftime(date, 11, "%d.%m.%Y", &tm);
 
 	/* set title */
 	char title[BUFSIZ] = "";
@@ -298,7 +340,7 @@ static struct case_t *
 prozubi_case_new(){
 	/* allocate case_t */
 	struct case_t *c = NEW(struct case_t, 
-			ERR("%s", "can't allocate struct case_t"), NULL);
+			ERR("%s", "can't allocate struct case_t"), return NULL);
 	
 	/* init values to NULL */
 #define CASES_COLUMN_DATE(member, number, title      ) c->member = time(NULL); 
@@ -367,9 +409,9 @@ prozubi_cases_foreach(
 	while (sqlite3_step(stmt) != SQLITE_DONE) {
 	
 		/* allocate and init case_t */
-		struct case_t *c = prozubi_case_new();
-		if (!c)
-			return;
+		struct case_t *c = NEW(struct case_t, 
+			ERR("%s", "can't allocate struct case_t"), return);
+
 
 		/* iterate columns */
 		int i;
@@ -402,6 +444,9 @@ prozubi_cases_foreach(
 						str[len] = 0;\
 						c->member = str;\
 						c->len_##member = len;\
+					} else {\
+						c->member = NULL;\
+						c->len_##member = -1;\
 					}\
 					break;\
 				}; 
@@ -411,10 +456,15 @@ prozubi_cases_foreach(
 				{\
 					size_t len = sqlite3_column_bytes(stmt, i);\
 					const void *value = sqlite3_column_blob(stmt, i);\
-					if (CASES_DATA_TYPE_##type == CASES_DATA_TYPE_cJSON){\
-						cJSON *json = cJSON_ParseWithLength(value, len);\
-						c->member = json;\
-						c->len_##member = len;\
+					if (value){\
+						if (CASES_DATA_TYPE_##type == CASES_DATA_TYPE_cJSON){\
+							cJSON *json = cJSON_ParseWithLength(value, len);\
+							c->member = json;\
+							c->len_##member = -1;\
+						}\
+					} else {\
+						c->member = NULL;\
+						c->len_##member = -1;\
 					}\
 					break;\
 				};
@@ -650,6 +700,115 @@ prozubi_cases_list_foreach(
 			}
 		}
 	}
+}
+
+#define CASES_COLUMN_DATE(member, number, title)\
+static int prozubi_case_set_##number (kdata2_t *p, struct case_t *c, time_t t){\
+	if (kdata2_set_number_for_uuid(p, CASES_TABLENAME, title, t, c->id))\
+		return -1;\
+	c->member = t;\
+	return 0;\
+}
+#define CASES_COLUMN_DATA(member, number, title, type)\
+static int prozubi_case_set_##number (kdata2_t *p, struct case_t *c,\
+	   	type *data, size_t len)\
+{\
+	if (CASES_DATA_TYPE_##type == CASES_DATA_TYPE_cJSON){\
+		char *str = cJSON_Print(data);\
+		if (str){\
+			if (kdata2_set_data_for_uuid(p, CASES_TABLENAME, title,\
+					(void *)str, strlen(str), c->id))\
+			{\
+				free(str);\
+				return -1;\
+			}\
+			if(c->member)\
+				cJSON_free(c->member);\
+			c->member = data;\
+			c->len_##member = -1;\
+			free(str);\
+		}\
+	}\
+	return 0;\
+}
+#define CASES_COLUMN_TEXT(member, number, title)\
+static int prozubi_case_set_##number (kdata2_t *p, struct case_t *c, const char *text){\
+	if (kdata2_set_text_for_uuid(p, CASES_TABLENAME, title, text, c->id))\
+		return -1;\
+	if(c->member)\
+		free(c->member);\
+	size_t len = strlen(text);\
+   	c->member = MALLOC(len + 1, ERR("can't allocate size: %ld", len + 1), return -1);\
+	strncpy(c->member, text, len);\
+	c->len_##member = len;\
+	return 0;\
+}
+		CASES_COLUMNS
+#undef CASES_COLUMN_DATE
+#undef CASES_COLUMN_TEXT			
+#undef CASES_COLUMN_DATA			
+
+static int prozubi_case_set_text(
+		CASES key, kdata2_t *p, struct case_t *c, const char *text)
+{
+	switch (key) {
+#define CASES_COLUMN_DATE(member, number, title) case number: break;	
+#define CASES_COLUMN_DATA(member, number, title, type) case number: break;	
+#define CASES_COLUMN_TEXT(member, number, title) case number:\
+		return prozubi_case_set_##number(p, c, text);\
+		
+		CASES_COLUMNS
+
+#undef CASES_COLUMN_DATE
+#undef CASES_COLUMN_TEXT			
+#undef CASES_COLUMN_DATA	
+		
+		default:
+			break;
+	}
+	return -1;
+}
+
+static int prozubi_case_set_date(
+		CASES key, kdata2_t *p, struct case_t *c, time_t t)
+{
+	switch (key) {
+#define CASES_COLUMN_TEXT(member, number, title) case number: break;	
+#define CASES_COLUMN_DATA(member, number, title, type) case number: break;	
+#define CASES_COLUMN_DATE(member, number, title) case number:\
+		return prozubi_case_set_##number(p, c, t);\
+		
+		CASES_COLUMNS
+
+#undef CASES_COLUMN_DATE
+#undef CASES_COLUMN_TEXT			
+#undef CASES_COLUMN_DATA	
+		
+		default:
+			break;
+	}
+	return -1;
+}
+
+static int prozubi_case_set_data(
+		CASES key, kdata2_t *p, struct case_t *c, void *data, size_t len)
+{
+	switch (key) {
+#define CASES_COLUMN_TEXT(member, number, title) case number: break;	
+#define CASES_COLUMN_DATE(member, number, title) case number: break;	
+#define CASES_COLUMN_DATA(member, number, title, type) case number:\
+		return prozubi_case_set_##number(p, c, data, len);\
+		
+		CASES_COLUMNS
+
+#undef CASES_COLUMN_DATE
+#undef CASES_COLUMN_TEXT			
+#undef CASES_COLUMN_DATA	
+		
+		default:
+			break;
+	}
+	return -1;
 }
 
 #endif /* ifndef CASES_H */
