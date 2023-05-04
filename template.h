@@ -2,7 +2,7 @@
  * File              : template.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 01.05.2023
+ * Last Modified Date: 04.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -198,6 +198,7 @@ prozubi_template_free(struct template_t *d){
 #undef TEMPLATES_COLUMN_TEXT			
 		
 		free(d);
+		d = NULL;
 	}
 }
 

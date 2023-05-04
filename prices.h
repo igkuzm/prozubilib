@@ -2,7 +2,7 @@
  * File              : prices.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 01.05.2023
+ * Last Modified Date: 04.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -196,6 +196,7 @@ prozubi_prices_free(struct price_t *d){
 #undef PRICES_COLUMN_TEXT			
 		
 		free(d);
+		d = NULL;
 	}
 }
 

@@ -2,7 +2,7 @@
  * File              : passport.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 03.05.2023
+ * Last Modified Date: 04.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -107,6 +107,7 @@ PASSPORT_COLUMNS
 	
 	strcat(SQL, "ZRECORDNAME FROM ");
 	strcat(SQL, PASSPORT_TABLENAME);
+	strcat(SQL, " ORDER BY ZFAMILIYA ASC, ZIMIA ASC, ZOTCHESTVO ASC");
 
 	/* start SQLite request */
 	int res;
@@ -216,9 +217,11 @@ prozubi_passport_new(
 	/* set values */
 
 #define PASSPORT_COLUMN_DATE(member, number, title)\
-   	kdata2_set_number_for_uuid(kdata, PASSPORT_TABLENAME, title, member, p->id); 
+	p->member = member;
 #define PASSPORT_COLUMN_TEXT(member, number, title)\
-   	if (member) kdata2_set_text_for_uuid(kdata, PASSPORT_TABLENAME, title, member, p->id);
+	p->member = MALLOC(strlen(member) + 1,\
+			ERR("can't allocate memory: %ld", strlen(member) + 1), return NULL);\
+	strcpy(p->member, member);
 			
 	PASSPORT_COLUMNS
 
@@ -239,6 +242,7 @@ prozubi_passport_free(struct passport_t *d){
 #undef PASSPORT_COLUMN_DATE			
 		
 		free(d);
+		d = NULL;
 	}
 }
 
@@ -409,6 +413,13 @@ static int prozubi_passport_update(
 	}
 
 	return 0;
+}
+
+static int prozubi_passport_remove(
+		kdata2_t *p, struct passport_t *c
+		)
+{
+	return kdata2_remove_for_uuid(p, PASSPORT_TABLENAME, c->id);
 }
 
 #endif /* ifndef PASSPORT_H */

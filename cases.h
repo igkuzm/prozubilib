@@ -2,7 +2,7 @@
  * File              : cases.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 03.05.2023
+ * Last Modified Date: 04.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -395,6 +395,7 @@ prozubi_cases_foreach(
 	strcat(SQL, CASES_TABLENAME);
 	if (patient_id)
 		strcat(SQL, STR(" WHERE ZPATIENTID = '%s'", patient_id));
+	strcat(SQL, " ORDER BY ZDATE ASC");
 
 	/* start SQLite request */
 	int res;
@@ -509,13 +510,17 @@ prozubi_case_free(struct case_t *c){
 
 #define CASES_COLUMN_DATE(member, number, title) 
 #define CASES_COLUMN_TEXT(member, number, title) if(c->member) free(c->member); 
-#define CASES_COLUMN_DATA(member, number, title, type) if(c->member) free(c->member); 
+#define CASES_COLUMN_DATA(member, number, title, type)\
+		if (CASES_DATA_TYPE_##type == CASES_DATA_TYPE_cJSON){\
+			if(c->member) cJSON_free(c->member);\
+		}
 		CASES_COLUMNS
 #undef CASES_COLUMN_DATE
 #undef CASES_COLUMN_TEXT			
 #undef CASES_COLUMN_DATA			
 		
 		free(c);
+		c = NULL;
 	}
 }
 
@@ -642,7 +647,7 @@ prozubi_cases_list_foreach(
 		if (cJSON_IsArray(element)){
 			/* handle array */
 			cJSON *jtitle = cJSON_GetArrayItem(element, 0);
-			char *title = cJSON_GetStringValue(jtitle);
+			char *el_title = cJSON_GetStringValue(jtitle);
 
 			cJSON *jkey = cJSON_GetArrayItem(element, 1); 
 			char  *skey = cJSON_GetStringValue(jkey); 
@@ -662,20 +667,20 @@ prozubi_cases_list_foreach(
 				}
 				array[i] = NULL; // NULL-terminate array
 			}
-			item_callback(user_data, c, parent, false, title, key, type, array);
+			item_callback(user_data, c, parent, false, el_title, key, type, array);
 
 		} else if (cJSON_IsObject(element)){
 			/* handle object */
 			cJSON *jparent = cJSON_GetObjectItem(element, "parent");
-			char *title = cJSON_GetStringValue(jparent); 
-			void *new_parent = item_callback(user_data, c, parent, true, title, -1, -1, NULL);
+			char *el_title = cJSON_GetStringValue(jparent); 
+			void *new_parent = item_callback(user_data, c, parent, true, el_title, -1, -1, NULL);
 			
 			cJSON *child = cJSON_GetObjectItem(element, "children");
 			cJSON *child_element;
 			cJSON_ArrayForEach(child_element, child){
 				if (cJSON_IsArray(child_element)){
 					cJSON *jtitle = cJSON_GetArrayItem(child_element, 0);
-					char *title = cJSON_GetStringValue(jtitle);
+					char *ctitle = cJSON_GetStringValue(jtitle);
 
 					cJSON *jkey = cJSON_GetArrayItem(child_element, 1); 
 					char  *skey = cJSON_GetStringValue(jkey); 
@@ -695,7 +700,7 @@ prozubi_cases_list_foreach(
 						}
 						array[i] = NULL; // NULL-terminate array
 					}
-					item_callback(user_data, c, new_parent, false, title, key, type, array);
+					item_callback(user_data, c, new_parent, false, ctitle, key, type, array);
 				}
 			}
 		}

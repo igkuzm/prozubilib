@@ -2,7 +2,7 @@
  * File              : doctors.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 01.05.2023
+ * Last Modified Date: 04.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -239,6 +239,7 @@ prozubi_doctor_free(struct doctor_t *d){
 #undef DOCTORS_COLUMN_DATA			
 		
 		free(d);
+		d = NULL;
 	}
 }
 

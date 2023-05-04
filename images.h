@@ -2,7 +2,7 @@
  * File              : images.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 03.05.2023
+ * Last Modified Date: 04.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -272,6 +272,7 @@ prozubi_image_free(struct image_t *i){
 #undef IMAGES_COLUMN_DATA			
 		
 		free(i);
+		i = NULL;
 	}
 }
 
