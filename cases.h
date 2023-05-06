@@ -2,7 +2,7 @@
  * File              : cases.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 04.05.2023
+ * Last Modified Date: 06.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -814,6 +814,13 @@ static int prozubi_case_set_data(
 			break;
 	}
 	return -1;
+}
+
+static int prozubi_case_remove(
+		kdata2_t *p, struct case_t *c
+		)
+{
+	return kdata2_remove_for_uuid(p, CASES_TABLENAME, c->id);
 }
 
 #endif /* ifndef CASES_H */
