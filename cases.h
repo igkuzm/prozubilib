@@ -2,7 +2,7 @@
  * File              : cases.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 05.05.2023
+ * Last Modified Date: 06.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -357,8 +357,7 @@ _prozubi_case_new(){
 static struct case_t *
 prozubi_case_new_for_patient(kdata2_t *kdata, char patientid[37]){
 	/* allocate case_t */
-	struct case_t *c = NEW(struct case_t, 
-			ERR("%s", "can't allocate struct case_t"), return NULL);
+	struct case_t *c = _prozubi_case_new();
 
 	/* get last case pro patient - to copy data from it */
 	char SQL[BUFSIZ];
@@ -453,11 +452,14 @@ prozubi_case_new_for_patient(kdata2_t *kdata, char patientid[37]){
 
 	if (no_rows){
 		/* add default values if now rows */
+		c->date = time(NULL);
+		c->dateofnext = time(NULL);
 		c->name = strdup("Первичный приём");
 		c->zhalobi = strdup("активно не предъявляет");
 		c->sostoyanie = strdup("удовлетворительное");
 		c->soznaniye = strdup("ясное");
 		c->polozheniye = strdup("активное");
+		c->patientid = strdup(patientid);
 	}
 
 	/*write data to SQL */
@@ -564,9 +566,7 @@ prozubi_cases_foreach(
 	while (sqlite3_step(stmt) != SQLITE_DONE) {
 	
 		/* allocate and init case_t */
-		struct case_t *c = NEW(struct case_t, 
-			ERR("%s", "can't allocate struct case_t"), return);
-
+		struct case_t *c = _prozubi_case_new();
 
 		/* iterate columns */
 		int i;
