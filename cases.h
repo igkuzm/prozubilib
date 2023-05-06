@@ -1018,6 +1018,14 @@ static int prozubi_case_update(
 	return 0;
 }
 
+static int prozubi_case_remove(
+		kdata2_t *p, struct case_t *c
+		)
+{
+	return kdata2_remove_for_uuid(p, CASES_TABLENAME, c->id);
+}
+
+
 
 
 #endif /* ifndef CASES_H */
