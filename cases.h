@@ -1023,11 +1023,5 @@ static int prozubi_case_remove(
 {
 	return kdata2_remove_for_uuid(p, CASES_TABLENAME, c->id);
 }
-<<<<<<< HEAD
-
-
-=======
->>>>>>> refs/remotes/origin/main
-
 
 #endif /* ifndef CASES_H */
