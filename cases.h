@@ -357,9 +357,18 @@ static struct case_t *
 prozubi_case_new_for_patient(kdata2_t *kdata, char patientid[37]){
 	/* allocate case_t */
 	struct case_t *c = _prozubi_case_new();
+	
+	/* create new uuid */
+		UUID4_STATE_T state; UUID4_T identifier;
+		uuid4_seed(&state);
+		uuid4_gen(&state, &identifier);
+		if (!uuid4_to_s(identifier, c->id, 37)){
+			ERR("%s", "can't generate uuid");
+			return NULL;
+		}
 
 	/* get last case pro patient - to copy data from it */
-	char SQL[BUFSIZ];
+	char SQL[BUFSIZ] = "";
 	strcat(SQL, "SELECT ");
 #define CASES_COLUMN_DATE(member, number, title      ) strcat(SQL, title); strcat(SQL, ", "); 
 #define CASES_COLUMN_TEXT(member, number, title      ) strcat(SQL, title); strcat(SQL, ", "); 
@@ -373,6 +382,8 @@ prozubi_case_new_for_patient(kdata2_t *kdata, char patientid[37]){
 	strcat(SQL, CASES_TABLENAME);
 	strcat(SQL, STR(" WHERE ZPATIENTID = '%s'", patientid));
 
+	LOG("SQL: %s", SQL);
+
 	/* start SQLite request */
 	int res;
 	sqlite3_stmt *stmt;
@@ -383,10 +394,7 @@ prozubi_case_new_for_patient(kdata2_t *kdata, char patientid[37]){
 		return NULL;
 	}	
 
-	bool no_rows = true;
 	while (sqlite3_step(stmt) != SQLITE_DONE) {
-		no_rows = false;
-	
 		/* iterate columns */
 		int i;
 		for (i = 0; i < CASES_COLS_NUM; ++i) {
@@ -449,17 +457,22 @@ prozubi_case_new_for_patient(kdata2_t *kdata, char patientid[37]){
 		}
 	}
 
-	if (no_rows){
 		/* add default values if now rows */
+		c->patientid = strdup(patientid);
 		c->date = time(NULL);
 		c->dateofnext = time(NULL);
+
+	if (!c->name)	
 		c->name = strdup("Первичный приём");
+	if (!c->zhalobi)	
 		c->zhalobi = strdup("активно не предъявляет");
+	if (!c->sostoyanie)	
 		c->sostoyanie = strdup("удовлетворительное");
+	if (!c->soznaniye)	
 		c->soznaniye = strdup("ясное");
+	if (!c->polozheniye)	
 		c->polozheniye = strdup("активное");
-		c->patientid = strdup(patientid);
-	}
+
 
 	/*write data to SQL */
 	int i;
@@ -771,6 +784,7 @@ prozubi_cases_list_foreach(
 		void * (*item_callback)(
 			void *user_data,
 			struct case_t *c,
+			void *allocated_ptr,
 			void * parent,
 			bool has_children,
 			char * title,
@@ -787,7 +801,7 @@ prozubi_cases_list_foreach(
 	}	
 	cJSON *jparent = cJSON_GetObjectItem(json, "parent");
 	char *title = cJSON_GetStringValue(jparent); 
-	void *parent = item_callback(user_data, c, NULL, true, title, -1, -1, NULL);
+	void *parent = item_callback(user_data, c, c, NULL, true, title, -1, -1, NULL);
 	
 	cJSON *root = cJSON_GetObjectItem(json, "children");
 	if (!cJSON_IsArray(root)){
@@ -820,13 +834,13 @@ prozubi_cases_list_foreach(
 				}
 				array[i] = NULL; // NULL-terminate array
 			}
-			item_callback(user_data, c, parent, false, el_title, key, type, array);
+			item_callback(user_data, c, NULL, parent, false, el_title, key, type, array);
 
 		} else if (cJSON_IsObject(element)){
 			/* handle object */
 			cJSON *jparent = cJSON_GetObjectItem(element, "parent");
 			char *el_title = cJSON_GetStringValue(jparent); 
-			void *new_parent = item_callback(user_data, c, parent, true, el_title, -1, -1, NULL);
+			void *new_parent = item_callback(user_data, c, NULL, parent, true, el_title, -1, -1, NULL);
 			
 			cJSON *child = cJSON_GetObjectItem(element, "children");
 			cJSON *child_element;
@@ -853,7 +867,7 @@ prozubi_cases_list_foreach(
 						}
 						array[i] = NULL; // NULL-terminate array
 					}
-					item_callback(user_data, c, new_parent, false, ctitle, key, type, array);
+					item_callback(user_data, c, NULL, new_parent, false, ctitle, key, type, array);
 				}
 			}
 		}
