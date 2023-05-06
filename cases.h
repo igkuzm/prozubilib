@@ -1,8 +1,19 @@
 /**
  * File              : cases.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
- * Date              : 20.04.2023
+ * Date              : 06.05.2023
  * Last Modified Date: 06.05.2023
+ * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
+ */
+/**
+ * File              : cases.h
+ * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
+ * Date              : 20.04.2023
+<<<<<<< HEAD
+ * Last Modified Date: 06.05.2023
+=======
+ * Last Modified Date: 05.05.2023
+>>>>>>> 6e3bc60cf01479a9761ad47b4544b20ad563e014
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -337,7 +348,7 @@ _prozubi_cases_list_new(
 
 /* allocate and init new case */
 static struct case_t *
-prozubi_case_new(){
+_prozubi_case_new(){
 	/* allocate case_t */
 	struct case_t *c = NEW(struct case_t, 
 			ERR("%s", "can't allocate struct case_t"), return NULL);
@@ -353,6 +364,160 @@ prozubi_case_new(){
 	
 	return c;
 }
+
+static struct case_t *
+prozubi_case_new_for_patient(kdata2_t *kdata, char patientid[37]){
+	/* allocate case_t */
+	struct case_t *c = NEW(struct case_t, 
+			ERR("%s", "can't allocate struct case_t"), return NULL);
+
+	/* get last case pro patient - to copy data from it */
+	char SQL[BUFSIZ];
+	strcat(SQL, "SELECT ");
+#define CASES_COLUMN_DATE(member, number, title      ) strcat(SQL, title); strcat(SQL, ", "); 
+#define CASES_COLUMN_TEXT(member, number, title      ) strcat(SQL, title); strcat(SQL, ", "); 
+#define CASES_COLUMN_DATA(member, number, title, type) strcat(SQL, title); strcat(SQL, ", "); 
+	CASES_COLUMNS
+#undef CASES_COLUMN_DATE
+#undef CASES_COLUMN_TEXT			
+#undef CASES_COLUMN_DATA			
+	
+	strcat(SQL, "ZRECORDNAME, MAX(ZDATE) FROM ");
+	strcat(SQL, CASES_TABLENAME);
+	strcat(SQL, STR(" WHERE ZPATIENTID = '%s'", patientid));
+
+	/* start SQLite request */
+	int res;
+	sqlite3_stmt *stmt;
+	
+	res = sqlite3_prepare_v2(kdata->db, SQL, -1, &stmt, NULL);
+	if (res != SQLITE_OK) {
+		ERR("sqlite3_prepare_v2: %s: %s", SQL, sqlite3_errmsg(kdata->db));	
+		return NULL;
+	}	
+
+	bool no_rows = true;
+	while (sqlite3_step(stmt) != SQLITE_DONE) {
+		no_rows = false;
+	
+		/* iterate columns */
+		int i;
+		for (i = 0; i < CASES_COLS_NUM; ++i) {
+			/* handle values */
+			switch (i) {
+
+#define CASES_COLUMN_DATE(member, number, title) \
+				case number:\
+				{\
+					c->member = time(NULL);\
+					break;\
+				}; 
+				
+#define CASES_COLUMN_TEXT(member, number, title) \
+				case number:\
+				{\
+					size_t len = sqlite3_column_bytes(stmt, i);\
+					const unsigned char *value = sqlite3_column_text(stmt, i);\
+					if (value){\
+						char *str = MALLOC(len + 1,\
+							ERR("can't allocate string with len: %ld", len+1), break);\
+						strncpy(str, (const char *)value, len);\
+						str[len] = 0;\
+						c->member = str;\
+						c->len_##member = len;\
+					} else {\
+						c->member = NULL;\
+						c->len_##member = -1;\
+					}\
+					break;\
+				}; 
+
+#define CASES_COLUMN_DATA(member, number, title, type) \
+				case number:\
+				{\
+					size_t len = sqlite3_column_bytes(stmt, i);\
+					const void *value = sqlite3_column_blob(stmt, i);\
+					if (value){\
+						if (CASES_DATA_TYPE_##type == CASES_DATA_TYPE_cJSON){\
+							cJSON *json = cJSON_ParseWithLength(value, len);\
+							c->member = json;\
+							c->len_##member = -1;\
+						}\
+					} else {\
+						c->member = NULL;\
+						c->len_##member = -1;\
+					}\
+					break;\
+				};
+
+			CASES_COLUMNS
+
+#undef CASES_COLUMN_DATE			
+#undef CASES_COLUMN_TEXT			
+#undef CASES_COLUMN_DATA			
+
+				default:
+					break;					
+			}
+		}
+	}
+
+	if (no_rows){
+		/* add default values if now rows */
+		c->name = strdup("Первичный приём");
+		c->zhalobi = strdup("активно не предъявляет");
+		c->sostoyanie = strdup("удовлетворительное");
+		c->soznaniye = strdup("ясное");
+		c->polozheniye = strdup("активное");
+	}
+
+	/*write data to SQL */
+	int i;
+	for (i = 0; i < CASES_COLS_NUM; ++i) {
+		switch (i) {
+				
+#define CASES_COLUMN_DATE(member, number, title) \
+				case number:\
+				{\
+					kdata2_set_number_for_uuid(kdata, CASES_TABLENAME, title,\
+						   	c->member, c->id);\
+					break;\
+				}; 
+				
+#define CASES_COLUMN_TEXT(member, number, title) \
+				case number:\
+				{\
+					char *str = c->member;\
+					if (!str) str = "";\
+					kdata2_set_text_for_uuid(kdata, CASES_TABLENAME, title,\
+						   	str, c->id);\
+					break;\
+				}; 
+
+#define CASES_COLUMN_DATA(member, number, title, type) \
+				case number:\
+				{\
+					if (c->member){\
+						kdata2_set_data_for_uuid(kdata, CASES_TABLENAME, title,\
+						   	c->member, c->len_##member, c->id);\
+					}\
+					break;\
+				}; 
+
+			CASES_COLUMNS
+
+#undef CASES_COLUMN_DATE			
+#undef CASES_COLUMN_TEXT			
+
+			default:
+				break;
+		}
+	}
+
+
+	return c;
+}
+
 
 /* callback all cases with patientid (set patient id to NULL to get all cases from database) */
 static void 
@@ -816,11 +981,60 @@ static int prozubi_case_set_data(
 	return -1;
 }
 
+static int prozubi_case_update(
+		kdata2_t *p, struct case_t *c
+		)
+{
+	int i;
+	for (i = 0; i < CASES_COLS_NUM; ++i) {
+		switch (i) {
+				
+#define CASES_COLUMN_DATE(member, number, title) \
+				case number:\
+				{\
+					kdata2_set_number_for_uuid(p, CASES_TABLENAME, title,\
+						   	c->member, c->id);\
+					break;\
+				}; 
+				
+#define CASES_COLUMN_TEXT(member, number, title) \
+				case number:\
+				{\
+					char *str = c->member;\
+					if (!str) str = "";\
+					kdata2_set_text_for_uuid(p, CASES_TABLENAME, str,\
+						   	c->member, c->id);\
+					break;\
+				}; 
+
+#define CASES_COLUMN_DATA(member, number, title, type) \
+				case number:\
+				{\
+					if (c->member){\
+						prozubi_case_set_##number(p, c, c->member, c->len_##member);\
+					}\
+					break;\
+				}; 
+
+			CASES_COLUMNS
+
+#undef CASES_COLUMN_DATE			
+#undef CASES_COLUMN_TEXT			
+
+			default:
+				break;
+		}
+	}
+
+	return 0;
+}
+
 static int prozubi_case_remove(
 		kdata2_t *p, struct case_t *c
 		)
 {
 	return kdata2_remove_for_uuid(p, CASES_TABLENAME, c->id);
 }
+
 
 #endif /* ifndef CASES_H */
