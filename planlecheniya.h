@@ -2,7 +2,7 @@
  * File              : planlecheniya.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.04.2023
- * Last Modified Date: 07.05.2023
+ * Last Modified Date: 08.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -68,9 +68,11 @@ prozubi_planlecheniya_foreach(
 		total_duration += duration;
 
 		/* callback stage */
+		char stage_str[64];
+		sprintf(stage_str, "Этап №%d", stage_i + 1);
 		void *stage_ptr = callback(
 				userdata, NULL, stage, PLANLECHENIYA_TYPE_STAGE,
-				stage_i, STR("Этап №%d", stage_i + 1), "", 0, 0, 0);
+				stage_i, stage_str, "", 0, 0, 0);
 		
 		cJSON *array = cJSON_GetObjectItem(stage, "array");
 		if (!cJSON_IsArray(array)){
@@ -119,8 +121,10 @@ prozubi_planlecheniya_foreach(
 		}
 
 		/* callback stage price and duration */
+		char stage_price_str[64];
+		sprintf(stage_price_str, "Итого за %d этап:", stage_i + 1);
 		callback(userdata, stage_ptr, item, PLANLECHENIYA_TYPE_STAGE_PRICE,
-				item_i, STR("Итого за %d этап:", stage_i + 1), "", 
+				item_i, stage_price_str, "", 
 				0, 0, stage_price);
 
 		callback(userdata, stage_ptr, item, PLANLECHENIYA_TYPE_STAGE_DURATION,
