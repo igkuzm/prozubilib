@@ -2,7 +2,7 @@
  * File              : cases.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 06.05.2023
- * Last Modified Date: 06.05.2023
+ * Last Modified Date: 08.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef CASES_H
@@ -511,6 +511,7 @@ prozubi_case_new_for_patient(kdata2_t *kdata, char patientid[37]){
 
 #undef CASES_COLUMN_DATE			
 #undef CASES_COLUMN_TEXT			
+#undef CASS_COLUMN_DATA			
 
 			default:
 				break;
