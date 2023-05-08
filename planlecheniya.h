@@ -36,9 +36,9 @@ prozubi_planlecheniya_foreach(
 			int index,
 			char * title,
 			char * kod,
-			int price,
-			int count,
-			int total
+			char * price,
+			char * count,
+			char * total
 			)
 		)
 {
@@ -108,11 +108,13 @@ prozubi_planlecheniya_foreach(
 			int price = atoi(price_str);
 			int count = atoi(count_str);
 			int total = price * count;
+			char total_str[32];
+			sprintf(total_str, "%d", total);
 
 			/* callback item */
 			callback(userdata, stage_ptr, item, PLANLECHENIYA_TYPE_ITEM,
 					item_i, title, kod, 
-					price, count, total);
+					price_str, count_str, total_str);
 			
 			stage_price += total; 
 			total_price += total;
@@ -121,28 +123,36 @@ prozubi_planlecheniya_foreach(
 		}
 
 		/* callback stage price and duration */
-		char stage_price_str[64];
-		sprintf(stage_price_str, "Итого за %d этап:", stage_i + 1);
+		char stage_price_title[64];
+		sprintf(stage_price_title, "Итого за %d этап:", stage_i + 1);
+		char stage_price_str[32];
+		sprintf(stage_price_str, "%d", stage_price);
 		callback(userdata, stage_ptr, item, PLANLECHENIYA_TYPE_STAGE_PRICE,
-				item_i, stage_price_str, "", 
-				0, 0, stage_price);
+				item_i, stage_price_title, "", 
+				0, 0, stage_price_str);
 
+		char stage_duration_str[32];
+		sprintf(stage_duration_str, "%d", duration);
 		callback(userdata, stage_ptr, item, PLANLECHENIYA_TYPE_STAGE_DURATION,
 				item_i, "Продолжительность этапа (мес.):", "", 
-				0, duration, 0);
+				0, stage_duration_str, 0);
 		
 
 		stage_i++;
 	}
 
 	/* callback total price and duration */
+	char total_price_str[32];
+	sprintf(total_price_str, "%d", total_price);
 	callback(userdata, NULL, planlecheniya, PLANLECHENIYA_TYPE_TOTAL_PRICE,
 			0, "Общая стоимость по плану:", "", 
-			0, 0, total_price);
+			0, 0, total_price_str);
 
+	char total_duration_str[32];
+	sprintf(total_duration_str, "%d", total_duration);
 	callback(userdata, NULL, planlecheniya, PLANLECHENIYA_TYPE_TOTAL_DURATION,
 			0, "Общая продолжительность лечения (мес.):", "", 
-			0, total_duration, 0);
+			0, total_duration_str, 0);
 	
 }
 
