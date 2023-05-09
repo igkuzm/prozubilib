@@ -511,7 +511,7 @@ prozubi_case_new_for_patient(kdata2_t *kdata, char patientid[37]){
 
 #undef CASES_COLUMN_DATE			
 #undef CASES_COLUMN_TEXT			
-#undef CASS_COLUMN_DATA			
+#undef CASES_COLUMN_DATA			
 
 			default:
 				break;
