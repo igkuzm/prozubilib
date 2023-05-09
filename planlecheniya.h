@@ -203,47 +203,45 @@ prozubi_planlecheniya_add_item(
 			ERR("can't read planlecheniya stage %d", i);
 			continue;	
 		}
-		if (stage_index == i)
-			break;
-		i++;
+		if (stage_index == i){
+			cJSON *array = cJSON_GetObjectItem(stage, "array");
+			if (!cJSON_IsArray(array)){
+					ERR("can't read array of stage %d", i);
+					ERR("stage %d: %s", i, cJSON_Print(stage));
+					return NULL;	
+			}
+			int index = cJSON_GetArraySize(array);
+
+			cJSON *item = cJSON_CreateObject();
+
+			char number[32];
+			sprintf(number, "%d", index+1);
+			cJSON_AddItemToObject(item, "number", cJSON_CreateString(number));
+			cJSON_AddItemToObject(item, "isItem", cJSON_CreateString("1"));
+			cJSON_AddItemToObject(item, "kod", cJSON_CreateString(kod));
+			cJSON_AddItemToObject(item, "title", cJSON_CreateString(title));
+			char price_str[32];
+			sprintf(price_str, "%d", price);
+			cJSON_AddItemToObject(item, "price", cJSON_CreateString(price_str));
+			char count_str[32];
+			sprintf(count_str, "%d", count);
+			cJSON_AddItemToObject(item, "count", cJSON_CreateString(count_str));
+			char child_str[32];
+			sprintf(child_str, "%d", index);
+			cJSON_AddItemToObject(item, "childIndex", cJSON_CreateString(child_str));
+			char total_str[32];
+			sprintf(total_str, "%d", price * count);
+			cJSON_AddItemToObject(item, "total", cJSON_CreateString(total_str));
+			char parent_str[32];
+			sprintf(parent_str, "%d", i);
+			cJSON_AddItemToObject(item, "parentIndex", cJSON_CreateString(parent_str));
+
+			cJSON_AddItemToArray(array, item);
+
+			return item;
+			}		
 	}
-	if (stage_index != i)
-		return NULL;
-	
-	cJSON *array = cJSON_GetObjectItem(stage, "array");
-	if (!cJSON_IsArray(array)){
-			ERR("can't read array of stage %d", i);
-			return NULL;	
-	}
-	int index = cJSON_GetArraySize(array);
-
-	cJSON *item = cJSON_CreateObject();
-
-	char number[32];
-	sprintf(number, "%d", index+1);
-	cJSON_AddItemToObject(item, "number", cJSON_CreateString(number));
-	cJSON_AddItemToObject(item, "isItem", cJSON_CreateString("1"));
-	cJSON_AddItemToObject(item, "kod", cJSON_CreateString(kod));
-	cJSON_AddItemToObject(item, "title", cJSON_CreateString(title));
-	char price_str[32];
-	sprintf(price_str, "%d", price);
-	cJSON_AddItemToObject(item, "price", cJSON_CreateString(price_str));
-	char count_str[32];
-	sprintf(count_str, "%d", count);
-	cJSON_AddItemToObject(item, "count", cJSON_CreateString(count_str));
-	char child_str[32];
-	sprintf(child_str, "%d", index);
-	cJSON_AddItemToObject(item, "childIndex", cJSON_CreateString(child_str));
-	char total_str[32];
-	sprintf(total_str, "%d", price * count);
-	cJSON_AddItemToObject(item, "total", cJSON_CreateString(total_str));
-	char parent_str[32];
-	sprintf(parent_str, "%d", i);
-	cJSON_AddItemToObject(item, "parentIndex", cJSON_CreateString(parent_str));
-
-	cJSON_AddItemToArray(array, item);
-
-	return item;
+	return NULL;
 }
 
 static cJSON_bool
@@ -266,34 +264,28 @@ prozubi_planlecheniya_set_item_title(
 			ERR("can't read planlecheniya stage %d", i);
 			continue;	
 		}
-		if (stage_index == i)
-			break;
-		i++;
-	}
-	if (stage_index != i)
-		return cJSON_False;	
-	
-	cJSON *array = cJSON_GetObjectItem(stage, "array");
-	if (!cJSON_IsArray(array)){
-			ERR("can't read array of stage %d", i);
-			return -1;	
-	}
+		if (stage_index == i){
+			cJSON *array = cJSON_GetObjectItem(stage, "array");
+			if (!cJSON_IsArray(array)){
+					ERR("can't read array of stage %d", i);
+					return cJSON_False;	
+			}
 
-	i = 0;
-	cJSON *item;
-	cJSON_ArrayForEach(item, array){
-		if (!cJSON_IsObject(item)){
-			ERR("can't read item %d", i);
-			continue;	
+			i = 0;
+			cJSON *item;
+			cJSON_ArrayForEach(item, array){
+				if (!cJSON_IsObject(item)){
+					ERR("can't read item %d", i);
+					continue;	
+				}
+				if (item_index == i){
+					return 
+						cJSON_ReplaceItemInObject(item, "title", cJSON_CreateString(title));
+				}
+			}
 		}
-		if (item_index == i)
-			break;
-		i++;
 	}
-	if (item_index != i)
-		return cJSON_False;	
-	
-	return cJSON_ReplaceItemInObject(item, "title", cJSON_CreateString(title));
+	return cJSON_False;
 }
 
 static cJSON_bool
@@ -316,34 +308,28 @@ prozubi_planlecheniya_set_item_kod(
 			ERR("can't read planlecheniya stage %d", i);
 			continue;	
 		}
-		if (stage_index == i)
-			break;
-		i++;
-	}
-	if (stage_index != i)
-		return cJSON_False;
-	
-	cJSON *array = cJSON_GetObjectItem(stage, "array");
-	if (!cJSON_IsArray(array)){
-			ERR("can't read array of stage %d", i);
-			return -1;	
-	}
+		if (stage_index == i){
+			cJSON *array = cJSON_GetObjectItem(stage, "array");
+			if (!cJSON_IsArray(array)){
+					ERR("can't read array of stage %d", i);
+					return -1;	
+			}
 
-	i = 0;
-	cJSON *item;
-	cJSON_ArrayForEach(item, array){
-		if (!cJSON_IsObject(item)){
-			ERR("can't read item %d", i);
-			continue;	
+			i = 0;
+			cJSON *item;
+			cJSON_ArrayForEach(item, array){
+				if (!cJSON_IsObject(item)){
+					ERR("can't read item %d", i);
+					continue;	
+				}
+				if (item_index == i){
+					return 
+						cJSON_ReplaceItemInObject(item, "kod", cJSON_CreateString(kod));
+				}
+			}
 		}
-		if (item_index == i)
-			break;
-		i++;
 	}
-	if (item_index != i)
-		return cJSON_False;
-
-	return cJSON_ReplaceItemInObject(item, "kod", cJSON_CreateString(kod));
+	return cJSON_False;
 }
 
 static cJSON_bool
@@ -366,51 +352,45 @@ prozubi_planlecheniya_set_item_price(
 			ERR("can't read planlecheniya stage %d", i);
 			continue;	
 		}
-		if (stage_index == i)
-			break;
-		i++;
-	}
-	if (stage_index != i)
-		return cJSON_False;
-	
-	cJSON *array = cJSON_GetObjectItem(stage, "array");
-	if (!cJSON_IsArray(array)){
-			ERR("can't read array of stage %d", i);
-			return -1;	
-	}
+		if (stage_index == i){
 
-	i = 0;
-	cJSON *item;
-	cJSON_ArrayForEach(item, array){
-		if (!cJSON_IsObject(item)){
-			ERR("can't read item %d", i);
-			continue;	
+			cJSON *array = cJSON_GetObjectItem(stage, "array");
+			if (!cJSON_IsArray(array)){
+					ERR("can't read array of stage %d", i);
+					return cJSON_False;	
+			}
+
+			i = 0;
+			cJSON *item;
+			cJSON_ArrayForEach(item, array){
+				if (!cJSON_IsObject(item)){
+					ERR("can't read item %d", i);
+					continue;	
+				}
+				if (item_index == i){
+					char *count;
+					cJSON *count_j =  cJSON_GetObjectItem(item, "count"); 
+					if (count_j)
+						count = cJSON_GetStringValue(count_j);
+					if (!count)
+						count = "";
+
+					char price_str[32];
+					sprintf(price_str, "%d", price);
+					if (!cJSON_ReplaceItemInObject(item, "price", cJSON_CreateString(price_str)))
+						return cJSON_False;
+
+					char total[32];
+					sprintf(total, "%d", price * atoi(count));
+					if (!cJSON_ReplaceItemInObject(item, "total", cJSON_CreateString(total)))
+						return cJSON_False;
+					
+					return cJSON_True;
+				}
+			}
 		}
-		if (item_index == i)
-			break;
-		i++;
 	}
-	if (item_index != i)
-		return cJSON_False;
-
-	char *count;
-	cJSON *count_j =  cJSON_GetObjectItem(item, "count"); 
-	if (count_j)
-		count = cJSON_GetStringValue(count_j);
-	if (!count)
-		count = "";
-
-	char price_str[32];
-	sprintf(price_str, "%d", price);
-	if (!cJSON_ReplaceItemInObject(item, "price", cJSON_CreateString(price_str)))
-		return cJSON_False;
-
-	char total[32];
-	sprintf(total, "%d", price * atoi(count));
-	if (!cJSON_ReplaceItemInObject(item, "total", cJSON_CreateString(total)))
-		return cJSON_False;
-	
-	return cJSON_True;
+	return cJSON_False;
 }
 
 static cJSON_bool
@@ -421,6 +401,7 @@ prozubi_planlecheniya_set_item_count(
 		int count
 		)
 {
+
 	if (!cJSON_IsArray(planlecheniya)){
 		ERR("%s", "can't read planlecheniya json");
 		return cJSON_False;
@@ -433,51 +414,45 @@ prozubi_planlecheniya_set_item_count(
 			ERR("can't read planlecheniya stage %d", i);
 			continue;	
 		}
-		if (stage_index == i)
-			break;
-		i++;
-	}
-	if (stage_index != i)
-		return cJSON_False;
-	
-	cJSON *array = cJSON_GetObjectItem(stage, "array");
-	if (!cJSON_IsArray(array)){
-			ERR("can't read array of stage %d", i);
-			return -1;	
-	}
+		if (stage_index == i){
 
-	i = 0;
-	cJSON *item;
-	cJSON_ArrayForEach(item, array){
-		if (!cJSON_IsObject(item)){
-			ERR("can't read item %d", i);
-			continue;	
+			cJSON *array = cJSON_GetObjectItem(stage, "array");
+			if (!cJSON_IsArray(array)){
+					ERR("can't read array of stage %d", i);
+					return cJSON_False;	
+			}
+
+			i = 0;
+			cJSON *item;
+			cJSON_ArrayForEach(item, array){
+				if (!cJSON_IsObject(item)){
+					ERR("can't read item %d", i);
+					continue;	
+				}
+				if (item_index == i){
+					char *price;
+					cJSON *price_j =  cJSON_GetObjectItem(item, "price"); 
+					if (price_j)
+						price = cJSON_GetStringValue(price_j);
+					if (!price)
+						price = "";
+
+					char count_str[32];
+					sprintf(count_str, "%d", count);
+					if (!cJSON_ReplaceItemInObject(item, "count", cJSON_CreateString(count_str)))
+						return cJSON_False;
+
+					char total[32];
+					sprintf(total, "%d", count * atoi(price));
+					if (!cJSON_ReplaceItemInObject(item, "total", cJSON_CreateString(total)))
+						return cJSON_False;
+					
+					return cJSON_True;
+				}
+			}
 		}
-		if (item_index == i)
-			break;
-		i++;
 	}
-	if (item_index != i)
-		return cJSON_False;
-
-	char *price;
-	cJSON *price_j =  cJSON_GetObjectItem(item, "price"); 
-	if (price_j)
-		price = cJSON_GetStringValue(price_j);
-	if (!price)
-		price = "";
-
-	char count_str[32];
-	sprintf(count_str, "%d", count);
-	if (!cJSON_ReplaceItemInObject(item, "count", cJSON_CreateString(count_str)))
-		return cJSON_False;
-
-	char total[32];
-	sprintf(total, "%d", count * atoi(price));
-	if (!cJSON_ReplaceItemInObject(item, "total", cJSON_CreateString(total)))
-		return cJSON_False;
-	
-	return cJSON_True;
+	return cJSON_False;
 }
 
 #endif /* ifndef PLANLECHENIYA_H */
