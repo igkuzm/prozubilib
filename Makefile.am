@@ -9,4 +9,4 @@ libprozubilib_a_SOURCES = \
 	date-time/strftime.c\
 	date-time/strptime.c
 
-libprozubilib_a_LIBADD = kdata2/libkdata2.a
+libprozubilib_a_LIBADD = kdata2/*.o
