@@ -10,7 +10,9 @@
 #define NOMENKLATURA_H
 
 #include "enum.h"
+#include "log.h"
 #include "kdata2/sqlite3.h"
+#include <stdio.h>
 
 
 #define NOMENKLATURA_BASE "nomenklatura.sqlite"
@@ -25,7 +27,7 @@
 
 typedef struct NOMENKLATURA_t {
 	#define NOMENKLATURA_COLUMN_INT(title) int    title;
-	#define NOMENKLATURA_COLUMN_TEX(title) char * title;
+	#define NOMENKLATURA_COLUMN_TEX(title) const char * title;
 	NOMENKLATURA_COLUMNS
 	#undef NOMENKLATURA_COLUMN_INT
 	#undef NOMENKLATURA_COLUMN_TEX
@@ -37,7 +39,7 @@ BEGIN_ENUM(NOMENKLATURA)
 	NOMENKLATURA_COLUMNS
 	#undef NOMENKLATURA_COLUMN_INT
 	#undef NOMENKLATURA_COLUMN_TEX
-	NOMENKLATURA_N
+	NOMENKLATURA_COLS_NUM
 END_ENUM(NOMENKLATURA)
 
 BEGIN_ENUM_STRING(NOMENKLATURA)
@@ -51,13 +53,143 @@ END_ENUM_STRING(NOMENKLATURA)
 static void
 prozubi_nomenklatura_foreach(
 		void * user_data,
-		int (*callback)(
+		void * (*callback)(
 			void * user_data,
+			void * parent,
 			nomenklatura_t *p
 			)
 		)
 {
+	if (!callback){
+		ERR("%s", "callback is NULL");
+		return;
+	}
 
+	sqlite3 *db;
+	
+	if (sqlite3_open_v2(NOMENKLATURA_BASE, &db, 
+				SQLITE_OPEN_READONLY, NULL))
+	{
+		ERR("SQLite: Failed to create '%s': %s", 
+				NOMENKLATURA_BASE, sqlite3_errmsg(db));
+		return;	
+	}
+	
+	/* create SQL string */
+	char SQL_p[BUFSIZ] = "";
+	char SQL[BUFSIZ] = "SELECT ";
+
+	#define NOMENKLATURA_COLUMN_INT(title) strcat(SQL, #title); strcat(SQL, ", "); 
+	#define NOMENKLATURA_COLUMN_TEX(title) strcat(SQL, #title); strcat(SQL, ", "); 
+	NOMENKLATURA_COLUMNS
+	#undef NOMENKLATURA_COLUMN_INT
+	#undef NOMENKLATURA_COLUMN_TEX
+	
+	strcat(SQL, "FROM ");
+	strcat(SQL, NOMENKLATURA_TABL);
+
+	strcat(SQL_p, SQL);
+	strcat(SQL_p, " WHERE parent = 0");
+
+	/* start SQLite request for parent*/
+	sqlite3_stmt *stmt_p;
+	if(sqlite3_prepare_v2(db, SQL, -1, &stmt_p, NULL)){
+		ERR("sqlite3_prepare_v2: %s: %s", SQL_p, sqlite3_errmsg(db));	
+		sqlite3_close(db);
+		return;
+	};
+
+	while (sqlite3_step(stmt_p) != SQLITE_DONE) {
+		nomenklatura_t p;
+	
+		/* iterate columns */
+		int i;
+		for (i = 0; i < NOMENKLATURA_COLS_NUM; ++i) {
+			/* handle values */
+			switch (i) {
+
+#define NOMENKLATURA_COLUMN_TEX(title) \
+				case NOMENKLATURA_##title:\
+				{\
+					const unsigned char *value = sqlite3_column_text(stmt_p, i);\
+					p.title = (const char *)value;\
+					break;\
+				};				
+#define NOMENKLATURA_COLUMN_INT(title) \
+				case NOMENKLATURA_##title:\
+				{\
+					int value = sqlite3_column_int(stmt_p, i);\
+					p.title = value;\
+					break;\
+				};				
+
+			NOMENKLATURA_COLUMNS
+
+#undef NOMENKLATURA_COLUMN_TEX			
+#undef NOMENKLATURA_COLUMN_INT			
+
+				default:
+					break;					
+			}
+		}		
+
+		/* callback */
+		void *parent = callback(user_data, NULL, &p);
+
+		/* get children */
+		sqlite3_stmt *stmt_c;
+		
+		/* create SQL string */
+		char SQL_c[BUFSIZ] = "";
+		sprintf(SQL_c, "%s WHERE headName = '%s'", SQL, p.name);
+
+		/* start SQLite request */
+		if(sqlite3_prepare_v2(db, SQL_c, -1, &stmt_c, NULL)){
+			ERR("sqlite3_prepare_v2: %s: %s", SQL_c, sqlite3_errmsg(db));	
+			sqlite3_close(db);
+			return;
+		};
+
+		while (sqlite3_step(stmt_c) != SQLITE_DONE) {
+			nomenklatura_t c;
+		
+			/* iterate columns */
+			int i;
+			for (i = 0; i < NOMENKLATURA_COLS_NUM; ++i) {
+				/* handle values */
+				switch (i) {
+
+#define NOMENKLATURA_COLUMN_TEX(title) \
+					case NOMENKLATURA_##title:\
+					{\
+						const unsigned char *value = sqlite3_column_text(stmt_c, i);\
+						c.title = (const char *)value;\
+						break;\
+					};				
+#define NOMENKLATURA_COLUMN_INT(title) \
+					case NOMENKLATURA_##title:\
+					{\
+						int value = sqlite3_column_int(stmt_c, i);\
+						c.title = value;\
+						break;\
+					};				
+
+				NOMENKLATURA_COLUMNS
+
+#undef NOMENKLATURA_COLUMN_TEX			
+#undef NOMENKLATURA_COLUMN_INT			
+
+					default:
+						break;					
+				}
+			}		
+			/* callback */
+			callback(user_data, parent, &c);
+		}	
+		sqlite3_finalize(stmt_c);
+	}
+	sqlite3_finalize(stmt_p);
+	sqlite3_close(db);
 }
 
 #endif // NOMENKLATURA_H	
