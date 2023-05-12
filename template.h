@@ -2,7 +2,7 @@
  * File              : template.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 04.05.2023
+ * Last Modified Date: 12.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -162,6 +162,8 @@ prozubi_template_foreach(
 						str[len] = 0;\
 						t->member = str;\
 						t->len_##member = len;\
+					} else {\
+						t->member = NULL;\
 					}\
 					break;\
 				};				

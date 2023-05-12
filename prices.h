@@ -2,7 +2,7 @@
  * File              : prices.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 04.05.2023
+ * Last Modified Date: 12.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -160,6 +160,8 @@ prozubi_price_foreach(
 						str[len] = 0;\
 						p->member = str;\
 						p->len_##member = len;\
+					} else {\
+						p->member = NULL;\
 					}\
 					break;\
 				}; 
