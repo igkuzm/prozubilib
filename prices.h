@@ -2,7 +2,7 @@
  * File              : prices.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 12.05.2023
+ * Last Modified Date: 17.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -187,6 +187,41 @@ prozubi_price_foreach(
 	}	
 
 	sqlite3_finalize(stmt);
+}
+
+#define PRICES_COLUMN_TEXT(member, number, title)\
+static int prozubi_prices_set_##number (kdata2_t *p, struct price_t *c,\
+		const char *text, bool update)\
+{\
+	if (update)\
+		if (kdata2_set_text_for_uuid(p, PRICES_TABLENAME, title, text, c->id))\
+			return -1;\
+	if(c->member)\
+		free(c->member);\
+	size_t len = strlen(text);\
+   	c->member = MALLOC(len + 1, ERR("can't allocate size: %ld", len + 1), return -1);\
+	strncpy(c->member, text, len);\
+	c->len_##member = len;\
+	return 0;\
+}
+		PRICES_COLUMNS
+#undef PRICES_COLUMN_TEXT			
+
+static int prozubi_prices_set_text(
+		PRICES key, kdata2_t *p, struct price_t *c, const char *text, bool update)
+{
+	switch (key) {
+#define PRICES_COLUMN_TEXT(member, number, title) case number:\
+		return prozubi_prices_set_##number(p, c, text, update);\
+		
+		PRICES_COLUMNS
+
+#undef PRICES_COLUMN_TEXT			
+		
+		default:
+			break;
+	}
+	return -1;
 }
 
 static void
