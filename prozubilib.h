@@ -2,7 +2,7 @@
  * File              : prozubilib.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 25.04.2023
+ * Last Modified Date: 17.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -20,6 +20,7 @@
 #include "template.h"
 #include "images.h"
 #include "prices.h"
+#include "nomenklatura.h"
 
 typedef kdata2_t prozubi_t;
 
