@@ -2,7 +2,7 @@
  * File              : cases.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 06.05.2023
- * Last Modified Date: 09.05.2023
+ * Last Modified Date: 20.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef CASES_H
@@ -353,6 +353,14 @@ _prozubi_case_new(){
 	return c;
 }
 
+static cJSON *
+prozubi_planlecheniya_new(struct case_t *c)
+{
+	cJSON *json = cJSON_CreateArray(); 
+	c->planlecheniya = json;
+	return json;
+}
+
 static struct case_t *
 prozubi_case_new_for_patient(kdata2_t *kdata, char patientid[37]){
 	/* allocate case_t */
@@ -518,6 +526,8 @@ prozubi_case_new_for_patient(kdata2_t *kdata, char patientid[37]){
 		}
 	}
 
+	/* create new plan lecheniya */
+	/*prozubi_planlecheniya_new(c);*/
 
 	return c;
 }
@@ -661,6 +671,10 @@ prozubi_cases_foreach(
 			ERR("%s", "can't get _prozubi_cases_list_new");
 			break;
 		}
+
+		/* fix plan lecheniye */
+		/*if (c->planlecheniya == NULL)*/
+			/*prozubi_planlecheniya_new(c);*/
 
 		/* callback */
 		if (callback)
