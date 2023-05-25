@@ -244,7 +244,12 @@ prozubi_image_foreach(
 					size_t len = sqlite3_column_bytes(stmt, i);\
 					const void *value = sqlite3_column_blob(stmt, i);\
 					if (IMAGES_DATA_TYPE_##type == IMAGES_DATA_TYPE_void){\
-						image->member = (void *)value;\
+						void *data = MALLOC(len,\
+							if (kdata->on_error)\
+								kdata->on_error(kdata->on_error_data,\
+							STR_ERR("can't allocate data with len: %ld", len)), break);\
+						memcpy(data, value, len);\
+						image->member = data;\
 						image->len_##member = len;\
 					}\
 					break;\
