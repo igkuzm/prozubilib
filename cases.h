@@ -612,7 +612,6 @@ prozubi_cases_foreach(
 				case number:\
 				{\
 					int col_type = sqlite3_column_type(stmt, i);\
-					fprintf(stderr, "COLL_TYPE: %d\n", col_type);\
 					if (col_type == SQLITE_INTEGER) {\
 						c->member = sqlite3_column_int64(stmt, i);\
 					} else if (col_type == SQLITE_FLOAT) {\
