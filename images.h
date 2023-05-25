@@ -2,7 +2,7 @@
  * File              : images.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 12.05.2023
+ * Last Modified Date: 25.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -105,9 +105,14 @@ prozubi_image_new(
 		const char *id
 		)
 {
+	if (!kdata)
+		return NULL;
+
 	/* allocate image_t */
 	struct image_t *i = NEW(struct image_t, 
-			ERR("%s", "can't allocate struct image_t"), return NULL);
+			if (kdata->on_error)
+				kdata->on_error(kdata->on_error_data,			
+			STR_ERR("%s", "can't allocate struct image_t")), return NULL);
 
 	if (!id){
 		/* create new uuid */
@@ -115,7 +120,9 @@ prozubi_image_new(
 		uuid4_seed(&state);
 		uuid4_gen(&state, &identifier);
 		if (!uuid4_to_s(identifier, i->id, 37)){
-			ERR("%s", "can't generate uuid");
+			if (kdata->on_error)
+				kdata->on_error(kdata->on_error_data,			
+			STR_ERR("%s", "can't generate uuid"));
 			return NULL;
 		}
 	} else
@@ -149,11 +156,12 @@ prozubi_image_foreach(
 {
 	/* check kdata */
 	if (!kdata){
-		ERR("%s", "kdata is NULL");
 		return;
 	}
 	if (!kdata->db){
-		ERR("%s", "kdata->db is NULL");
+		if (kdata->on_error)
+			kdata->on_error(kdata->on_error_data,		
+		STR_ERR("%s", "kdata->db is NULL"));
 		return;
 	}
 
@@ -179,14 +187,18 @@ prozubi_image_foreach(
 	
 	res = sqlite3_prepare_v2(kdata->db, SQL, -1, &stmt, NULL);
 	if (res != SQLITE_OK) {
-		ERR("sqlite3_prepare_v2: %s: %s", SQL, sqlite3_errmsg(kdata->db));	
+		if (kdata->on_error)
+			kdata->on_error(kdata->on_error_data,		
+		STR_ERR("sqlite3_prepare_v2: %s: %s", SQL, sqlite3_errmsg(kdata->db)));	
 		return;
 	}	
 
 	while (sqlite3_step(stmt) != SQLITE_DONE) {
 		/* allocate image_t */	
 		struct image_t * image = NEW(struct image_t, 
-				ERR("%s", "can't allocate struct image_t"), return);	
+			if (kdata->on_error)
+				kdata->on_error(kdata->on_error_data,				
+				STR_ERR("%s", "can't allocate struct image_t")), return);	
 	
 		/* iterate columns */
 		int i;
@@ -213,7 +225,9 @@ prozubi_image_foreach(
 					const unsigned char *value = sqlite3_column_text(stmt, i);\
 					if (value){\
 						char *str = MALLOC(len + 1,\
-							ERR("can't allocate string with len: %ld", len+1), break);\
+							if (kdata->on_error)\
+								kdata->on_error(kdata->on_error_data,\
+							STR_ERR("can't allocate string with len: %ld", len+1)), break);\
 						strncpy(str, (const char *)value, len);\
 						str[len] = 0;\
 						image->member = str;\
@@ -294,7 +308,10 @@ static int prozubi_image_set_##number (kdata2_t *p, struct image_t *c,\
 			return -1;\
 		if(c->member)\
 			free(c->member);\
-		c->member = MALLOC(len, ERR("can't allocate size: %ld", len), return -1);\
+		c->member = MALLOC(len,\
+			if (p->on_error)\
+				p->on_error(p->on_error_data,\
+				STR_ERR("can't allocate size: %ld", len)), return -1);\
 		memcpy(c->member, data, len);\
 		c->len_##member = len;\
 	}\
@@ -307,7 +324,10 @@ static int prozubi_image_set_##number (kdata2_t *p, struct image_t *c, const cha
 	if(c->member)\
 		free(c->member);\
 	size_t len = strlen(text);\
-   	c->member = MALLOC(len + 1, ERR("can't allocate size: %ld", len + 1), return -1);\
+   	c->member = MALLOC(len + 1,\
+			if (p->on_error)\
+				p->on_error(p->on_error_data,\
+			STR_ERR("can't allocate size: %ld", len + 1)), return -1);\
 	strncpy(c->member, text, len);\
 	c->len_##member = len;\
 	return 0;\

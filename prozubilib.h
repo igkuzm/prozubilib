@@ -2,7 +2,7 @@
  * File              : prozubilib.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 17.05.2023
+ * Last Modified Date: 25.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -28,7 +28,11 @@ typedef kdata2_t prozubi_t;
 prozubi_t *
 prozubi_init(
 		const char *filepath, // path to store SQLite database
-		const char *token     // yandex disk token
+		const char *token,   // yandex disk token
+		void       *on_error_data,
+		void      (*on_error)      (void *on_error_data, const char *error),
+		void       *on_log_data,
+		void      (*on_log)        (void *on_log_data, const char *message)
 		);
 
 /* set Yandex Disk token */

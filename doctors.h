@@ -2,7 +2,7 @@
  * File              : doctors.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 12.05.2023
+ * Last Modified Date: 25.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -97,14 +97,18 @@ prozubi_doctor_new(
 {
 	/* allocate case_t */
 	struct doctor_t *d = NEW(struct doctor_t, 
-			ERR("%s", "can't allocate struct doctor_t"), return NULL);
+			if (kdata->on_error)
+				kdata->on_error(kdata->on_error_data,			
+			STR_ERR("%s", "can't allocate struct doctor_t")), return NULL);
 	if (!id){
 		/* create new uuid */
 		UUID4_STATE_T state; UUID4_T identifier;
 		uuid4_seed(&state);
 		uuid4_gen(&state, &identifier);
 		if (!uuid4_to_s(identifier, d->id, 37)){
-			ERR("%s", "can't generate uuid");
+			if (kdata->on_error)
+				kdata->on_error(kdata->on_error_data,			
+				STR_ERR("%s", "can't generate uuid"));
 			return NULL;
 		}
 	} else
@@ -134,11 +138,12 @@ prozubi_doctor_foreach(
 {
 	/* check kdata */
 	if (!kdata){
-		ERR("%s", "kdata is NULL");
 		return;
 	}
 	if (!kdata->db){
-		ERR("%s", "kdata->db is NULL");
+		if (kdata->on_error)
+			kdata->on_error(kdata->on_error_data,		
+			STR_ERR("%s", "kdata->db is NULL"));
 		return;
 	}
 
@@ -160,14 +165,18 @@ prozubi_doctor_foreach(
 	
 	res = sqlite3_prepare_v2(kdata->db, SQL, -1, &stmt, NULL);
 	if (res != SQLITE_OK) {
-		ERR("sqlite3_prepare_v2: %s: %s", SQL, sqlite3_errmsg(kdata->db));	
+		if (kdata->on_error)
+			kdata->on_error(kdata->on_error_data,
+		STR_ERR("sqlite3_prepare_v2: %s: %s", SQL, sqlite3_errmsg(kdata->db)));	
 		return;
 	}	
 
 	while (sqlite3_step(stmt) != SQLITE_DONE) {
 	
 		struct doctor_t *d = NEW(struct doctor_t, 
-				ERR("%s", "can't allocate struct doctor_t"), return);
+			if (kdata->on_error)
+				kdata->on_error(kdata->on_error_data,				
+				STR_ERR("%s", "can't allocate struct doctor_t")), return);
 	
 		/* iterate columns */
 		int i;
@@ -182,7 +191,9 @@ prozubi_doctor_foreach(
 					const unsigned char *value = sqlite3_column_text(stmt, i);\
 					if (value){\
 						char *str = MALLOC(len + 1,\
-							ERR("can't allocate string with len: %ld", len+1), break);\
+							if (kdata->on_error)\
+								kdata->on_error(kdata->on_error_data,\
+							STR_ERR("can't allocate string with len: %ld", len+1)), break);\
 						strncpy(str, (const char *)value, len);\
 						str[len] = 0;\
 						d->member = str;\

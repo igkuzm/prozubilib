@@ -2,7 +2,7 @@
  * File              : cases.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 06.05.2023
- * Last Modified Date: 20.05.2023
+ * Last Modified Date: 25.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef CASES_H
@@ -294,13 +294,11 @@ _prozubi_cases_list_new(
 {
 	
 	if (!c){
-		ERR("%s", "case_t is NULL");
 		return NULL;
 	}	
 
 	cJSON *json = cJSON_CreateObject();
 	if (!json){
-		ERR("%s", "can't create cJSON");
 		return NULL;
 	}
 	
@@ -339,7 +337,7 @@ static struct case_t *
 _prozubi_case_new(){
 	/* allocate case_t */
 	struct case_t *c = NEW(struct case_t, 
-			ERR("%s", "can't allocate struct case_t"), return NULL);
+			, return NULL);
 	
 	/* init values to NULL */
 #define CASES_COLUMN_DATE(member, number, title      ) c->member = time(NULL); 
@@ -371,7 +369,9 @@ prozubi_case_new_for_patient(kdata2_t *kdata, char patientid[37]){
 		uuid4_seed(&state);
 		uuid4_gen(&state, &identifier);
 		if (!uuid4_to_s(identifier, c->id, 37)){
-			ERR("%s", "can't generate uuid");
+			if (kdata->on_error)
+				kdata->on_error(kdata->on_error_data,
+			STR_ERR("%s", "can't generate uuid"));
 			return NULL;
 		}
 
@@ -390,7 +390,9 @@ prozubi_case_new_for_patient(kdata2_t *kdata, char patientid[37]){
 	strcat(SQL, CASES_TABLENAME);
 	strcat(SQL, STR(" WHERE ZPATIENTID = '%s'", patientid));
 
-	LOG("SQL: %s", SQL);
+	if (kdata->on_log)
+		kdata->on_log(kdata->on_log_data,
+	STR_ERR("%s", SQL));
 
 	/* start SQLite request */
 	int res;
@@ -398,7 +400,9 @@ prozubi_case_new_for_patient(kdata2_t *kdata, char patientid[37]){
 	
 	res = sqlite3_prepare_v2(kdata->db, SQL, -1, &stmt, NULL);
 	if (res != SQLITE_OK) {
-		ERR("sqlite3_prepare_v2: %s: %s", SQL, sqlite3_errmsg(kdata->db));	
+			if (kdata->on_error)
+				kdata->on_error(kdata->on_error_data,
+			STR_ERR("sqlite3_prepare_v2: %s: %s", SQL, sqlite3_errmsg(kdata->db)));
 		return NULL;
 	}	
 
@@ -423,7 +427,9 @@ prozubi_case_new_for_patient(kdata2_t *kdata, char patientid[37]){
 					const unsigned char *value = sqlite3_column_text(stmt, i);\
 					if (value){\
 						char *str = MALLOC(len + 1,\
-							ERR("can't allocate string with len: %ld", len+1), break);\
+							if (kdata->on_error)\
+								kdata->on_error(kdata->on_error_data,\
+							STR_ERR("can't allocate string with len: %ld", len+1)), break);\
 						strncpy(str, (const char *)value, len);\
 						str[len] = 0;\
 						c->member = str;\
@@ -544,18 +550,21 @@ prozubi_cases_foreach(
 {
 	/* check kdata */
 	if (!kdata){
-		ERR("%s", "kdata is NULL");
 		return;
 	}
 	if (!kdata->db){
-		ERR("%s", "kdata->db is NULL");
+		if (kdata->on_error)
+			kdata->on_error(kdata->on_error_data,
+		STR_ERR("%s", "kdata->db is NULL"));
 		return;
 	}
 
 	/* get cases list children */
 	cJSON *cases_list_children = cJSON_Parse(_prozubi_cases_list_string);
 	if (!cases_list_children) {
-		ERR("%s", "can't get cJSON from _prozubi_cases_list_string");
+		if (kdata->on_error)
+			kdata->on_error(kdata->on_error_data,
+		STR_ERR("%s", "can't get cJSON from _prozubi_cases_list_string"));
 		return;
 	}
 	
@@ -582,7 +591,9 @@ prozubi_cases_foreach(
 	
 	res = sqlite3_prepare_v2(kdata->db, SQL, -1, &stmt, NULL);
 	if (res != SQLITE_OK) {
-		ERR("sqlite3_prepare_v2: %s: %s", SQL, sqlite3_errmsg(kdata->db));	
+		if (kdata->on_error)
+			kdata->on_error(kdata->on_error_data,
+		STR_ERR("sqlite3_prepare_v2: %s: %s", SQL, sqlite3_errmsg(kdata->db)));
 		return;
 	}	
 
@@ -617,7 +628,9 @@ prozubi_cases_foreach(
 					const unsigned char *value = sqlite3_column_text(stmt, i);\
 					if (value){\
 						char *str = MALLOC(len + 1,\
-							ERR("can't allocate string with len: %ld", len+1), break);\
+						if (kdata->on_error)\
+							kdata->on_error(kdata->on_error_data,\
+							STR_ERR("can't allocate string with len: %ld", len+1)), break);\
 						strncpy(str, (const char *)value, len);\
 						str[len] = 0;\
 						c->member = str;\
@@ -668,7 +681,9 @@ prozubi_cases_foreach(
 		/* handle cases list */
 		c->case_list = _prozubi_cases_list_new(c, cases_list_children);
 		if (!c->case_list){
-			ERR("%s", "can't get _prozubi_cases_list_new");
+			if (kdata->on_error)
+				kdata->on_error(kdata->on_error_data,
+			STR_ERR("%s", "can't get _prozubi_cases_list_new"));			
 			break;
 		}
 
@@ -811,7 +826,6 @@ prozubi_cases_list_foreach(
 {
 	cJSON *json = c->case_list;
 	if (!cJSON_IsObject(json)){
-		ERR("%s", "error to read json");
 		return;
 	}	
 	cJSON *jparent = cJSON_GetObjectItem(json, "parent");
@@ -820,7 +834,6 @@ prozubi_cases_list_foreach(
 	
 	cJSON *root = cJSON_GetObjectItem(json, "children");
 	if (!cJSON_IsArray(root)){
-		ERR("%s", "error to read json");
 		return;
 	}
 
@@ -842,7 +855,7 @@ prozubi_cases_list_foreach(
 			char ** array = NULL;
 			if (type == CASES_LIST_TYPE_COMBOBOX){
 				cJSON *jarray = cJSON_GetArrayItem(element, 3); 
-				array = MALLOC(8*10, ERR("%s", "can't allocate memory"), break);
+				array = MALLOC(8*10, , break);
 				cJSON *item; int i = 0;
 				cJSON_ArrayForEach(item, jarray){
 					array[i++] = cJSON_GetStringValue(item); 
@@ -875,7 +888,7 @@ prozubi_cases_list_foreach(
 					char ** array = NULL;
 					if (type == CASES_LIST_TYPE_COMBOBOX){
 						cJSON *jarray = cJSON_GetArrayItem(child_element, 3); 
-						array = MALLOC(8*10, ERR("%s", "can't allocate memory"), break);
+						array = MALLOC(8*10, , break);
 						cJSON *item; int i = 0;
 						cJSON_ArrayForEach(item, jarray){
 							array[i++] = cJSON_GetStringValue(item); 
@@ -925,7 +938,10 @@ static int prozubi_case_set_##number (kdata2_t *p, struct case_t *c, const char 
 	if(c->member)\
 		free(c->member);\
 	size_t len = strlen(text);\
-   	c->member = MALLOC(len + 1, ERR("can't allocate size: %ld", len + 1), return -1);\
+   	c->member = MALLOC(len + 1,\
+			if (p->on_error)\
+				p->on_error(p->on_error_data,\
+			STR_ERR("can't allocate size: %ld", len + 1)), return -1);\
 	strncpy(c->member, text, len);\
 	c->len_##member = len;\
 	return 0;\

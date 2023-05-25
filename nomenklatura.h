@@ -2,13 +2,14 @@
  * File              : nomenklatura.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 11.05.2023
- * Last Modified Date: 11.05.2023
+ * Last Modified Date: 25.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
 #ifndef NOMENKLATURA_H
 #define NOMENKLATURA_H
 
+#include "kdata2/kdata2.h"
 #include "enum.h"
 #include "log.h"
 #include "kdata2/sqlite3.h"
@@ -52,6 +53,7 @@ END_ENUM_STRING(NOMENKLATURA)
 
 static void
 prozubi_nomenklatura_foreach(
+		kdata2_t *kdata,
 		void * user_data,
 		void * (*callback)(
 			void * user_data,
@@ -60,8 +62,13 @@ prozubi_nomenklatura_foreach(
 			)
 		)
 {
+	if (!kdata)
+		return;
+
 	if (!callback){
-		ERR("%s", "callback is NULL");
+		if (kdata->on_error)
+			kdata->on_error(kdata->on_error_data,		
+		STR_ERR("%s", "callback is NULL"));
 		return;
 	}
 
@@ -70,8 +77,10 @@ prozubi_nomenklatura_foreach(
 	if (sqlite3_open_v2(NOMENKLATURA_BASE, &db, 
 				SQLITE_OPEN_READONLY, NULL))
 	{
-		ERR("SQLite: Failed to create '%s': %s", 
-				NOMENKLATURA_BASE, sqlite3_errmsg(db));
+		if (kdata->on_error)
+			kdata->on_error(kdata->on_error_data,		
+			STR_ERR("SQLite: Failed to create '%s': %s", 
+				NOMENKLATURA_BASE, sqlite3_errmsg(db)));
 		return;	
 	}
 	
@@ -94,7 +103,9 @@ prozubi_nomenklatura_foreach(
 	/* start SQLite request for parent*/
 	sqlite3_stmt *stmt_p;
 	if(sqlite3_prepare_v2(db, SQL, -1, &stmt_p, NULL)){
-		ERR("sqlite3_prepare_v2: %s: %s", SQL_p, sqlite3_errmsg(db));	
+		if (kdata->on_error)
+			kdata->on_error(kdata->on_error_data,				
+			STR_ERR("sqlite3_prepare_v2: %s: %s", SQL_p, sqlite3_errmsg(db)));	
 		sqlite3_close(db);
 		return;
 	};
@@ -145,7 +156,9 @@ prozubi_nomenklatura_foreach(
 
 		/* start SQLite request */
 		if(sqlite3_prepare_v2(db, SQL_c, -1, &stmt_c, NULL)){
-			ERR("sqlite3_prepare_v2: %s: %s", SQL_c, sqlite3_errmsg(db));	
+			if (kdata->on_error)
+				kdata->on_error(kdata->on_error_data,			
+				STR_ERR("sqlite3_prepare_v2: %s: %s", SQL_c, sqlite3_errmsg(db)));	
 			sqlite3_close(db);
 			return;
 		};

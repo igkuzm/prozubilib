@@ -2,7 +2,7 @@
  * File              : prozubilib.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 17.04.2023
- * Last Modified Date: 25.04.2023
+ * Last Modified Date: 25.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -17,18 +17,27 @@
 prozubi_t *
 prozubi_init(
 		const char *filepath,
-		const char *token
+		const char *token,
+		void       *on_error_data,
+		void      (*on_error)      (void *on_error_data, const char *error),
+		void       *on_log_data,
+		void      (*on_log)        (void *on_log_data, const char *message)		
 		)
 {
+	if (on_log)
+		on_log(on_log_data, STR_LOG("%s", "init..."));
+	
 	/* check filepath */
 	if (!filepath) {
-		ERR("%s", "filepath is NULL");
+		if (on_error)
+			on_error(on_error_data, STR_ERR("%s", "filepath is NULL"));
 		return NULL;
 	}
 
 	/* check token */
 	if (!token)
-		LOG("%s", "token is NULL");
+		if (on_log)
+			on_log(on_log_data, STR_LOG("%s", "token is NULL"));
 
 	/* init tables */
 	struct kdata2_table *zcases;	
@@ -51,7 +60,9 @@ prozubi_init(
 
 	/* init kdata */ 
 	kdata2_t *kdata;
-	kdata2_init(&kdata, filepath, token, 60,
+	kdata2_init(&kdata, filepath, token,
+		   on_error_data, on_error, on_log_data, on_log,	
+			60,
 			zcases, zdoctors, zimages, zpassport, zprices, ztemplates,
 			NULL);
 
@@ -61,12 +72,12 @@ prozubi_init(
 int _prozubi_check_lib(prozubi_t *p){
 	/* check prozubi */
 	if (!p) {
-		ERR("%s", "prozubi_t is NULL");
 		return -1;
 	}
 	/* check SQLite database */
 	if (!p->db) {
-		ERR("%s", "SQLite database is NULL");
+		if (p->on_error)
+			p->on_error(p->on_error_data, STR_ERR("%s", "SQLite database is NULL"));
 		return -1;
 	}	
 
@@ -85,8 +96,9 @@ prozubi_set_token(
 	
 	/* check token */
 	if (!token){
-		return -1;	
-		LOG("%s", "token is NULL");
+		if (p->on_error)
+			p->on_error(p->on_error_data, STR_ERR("%s", "SQLite database is NULL"));
+		return -1;
 	}
 	
 	return kdata2_set_access_token(p, token);
@@ -102,7 +114,8 @@ prozubi_stop_sync(
 		return -1;
 	
 	if (!p->tid){
-		ERR("%s", "thread id is NULL");	
+		if (p->on_error)
+			p->on_error(p->on_error_data, STR_ERR("%s", "thread id is NULL"));		
 		return -1;
 	}
 	
