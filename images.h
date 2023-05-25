@@ -405,4 +405,11 @@ static int prozubi_image_set_data(
 	return -1;
 }
 
+static int prozubi_image_remove(
+		kdata2_t *p, struct image_t *c
+		)
+{
+	return kdata2_remove_for_uuid(p, IMAGES_TABLENAME, c->id);
+}
+
 #endif /* ifndef IMAGES_H */
