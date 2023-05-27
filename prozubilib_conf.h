@@ -2,7 +2,7 @@
  * File              : prozubilib_conf.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 17.04.2023
- * Last Modified Date: 24.04.2023
+ * Last Modified Date: 27.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -15,6 +15,8 @@
 #include "kdata2/sqlite3.h"
 #include "kdata2/cYandexDisk/cJSON.h"
 #include "kdata2/cYandexDisk/uuid4.h"
+
+typedef kdata2_t prozubi_t;
 
 #ifndef UUID4_STR
 #define UUID4_STR

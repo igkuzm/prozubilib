@@ -2,7 +2,7 @@
  * File              : cases.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 06.05.2023
- * Last Modified Date: 25.05.2023
+ * Last Modified Date: 27.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef CASES_H
@@ -360,7 +360,7 @@ prozubi_planlecheniya_new(struct case_t *c)
 }
 
 static struct case_t *
-prozubi_case_new_for_patient(kdata2_t *kdata, char patientid[37]){
+prozubi_case_new_for_patient(prozubi_t *p, char patientid[37]){
 	/* allocate case_t */
 	struct case_t *c = _prozubi_case_new();
 	
@@ -369,8 +369,8 @@ prozubi_case_new_for_patient(kdata2_t *kdata, char patientid[37]){
 		uuid4_seed(&state);
 		uuid4_gen(&state, &identifier);
 		if (!uuid4_to_s(identifier, c->id, 37)){
-			if (kdata->on_error)
-				kdata->on_error(kdata->on_error_data,
+			if (p->on_error)
+				p->on_error(p->on_error_data,
 			STR_ERR("%s", "can't generate uuid"));
 			return NULL;
 		}
@@ -390,19 +390,19 @@ prozubi_case_new_for_patient(kdata2_t *kdata, char patientid[37]){
 	strcat(SQL, CASES_TABLENAME);
 	strcat(SQL, STR(" WHERE ZPATIENTID = '%s'", patientid));
 
-	if (kdata->on_log)
-		kdata->on_log(kdata->on_log_data,
+	if (p->on_log)
+		p->on_log(p->on_log_data,
 	STR_ERR("%s", SQL));
 
 	/* start SQLite request */
 	int res;
 	sqlite3_stmt *stmt;
 	
-	res = sqlite3_prepare_v2(kdata->db, SQL, -1, &stmt, NULL);
+	res = sqlite3_prepare_v2(p->db, SQL, -1, &stmt, NULL);
 	if (res != SQLITE_OK) {
-			if (kdata->on_error)
-				kdata->on_error(kdata->on_error_data,
-			STR_ERR("sqlite3_prepare_v2: %s: %s", SQL, sqlite3_errmsg(kdata->db)));
+			if (p->on_error)
+				p->on_error(p->on_error_data,
+			STR_ERR("sqlite3_prepare_v2: %s: %s", SQL, sqlite3_errmsg(p->db)));
 		return NULL;
 	}	
 
@@ -427,8 +427,8 @@ prozubi_case_new_for_patient(kdata2_t *kdata, char patientid[37]){
 					const unsigned char *value = sqlite3_column_text(stmt, i);\
 					if (value){\
 						char *str = MALLOC(len + 1,\
-							if (kdata->on_error)\
-								kdata->on_error(kdata->on_error_data,\
+							if (p->on_error)\
+								p->on_error(p->on_error_data,\
 							STR_ERR("can't allocate string with len: %ld", len+1)), break);\
 						strncpy(str, (const char *)value, len);\
 						str[len] = 0;\
@@ -496,7 +496,7 @@ prozubi_case_new_for_patient(kdata2_t *kdata, char patientid[37]){
 #define CASES_COLUMN_DATE(member, number, title) \
 				case number:\
 				{\
-					kdata2_set_number_for_uuid(kdata, CASES_TABLENAME, title,\
+					kdata2_set_number_for_uuid(p, CASES_TABLENAME, title,\
 						   	c->member, c->id);\
 					break;\
 				}; 
@@ -506,7 +506,7 @@ prozubi_case_new_for_patient(kdata2_t *kdata, char patientid[37]){
 				{\
 					char *str = c->member;\
 					if (!str) str = "";\
-					kdata2_set_text_for_uuid(kdata, CASES_TABLENAME, title,\
+					kdata2_set_text_for_uuid(p, CASES_TABLENAME, title,\
 						   	str, c->id);\
 					break;\
 				}; 
@@ -515,7 +515,7 @@ prozubi_case_new_for_patient(kdata2_t *kdata, char patientid[37]){
 				case number:\
 				{\
 					if (c->member){\
-						kdata2_set_data_for_uuid(kdata, CASES_TABLENAME, title,\
+						kdata2_set_data_for_uuid(p, CASES_TABLENAME, title,\
 						   	c->member, c->len_##member, c->id);\
 					}\
 					break;\
@@ -542,28 +542,28 @@ prozubi_case_new_for_patient(kdata2_t *kdata, char patientid[37]){
 /* callback all cases with patientid (set patient id to NULL to get all cases from database) */
 static void 
 prozubi_cases_foreach(
-		kdata2_t   *kdata,
+		prozubi_t   *p,
 		const char *patient_id,
 		void       *user_data,
 		int        (*callback)(void *user_data, struct case_t *c)
 		)
 {
 	/* check kdata */
-	if (!kdata){
+	if (!p){
 		return;
 	}
-	if (!kdata->db){
-		if (kdata->on_error)
-			kdata->on_error(kdata->on_error_data,
-		STR_ERR("%s", "kdata->db is NULL"));
+	if (!p->db){
+		if (p->on_error)
+			p->on_error(p->on_error_data,
+		STR_ERR("%s", "p->db is NULL"));
 		return;
 	}
 
 	/* get cases list children */
 	cJSON *cases_list_children = cJSON_Parse(_prozubi_cases_list_string);
 	if (!cases_list_children) {
-		if (kdata->on_error)
-			kdata->on_error(kdata->on_error_data,
+		if (p->on_error)
+			p->on_error(p->on_error_data,
 		STR_ERR("%s", "can't get cJSON from _prozubi_cases_list_string"));
 		return;
 	}
@@ -589,11 +589,11 @@ prozubi_cases_foreach(
 	int res;
 	sqlite3_stmt *stmt;
 	
-	res = sqlite3_prepare_v2(kdata->db, SQL, -1, &stmt, NULL);
+	res = sqlite3_prepare_v2(p->db, SQL, -1, &stmt, NULL);
 	if (res != SQLITE_OK) {
-		if (kdata->on_error)
-			kdata->on_error(kdata->on_error_data,
-		STR_ERR("sqlite3_prepare_v2: %s: %s", SQL, sqlite3_errmsg(kdata->db)));
+		if (p->on_error)
+			p->on_error(p->on_error_data,
+		STR_ERR("sqlite3_prepare_v2: %s: %s", SQL, sqlite3_errmsg(p->db)));
 		return;
 	}	
 
@@ -627,8 +627,8 @@ prozubi_cases_foreach(
 					const unsigned char *value = sqlite3_column_text(stmt, i);\
 					if (value){\
 						char *str = MALLOC(len + 1,\
-						if (kdata->on_error)\
-							kdata->on_error(kdata->on_error_data,\
+						if (p->on_error)\
+							p->on_error(p->on_error_data,\
 							STR_ERR("can't allocate string with len: %ld", len+1)), break);\
 						strncpy(str, (const char *)value, len);\
 						str[len] = 0;\
@@ -680,8 +680,8 @@ prozubi_cases_foreach(
 		/* handle cases list */
 		c->case_list = _prozubi_cases_list_new(c, cases_list_children);
 		if (!c->case_list){
-			if (kdata->on_error)
-				kdata->on_error(kdata->on_error_data,
+			if (p->on_error)
+				p->on_error(p->on_error_data,
 			STR_ERR("%s", "can't get _prozubi_cases_list_new"));			
 			break;
 		}
@@ -806,33 +806,113 @@ prozubi_case_get_len(struct case_t *c, const char *name){
 	return 0;
 }
 
-static void
-prozubi_cases_list_foreach(
-		struct case_t *c,
-		void * user_data,
-		void * (*item_callback)(
-			void *user_data,
+struct case_list_node {
+	struct case_t *c;
+	char * title;
+	enum tagCASES key;
+	enum tagCASES_LIST_TYPE type;
+	char ** array;
+};
+
+static struct case_list_node * 
+_case_list_node_new(
+			prozubi_t *p,
 			struct case_t *c,
-			void *allocated_ptr,
-			void * parent,
-			bool has_children,
 			char * title,
 			enum tagCASES key,
 			enum tagCASES_LIST_TYPE type,
 			char ** array
+		)
+{
+	if (!p)
+		return NULL;
+	if (!c) {
+		if (p->on_error)
+			p->on_error(p->on_error_data,
+		STR_ERR("struct case_t is NULL"));
+		return NULL;	
+	}
+
+	struct case_list_node *n = 
+		NEW(struct case_list_node,
+			if (p->on_error)
+				p->on_error(p->on_error_data,
+				STR_ERR("can't allocate struct case_list_node")), return NULL);
+
+	n->c = c;
+	n->title = title;
+	n->key = key;
+	n->type = type;
+	n->array = array;
+
+	return n;
+}
+
+static void 
+prozubi_case_list_node_free(prozubi_t *p, struct case_list_node *n)
+{
+	if (!p)
+		return;
+	if (!n) {
+		if (p->on_error)
+			p->on_error(p->on_error_data,
+		STR_ERR("struct case_list_node is NULL"));
+		return;	
+	}
+
+	if (n->title)
+		free(n->title);
+
+	if (n->array){
+		char **ptr = n->array;
+		while (*ptr)
+			free(*ptr++);
+
+		free(n->array);
+	}
+	
+	free(n);
+}
+
+static void
+prozubi_cases_list_foreach(
+		prozubi_t     *p,
+		struct case_t *c,
+		void * user_data,
+		void * (*item_callback)(
+			void *user_data,
+			void *allocated_ptr,
+			void * parent,
+			bool has_children,
+			struct case_list_node *n
 			)	
 		)
 {
 	cJSON *json = c->case_list;
 	if (!cJSON_IsObject(json)){
+		if (p->on_error)
+			p->on_error(p->on_error_data,
+			STR_ERR("json error"));
 		return;
 	}	
 	cJSON *jparent = cJSON_GetObjectItem(json, "parent");
+	if (!jparent){
+		if (p->on_error)
+			p->on_error(p->on_error_data,
+			STR_ERR("json error: no `parent` object"));
+		return;
+	}
+	
 	char *title = cJSON_GetStringValue(jparent); 
-	void *parent = item_callback(user_data, c, c, NULL, true, title, -1, -1, NULL);
+	struct case_list_node *n = _case_list_node_new(p, c, title, -1, -1, NULL);
+	void *parent = item_callback(user_data, c, NULL, true, 
+			_case_list_node_new(p, c, title, -1, -1, NULL));
 	
 	cJSON *root = cJSON_GetObjectItem(json, "children");
 	if (!cJSON_IsArray(root)){
+		if (p->on_error)
+			p->on_error(p->on_error_data,
+			STR_ERR("json error: no `children` object"));		
 		return;
 	}
 
@@ -861,13 +941,15 @@ prozubi_cases_list_foreach(
 				}
 				array[i] = NULL; // NULL-terminate array
 			}
-			item_callback(user_data, c, NULL, parent, false, el_title, key, type, array);
+			item_callback(user_data, NULL, parent, false, 
+					_case_list_node_new(p, c, title, key, type, array));
 
 		} else if (cJSON_IsObject(element)){
 			/* handle object */
 			cJSON *jparent = cJSON_GetObjectItem(element, "parent");
 			char *el_title = cJSON_GetStringValue(jparent); 
-			void *new_parent = item_callback(user_data, c, NULL, parent, true, el_title, -1, -1, NULL);
+			void *new_parent = item_callback(user_data, NULL, parent, true,
+									_case_list_node_new(p, c, title, -1, -1, NULL));
 			
 			cJSON *child = cJSON_GetObjectItem(element, "children");
 			cJSON *child_element;
@@ -894,7 +976,8 @@ prozubi_cases_list_foreach(
 						}
 						array[i] = NULL; // NULL-terminate array
 					}
-					item_callback(user_data, c, NULL, new_parent, false, ctitle, key, type, array);
+					item_callback(user_data, NULL, new_parent, false,
+							_case_list_node_new(p, c, title, key, type, array));
 				}
 			}
 		}
@@ -902,14 +985,14 @@ prozubi_cases_list_foreach(
 }
 
 #define CASES_COLUMN_DATE(member, number, title)\
-static int prozubi_case_set_##number (kdata2_t *p, struct case_t *c, time_t t){\
+static int prozubi_case_set_##number (prozubi_t *p, struct case_t *c, time_t t){\
 	if (kdata2_set_number_for_uuid(p, CASES_TABLENAME, title, t, c->id))\
 		return -1;\
 	c->member = t;\
 	return 0;\
 }
 #define CASES_COLUMN_DATA(member, number, title, type)\
-static int prozubi_case_set_##number (kdata2_t *p, struct case_t *c,\
+static int prozubi_case_set_##number (prozubi_t *p, struct case_t *c,\
 	   	type *data, size_t len)\
 {\
 	if (CASES_DATA_TYPE_##type == CASES_DATA_TYPE_cJSON){\
@@ -931,7 +1014,7 @@ static int prozubi_case_set_##number (kdata2_t *p, struct case_t *c,\
 	return 0;\
 }
 #define CASES_COLUMN_TEXT(member, number, title)\
-static int prozubi_case_set_##number (kdata2_t *p, struct case_t *c, const char *text){\
+static int prozubi_case_set_##number (prozubi_t *p, struct case_t *c, const char *text){\
 	if (kdata2_set_text_for_uuid(p, CASES_TABLENAME, title, text, c->id))\
 		return -1;\
 	if(c->member)\
@@ -951,7 +1034,7 @@ static int prozubi_case_set_##number (kdata2_t *p, struct case_t *c, const char 
 #undef CASES_COLUMN_DATA			
 
 static int prozubi_case_set_text(
-		CASES key, kdata2_t *p, struct case_t *c, const char *text)
+		CASES key, prozubi_t *p, struct case_t *c, const char *text)
 {
 	switch (key) {
 #define CASES_COLUMN_DATE(member, number, title) case number: break;	
@@ -972,7 +1055,7 @@ static int prozubi_case_set_text(
 }
 
 static int prozubi_case_set_date(
-		CASES key, kdata2_t *p, struct case_t *c, time_t t)
+		CASES key, prozubi_t *p, struct case_t *c, time_t t)
 {
 	switch (key) {
 #define CASES_COLUMN_TEXT(member, number, title) case number: break;	
@@ -993,7 +1076,7 @@ static int prozubi_case_set_date(
 }
 
 static int prozubi_case_set_data(
-		CASES key, kdata2_t *p, struct case_t *c, void *data, size_t len)
+		CASES key, prozubi_t *p, struct case_t *c, void *data, size_t len)
 {
 	switch (key) {
 #define CASES_COLUMN_TEXT(member, number, title) case number: break;	
@@ -1014,7 +1097,7 @@ static int prozubi_case_set_data(
 }
 
 static int prozubi_case_update(
-		kdata2_t *p, struct case_t *c
+		prozubi_t *p, struct case_t *c
 		)
 {
 	int i;
@@ -1062,10 +1145,28 @@ static int prozubi_case_update(
 }
 
 static int prozubi_case_remove(
-		kdata2_t *p, struct case_t *c
+		prozubi_t *p, struct case_t *c
 		)
 {
 	return kdata2_remove_for_uuid(p, CASES_TABLENAME, c->id);
+}
+
+static void 
+prozubi_case_list_node_free_with_case(prozubi_t *p, struct case_list_node *n)
+{
+	if (!p)
+		return;
+	if (!n) {
+		if (p->on_error)
+			p->on_error(p->on_error_data,
+		STR_ERR("struct case_list_node is NULL"));
+		return;	
+	}
+
+	if (n->c)
+		prozubi_case_free(n->c);
+		
+	prozubi_case_list_node_free(p, n);
 }
 
 #endif /* ifndef CASES_H */
