@@ -354,6 +354,9 @@ _prozubi_case_new(){
 static cJSON *
 prozubi_planlecheniya_new(struct case_t *c)
 {
+	if (c->planlecheniya)
+		cJSON_free(c->planlecheniya);
+	
 	cJSON *json = cJSON_CreateArray(); 
 	c->planlecheniya = json;
 	return json;
