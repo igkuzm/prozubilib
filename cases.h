@@ -2,7 +2,7 @@
  * File              : cases.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 06.05.2023
- * Last Modified Date: 27.05.2023
+ * Last Modified Date: 28.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef CASES_H
@@ -811,6 +811,7 @@ prozubi_case_get_len(struct case_t *c, const char *name){
 
 struct case_list_node {
 	struct case_t *c;
+	void *allocated_ptr;
 	char * title;
 	enum tagCASES key;
 	enum tagCASES_LIST_TYPE type;
@@ -821,6 +822,7 @@ static struct case_list_node *
 _case_list_node_new(
 			prozubi_t *p,
 			struct case_t *c,
+			void *allocated_ptr,
 			char * title,
 			enum tagCASES key,
 			enum tagCASES_LIST_TYPE type,
@@ -843,6 +845,7 @@ _case_list_node_new(
 				STR_ERR("can't allocate struct case_list_node")), return NULL);
 
 	n->c = c;
+	n->allocated_ptr = allocated_ptr;
 	n->title = title;
 	n->key = key;
 	n->type = type;
@@ -884,7 +887,6 @@ prozubi_cases_list_foreach(
 		void * user_data,
 		void * (*item_callback)(
 			void *user_data,
-			void *allocated_ptr,
 			void * parent,
 			bool has_children,
 			struct case_list_node *n
@@ -907,9 +909,8 @@ prozubi_cases_list_foreach(
 	}
 	
 	char *title = cJSON_GetStringValue(jparent); 
-	struct case_list_node *n = _case_list_node_new(p, c, title, -1, -1, NULL);
-	void *parent = item_callback(user_data, c, NULL, true, 
-			_case_list_node_new(p, c, title, -1, -1, NULL));
+	void *parent = item_callback(user_data, NULL, true, 
+			_case_list_node_new(p, c, c, title, -1, -1, NULL));
 	
 	cJSON *root = cJSON_GetObjectItem(json, "children");
 	if (!cJSON_IsArray(root)){
@@ -944,15 +945,15 @@ prozubi_cases_list_foreach(
 				}
 				array[i] = NULL; // NULL-terminate array
 			}
-			item_callback(user_data, NULL, parent, false, 
-					_case_list_node_new(p, c, title, key, type, array));
+			item_callback(user_data, parent, false, 
+					_case_list_node_new(p, c, NULL, title, key, type, array));
 
 		} else if (cJSON_IsObject(element)){
 			/* handle object */
 			cJSON *jparent = cJSON_GetObjectItem(element, "parent");
 			char *el_title = cJSON_GetStringValue(jparent); 
-			void *new_parent = item_callback(user_data, NULL, parent, true,
-									_case_list_node_new(p, c, title, -1, -1, NULL));
+			void *new_parent = item_callback(user_data, parent, true,
+									_case_list_node_new(p, c, NULL, title, -1, -1, NULL));
 			
 			cJSON *child = cJSON_GetObjectItem(element, "children");
 			cJSON *child_element;
@@ -979,8 +980,8 @@ prozubi_cases_list_foreach(
 						}
 						array[i] = NULL; // NULL-terminate array
 					}
-					item_callback(user_data, NULL, new_parent, false,
-							_case_list_node_new(p, c, title, key, type, array));
+					item_callback(user_data, new_parent, false,
+							_case_list_node_new(p, c, NULL, title, key, type, array));
 				}
 			}
 		}
@@ -1166,10 +1167,14 @@ prozubi_case_list_node_free_with_case(prozubi_t *p, struct case_list_node *n)
 		return;	
 	}
 
-	if (n->c)
-		prozubi_case_free(n->c);
+	if (n->allocated_ptr)
+		prozubi_case_free(n->allocated_ptr);
 		
 	prozubi_case_list_node_free(p, n);
 }
+
+#define prozubi_case_list_node_array_foreach(case_list, element)\
+	char ** __ptr__ = ((struct case_list_node *)caselist)->array;\
+	for (element = *__ptr__; *__ptr__; *__ptr__++, element = *__ptr__)
 
 #endif /* ifndef CASES_H */
