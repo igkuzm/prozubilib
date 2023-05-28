@@ -850,6 +850,10 @@ _case_list_node_new(
 	return n;
 }
 
+#define prozubi_case_list_node_array_foreach(caseListNode, element)\
+	char ** __ptr__ = ((struct case_list_node *)caseListNode)->array;\
+	for (element = *__ptr__; *__ptr__; *__ptr__++, element = *__ptr__)
+
 static void 
 prozubi_case_list_node_free(prozubi_t *p, struct case_list_node *n)
 {
@@ -866,10 +870,10 @@ prozubi_case_list_node_free(prozubi_t *p, struct case_list_node *n)
 		free(n->title);
 
 	if (n->array){
-		char **ptr = n->array;
-		while (*ptr)
-			free(*ptr++);
-
+		char *str;
+		prozubi_case_list_node_array_foreach(n, str){
+			free(str);	
+		}
 		free(n->array);
 	}
 	
@@ -1173,9 +1177,5 @@ prozubi_case_list_node_free_with_case(prozubi_t *p, struct case_list_node *n)
 		
 	prozubi_case_list_node_free(p, n);
 }
-
-#define prozubi_case_list_node_array_foreach(case_list, element)\
-	char ** __ptr__ = ((struct case_list_node *)caselist)->array;\
-	for (element = *__ptr__; *__ptr__; *__ptr__++, element = *__ptr__)
 
 #endif /* ifndef CASES_H */
