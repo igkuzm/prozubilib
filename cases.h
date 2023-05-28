@@ -2,7 +2,7 @@
  * File              : cases.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 06.05.2023
- * Last Modified Date: 28.05.2023
+ * Last Modified Date: 29.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef CASES_H
@@ -562,15 +562,6 @@ prozubi_cases_foreach(
 		return;
 	}
 
-	/* get cases list children */
-	cJSON *cases_list_children = cJSON_Parse(_prozubi_cases_list_string);
-	if (!cases_list_children) {
-		if (p->on_error)
-			p->on_error(p->on_error_data,
-		STR_ERR("%s", "can't get cJSON from _prozubi_cases_list_string"));
-		return;
-	}
-	
 	/* create SQL string */
 	char SQL[BUFSIZ] = "SELECT ";
 
@@ -681,6 +672,15 @@ prozubi_cases_foreach(
 		}
 
 		/* handle cases list */
+		/* get cases list children */
+		cJSON *cases_list_children = cJSON_Parse(_prozubi_cases_list_string);
+		if (!cases_list_children) {
+			if (p->on_error)
+				p->on_error(p->on_error_data,
+			STR_ERR("%s", "can't get cJSON from _prozubi_cases_list_string"));
+			return;
+		}
+	
 		c->case_list = _prozubi_cases_list_new(c, cases_list_children);
 		if (!c->case_list){
 			if (p->on_error)
@@ -688,10 +688,6 @@ prozubi_cases_foreach(
 			STR_ERR("%s", "can't get _prozubi_cases_list_new"));			
 			break;
 		}
-
-		/* fix plan lecheniye */
-		/*if (c->planlecheniya == NULL)*/
-			/*prozubi_planlecheniya_new(c);*/
 
 		/* callback */
 		if (callback)
