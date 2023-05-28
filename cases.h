@@ -893,6 +893,11 @@ prozubi_cases_list_foreach(
 			)	
 		)
 {
+
+	char *title = NULL, **array = NULL;
+	void *parent = NULL;
+	int key = -1, type = -1;
+
 	cJSON *json = c->case_list;
 	if (!cJSON_IsObject(json)){
 		if (p->on_error)
@@ -908,8 +913,8 @@ prozubi_cases_list_foreach(
 		return;
 	}
 	
-	char *title = cJSON_GetStringValue(jparent); 
-	void *parent = item_callback(user_data, NULL, true, 
+	title = cJSON_GetStringValue(jparent); 
+	parent = item_callback(user_data, NULL, true, 
 			_case_list_node_new(p, c, c, title, -1, -1, NULL));
 	
 	cJSON *root = cJSON_GetObjectItem(json, "children");
@@ -925,17 +930,17 @@ prozubi_cases_list_foreach(
 		if (cJSON_IsArray(element)){
 			/* handle array */
 			cJSON *jtitle = cJSON_GetArrayItem(element, 0);
-			char *el_title = cJSON_GetStringValue(jtitle);
+			title = cJSON_GetStringValue(jtitle);
 
 			cJSON *jkey = cJSON_GetArrayItem(element, 1); 
 			char  *skey = cJSON_GetStringValue(jkey); 
-			int key = getIndexCASES(skey);	
+			key = getIndexCASES(skey);	
 
 			cJSON *jtype = cJSON_GetArrayItem(element, 2); 
 			char  *stype = cJSON_GetStringValue(jtype); 
-			int type = getIndexCASES_LIST_TYPE(stype);	
+			type = getIndexCASES_LIST_TYPE(stype);	
 			
-			char ** array = NULL;
+			array = NULL;
 			if (type == CASES_LIST_TYPE_COMBOBOX){
 				cJSON *jarray = cJSON_GetArrayItem(element, 3); 
 				array = MALLOC(8*10, , break);
@@ -946,31 +951,31 @@ prozubi_cases_list_foreach(
 				array[i] = NULL; // NULL-terminate array
 			}
 			item_callback(user_data, parent, false, 
-					_case_list_node_new(p, c, NULL, el_title, key, type, array));
+					_case_list_node_new(p, c, NULL, title, key, type, array));
 
 		} else if (cJSON_IsObject(element)){
 			/* handle object */
 			cJSON *jparent = cJSON_GetObjectItem(element, "parent");
-			char *el1_title = cJSON_GetStringValue(jparent); 
+			title = cJSON_GetStringValue(jparent); 
 			void *new_parent = item_callback(user_data, parent, true,
-									_case_list_node_new(p, c, NULL, el1_title, -1, -1, NULL));
+									_case_list_node_new(p, c, NULL, title, -1, -1, NULL));
 			
 			cJSON *child = cJSON_GetObjectItem(element, "children");
 			cJSON *child_element;
 			cJSON_ArrayForEach(child_element, child){
 				if (cJSON_IsArray(child_element)){
 					cJSON *jtitle = cJSON_GetArrayItem(child_element, 0);
-					char *ctitle = cJSON_GetStringValue(jtitle);
+					title = cJSON_GetStringValue(jtitle);
 
 					cJSON *jkey = cJSON_GetArrayItem(child_element, 1); 
 					char  *skey = cJSON_GetStringValue(jkey); 
-					int key = getIndexCASES(skey);	
+					key = getIndexCASES(skey);	
 
 					cJSON *jtype = cJSON_GetArrayItem(child_element, 2); 
 					char  *stype = cJSON_GetStringValue(jtype); 
-					int type = getIndexCASES_LIST_TYPE(stype);	
+					type = getIndexCASES_LIST_TYPE(stype);	
 					
-					char ** array = NULL;
+					array = NULL;
 					if (type == CASES_LIST_TYPE_COMBOBOX){
 						cJSON *jarray = cJSON_GetArrayItem(child_element, 3); 
 						array = MALLOC(8*10, , break);
@@ -981,7 +986,7 @@ prozubi_cases_list_foreach(
 						array[i] = NULL; // NULL-terminate array
 					}
 					item_callback(user_data, new_parent, false,
-							_case_list_node_new(p, c, NULL, ctitle, key, type, array));
+							_case_list_node_new(p, c, NULL, title, key, type, array));
 				}
 			}
 		}
