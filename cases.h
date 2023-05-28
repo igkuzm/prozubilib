@@ -946,14 +946,14 @@ prozubi_cases_list_foreach(
 				array[i] = NULL; // NULL-terminate array
 			}
 			item_callback(user_data, parent, false, 
-					_case_list_node_new(p, c, NULL, title, key, type, array));
+					_case_list_node_new(p, c, NULL, el_title, key, type, array));
 
 		} else if (cJSON_IsObject(element)){
 			/* handle object */
 			cJSON *jparent = cJSON_GetObjectItem(element, "parent");
 			char *el_title = cJSON_GetStringValue(jparent); 
 			void *new_parent = item_callback(user_data, parent, true,
-									_case_list_node_new(p, c, NULL, title, -1, -1, NULL));
+									_case_list_node_new(p, c, NULL, el_title, -1, -1, NULL));
 			
 			cJSON *child = cJSON_GetObjectItem(element, "children");
 			cJSON *child_element;
@@ -981,7 +981,7 @@ prozubi_cases_list_foreach(
 						array[i] = NULL; // NULL-terminate array
 					}
 					item_callback(user_data, new_parent, false,
-							_case_list_node_new(p, c, NULL, title, key, type, array));
+							_case_list_node_new(p, c, NULL, ctitle, key, type, array));
 				}
 			}
 		}
