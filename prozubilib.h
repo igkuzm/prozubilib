@@ -2,7 +2,7 @@
  * File              : prozubilib.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 27.05.2023
+ * Last Modified Date: 30.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -21,6 +21,7 @@
 #include "images.h"
 #include "prices.h"
 #include "nomenklatura.h"
+#include "diagnosis.h"
 
 /* init prozubi database and start yandex disk sync */
 prozubi_t *
