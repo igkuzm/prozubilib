@@ -62,7 +62,7 @@ _prozubi_diagnosis_poteria_zhevatelnoy_effectivnosti(
 	return pze;
 }
 
-char *
+static char *
 prozubi_diagnosis_get(
 			prozubi_t *p,
 			struct case_t *c
