@@ -115,7 +115,7 @@ prozubi_diagnosis_get(
 		for (i = 0; i < 2; ++i) {\
 			if (strcmp(c->n, pt[i]) == 0){\
 				char s[256];\
-				sprintf(s, "K04.5. Хронический апикальный периодонтит, зуб %s. ", t);\
+				sprintf(s, "K04.5. Хронический апикальный периодонтит, зуб %s.\n", t);\
 				strcat(str, s);\
 				break;\
 			}\
@@ -126,7 +126,7 @@ prozubi_diagnosis_get(
 	#define DIAGNOSIS_TOOTH(n, t)\
 		if (strcmp(c->n, "P") == 0){\
 			char s[256];\
-			sprintf(s, "K04.0. Пульпит, зуб %s. ", t);\
+			sprintf(s, "K04.0. Пульпит, зуб %s.\n", t);\
 			strcat(str, s);\
 		}
 	DIAGNOSIS_TEETH
@@ -135,7 +135,7 @@ prozubi_diagnosis_get(
 	#define DIAGNOSIS_TOOTH(n, t)\
 		if (strcmp(c->n, "C") == 0){\
 			char s[256];\
-			sprintf(s, "K02.2. Кариес цемента, зуб %s. ", t);\
+			sprintf(s, "K02.2. Кариес цемента, зуб %s.\n", t);\
 			strcat(str, s);\
 		}
 	DIAGNOSIS_TEETH
