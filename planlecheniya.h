@@ -2,7 +2,7 @@
  * File              : planlecheniya.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.04.2023
- * Last Modified Date: 25.05.2023
+ * Last Modified Date: 30.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -47,7 +47,7 @@ prozubi_planlecheniya_foreach(
 		)
 {
 	if (!kdata)
-		return NULL;
+		return;
 
 	if (!cJSON_IsArray(planlecheniya)){
 		if (kdata->on_error)
