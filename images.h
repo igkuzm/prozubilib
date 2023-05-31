@@ -2,7 +2,7 @@
  * File              : images.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 25.05.2023
+ * Last Modified Date: 31.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -127,6 +127,15 @@ prozubi_image_new(
 		}
 	} else
 		strcpy(i->id, id);
+
+#define IMAGES_COLUMN_DATE(member, number, title      ) i->member = member; 
+#define IMAGES_COLUMN_TEXT(member, number, title      ) i->member = (char *)member; 
+#define IMAGES_COLUMN_DATA(member, number, title, type) i->member = member;\
+	i->len_##member = len_##member; 
+	IMAGES_COLUMNS
+#undef IMAGES_COLUMN_DATE
+#undef IMAGES_COLUMN_TEXT
+#undef IMAGES_COLUMN_DATA	
 
 	/* set values */
 #define IMAGES_COLUMN_DATE(member, number, title)\
