@@ -94,7 +94,7 @@ prozubi_images_table_init(struct kdata2_table **images){
 /* allocate and init new case */
 static struct image_t *
 prozubi_image_new(
-		kdata2_t *kdata,
+		prozubi_t *p,
 #define IMAGES_COLUMN_DATE(member, number, title      ) time_t member, 
 #define IMAGES_COLUMN_TEXT(member, number, title      ) const char * member, 
 #define IMAGES_COLUMN_DATA(member, number, title, type) type * member, size_t len_##member, 
@@ -105,13 +105,13 @@ prozubi_image_new(
 		const char *id
 		)
 {
-	if (!kdata)
+	if (!p)
 		return NULL;
 
 	/* allocate image_t */
 	struct image_t *i = NEW(struct image_t, 
-			if (kdata->on_error)
-				kdata->on_error(kdata->on_error_data,			
+			if (p->on_error)
+				p->on_error(p->on_error_data,			
 			STR_ERR("%s", "can't allocate struct image_t")), return NULL);
 
 	if (!id){
@@ -120,32 +120,36 @@ prozubi_image_new(
 		uuid4_seed(&state);
 		uuid4_gen(&state, &identifier);
 		if (!uuid4_to_s(identifier, i->id, 37)){
-			if (kdata->on_error)
-				kdata->on_error(kdata->on_error_data,			
+			if (p->on_error)
+				p->on_error(p->on_error_data,			
 			STR_ERR("%s", "can't generate uuid"));
 			return NULL;
 		}
 	} else
 		strcpy(i->id, id);
 
-#define IMAGES_COLUMN_DATE(member, number, title      ) i->member = member; 
-#define IMAGES_COLUMN_TEXT(member, number, title      ) i->member = (char *)member; 
-#define IMAGES_COLUMN_DATA(member, number, title, type) i->member = member;\
-	i->len_##member = len_##member; 
-	IMAGES_COLUMNS
-#undef IMAGES_COLUMN_DATE
-#undef IMAGES_COLUMN_TEXT
-#undef IMAGES_COLUMN_DATA	
-
 	/* set values */
 #define IMAGES_COLUMN_DATE(member, number, title)\
-   	kdata2_set_number_for_uuid(kdata, IMAGES_TABLENAME, title, member, i->id); 
+   	kdata2_set_number_for_uuid(p, IMAGES_TABLENAME, title, member, i->id);\
+	i->member = member;
 #define IMAGES_COLUMN_TEXT(member, number, title)\
-   	if (member)\
-		kdata2_set_text_for_uuid(kdata, IMAGES_TABLENAME, title, member, i->id);	
+   	if (member){\
+		kdata2_set_text_for_uuid(p, IMAGES_TABLENAME, title, member, i->id);\
+		size_t len = strlen(member);\
+		i->member = MALLOC(len + 1,\
+				if (p->on_error)\
+					p->on_error(p->on_error_data,\
+				STR_ERR("can't allocate size: %ld", len + 1)), return NULL);\
+		strncpy(i->member, member, len);\
+		i->len_##member = len;\
+	}
 #define IMAGES_COLUMN_DATA(member, number, title, type)\
-   	if (member)\
-		kdata2_set_data_for_uuid(kdata, IMAGES_TABLENAME, title, (void *)member, len_##member, i->id);	
+   	if (member){\
+		kdata2_set_data_for_uuid(p, IMAGES_TABLENAME, title, (void *)member,\
+				len_##member, i->id);\
+		i->member = member;\
+		i->len_##member = len_##member;\
+	}
 	IMAGES_COLUMNS
 #undef IMAGES_COLUMN_DATE
 #undef IMAGES_COLUMN_TEXT
