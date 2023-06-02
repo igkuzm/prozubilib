@@ -2,23 +2,24 @@
 
 SUBDIRS = kdata2
 
-noinst_LIBRARIES = libprozubilib.a
+lib_LTLIBRARIES = libprozubilib.la
 
-if WINDOWS
-if X86_64
-		CURL_LIBDIR = -Lkdata2/cYandexDisk/curl/windows/win64/libs
-endif
-if I386
-		CURL_LIBDIR = -Lkdata2/cYandexDisk/curl/windows/win32/libs
-endif
-else
-	SQLITE3_LINK = -lsqlite3
+if WIN64
+CURL_LIBDIR = -Lkdata2/cYandexDisk/curl/windows/win64/lib
 endif
 
+if WIN32
+CURL_LIBDIR = -Lkdata2/cYandexDisk/curl/windows/win32/lib
+endif
 
-libprozubilib_a_SOURCES = \
+if !WINDOWS
+SQLITE3_LINK = -lsqlite3
+endif
+
+
+libprozubilib_la_SOURCES = \
 	prozubilib.c \
 	date-time/strftime.c\
 	date-time/strptime.c
 
-libprozubilib_a_LIBADD = kdata2/*.o kdata2/cYandexDisk/*.o $(SQLITE3_LINK) -lcurl $(CURL_LIBDIR)
+libprozubilib_la_LIBADD =  $(SQLITE3_LINK) -lcurl $(CURL_LIBDIR)
