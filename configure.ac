@@ -1,8 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT
-AC_CONFIG_SRCDIR([configure.ac])
-AM_INIT_AUTOMAKE(prozubilib, 0.1)
+AC_INIT([prozubilib], [1.0])
+AM_INIT_AUTOMAKE
 AM_MAINTAINER_MODE
 
 LT_INIT
