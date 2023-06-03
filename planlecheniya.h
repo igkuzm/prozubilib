@@ -2,7 +2,7 @@
  * File              : planlecheniya.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.04.2023
- * Last Modified Date: 30.05.2023
+ * Last Modified Date: 03.06.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -531,5 +531,43 @@ prozubi_planlecheniya_set_item_count(
 	}
 	return cJSON_False;
 }
+
+static cJSON_bool
+prozubi_planlecheniya_set_stage_duration(
+		kdata2_t *kdata,
+		cJSON *planlecheniya,
+		int stage_index,
+		int duration
+		)
+{
+	if (!kdata)
+		return 0;
+
+	if (!cJSON_IsArray(planlecheniya)){
+		if (kdata->on_error)
+			kdata->on_error(kdata->on_error_data,		
+			STR_ERR("%s", "can't read planlecheniya json"));
+		return cJSON_False;
+	}
+
+	int i;
+	cJSON *stage;
+	cJSON_ArrayForEach(stage, planlecheniya){
+		if (!cJSON_IsObject(stage)){
+			if (kdata->on_error)
+				kdata->on_error(kdata->on_error_data,			
+				STR_ERR("can't read planlecheniya stage %d", i));
+			continue;	
+		}
+		if (stage_index == i){
+			char duration_str[32];
+			sprintf(duration_str, "%d", duration);
+			if (!cJSON_ReplaceItemInObject(stage, "time", cJSON_CreateString(duration_str)))
+				return cJSON_False;
+		}
+	}
+	return cJSON_False;
+}
+
 
 #endif /* ifndef PLANLECHENIYA_H */
