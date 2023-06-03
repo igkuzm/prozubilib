@@ -223,7 +223,7 @@ prozubi_planlecheniya_add_item(
 		return NULL;	
 	}
 
-	int i;
+	int i = 0;
 	cJSON *stage;
 	cJSON_ArrayForEach(stage, planlecheniya){
 		if (!cJSON_IsObject(stage)){
@@ -270,6 +270,8 @@ prozubi_planlecheniya_add_item(
 
 			return item;
 			}		
+		//iterate
+		i++;
 	}
 	return NULL;
 }
@@ -293,7 +295,7 @@ prozubi_planlecheniya_set_item_title(
 		return cJSON_False;	
 	}
 
-	int i;
+	int i = 0;
 	cJSON *stage;
 	cJSON_ArrayForEach(stage, planlecheniya){
 		if (!cJSON_IsObject(stage)){
@@ -324,8 +326,12 @@ prozubi_planlecheniya_set_item_title(
 					return 
 						cJSON_ReplaceItemInObject(item, "title", cJSON_CreateString(title));
 				}
+				//iterate
+				i++;
 			}
 		}
+		//iterate
+		i++;
 	}
 	return cJSON_False;
 }
@@ -349,7 +355,7 @@ prozubi_planlecheniya_set_item_kod(
 		return cJSON_False;
 	}
 
-	int i;
+	int i = 0;
 	cJSON *stage;
 	cJSON_ArrayForEach(stage, planlecheniya){
 		if (!cJSON_IsObject(stage)){
@@ -380,8 +386,12 @@ prozubi_planlecheniya_set_item_kod(
 					return 
 						cJSON_ReplaceItemInObject(item, "kod", cJSON_CreateString(kod));
 				}
+				//iterate
+				i++;
 			}
 		}
+		//iterate
+		i++;
 	}
 	return cJSON_False;
 }
@@ -405,7 +415,7 @@ prozubi_planlecheniya_set_item_price(
 		return cJSON_False;
 	}
 
-	int i;
+	int i = 0;
 	cJSON *stage;
 	cJSON_ArrayForEach(stage, planlecheniya){
 		if (!cJSON_IsObject(stage)){
@@ -453,8 +463,12 @@ prozubi_planlecheniya_set_item_price(
 					
 					return cJSON_True;
 				}
+				//iterate
+				i++;
 			}
 		}
+		//iterate
+		i++;
 	}
 	return cJSON_False;
 }
@@ -478,7 +492,7 @@ prozubi_planlecheniya_set_item_count(
 		return cJSON_False;
 	}
 
-	int i;
+	int i = 0;
 	cJSON *stage;
 	cJSON_ArrayForEach(stage, planlecheniya){
 		if (!cJSON_IsObject(stage)){
@@ -526,8 +540,12 @@ prozubi_planlecheniya_set_item_count(
 					
 					return cJSON_True;
 				}
+				//iterate
+				i++;
 			}
 		}
+		//iterate
+		i++;
 	}
 	return cJSON_False;
 }
@@ -550,7 +568,7 @@ prozubi_planlecheniya_set_stage_duration(
 		return cJSON_False;
 	}
 
-	int i;
+	int i = 0;
 	cJSON *stage;
 	cJSON_ArrayForEach(stage, planlecheniya){
 		if (!cJSON_IsObject(stage)){
@@ -565,6 +583,8 @@ prozubi_planlecheniya_set_stage_duration(
 			if (!cJSON_ReplaceItemInObject(stage, "time", cJSON_CreateString(duration_str)))
 				return cJSON_False;
 		}
+		//iterate
+		i++;
 	}
 	return cJSON_False;
 }
