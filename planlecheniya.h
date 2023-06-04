@@ -230,7 +230,7 @@ prozubi_planlecheniya_foreach(
 	sprintf(total_duration_str, "%d", total_duration);
 	callback(
 		userdata, NULL, _planlecheniya_new(
-			p, planlecheniya, PLANLECHENIYA_TYPE_TOTAL_PRICE, -1, -1, 
+			p, planlecheniya, PLANLECHENIYA_TYPE_TOTAL_DURATION, -1, -1, 
 			strdup("Общая продолжительность лечения (мес.):"), NULL, NULL, total_duration_str, NULL));
 }
 
