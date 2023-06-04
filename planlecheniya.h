@@ -40,7 +40,7 @@ struct planlecheniya_t {
 	char * total;
 };
 
-struct planlecheniya_t *
+static struct planlecheniya_t *
 _planlecheniya_new(
 		prozubi_t *p,
 		cJSON *planlecheniya,
@@ -71,6 +71,25 @@ _planlecheniya_new(
 	t->total         = total;
 
 	return t;
+}
+
+static void
+prozubi_planlecheniya_free(struct planlecheniya_t *t)
+{
+	if (!t)
+		return;
+	if (t->title)
+		free(t->title);
+	if (t->kod)
+		free(t->kod);
+	if (t->price)
+		free(t->price);
+	if (t->count)
+		free(t->count);
+	if (t->total)
+		free(t->total);
+
+	free(t);
 }
 
 static void
@@ -119,12 +138,12 @@ prozubi_planlecheniya_foreach(
 		total_duration += duration;
 
 		/* callback stage */
-		char stage_str[64];
+		char *stage_str = malloc(32);
 		sprintf(stage_str, "Этап №%d", stage_i + 1);
 		void *stage_ptr = callback(
 				userdata, NULL, _planlecheniya_new(
 					p, planlecheniya, PLANLECHENIYA_TYPE_STAGE, stage_i, -1, 
-					stage_str, "", NULL, NULL, NULL));
+					stage_str, NULL, NULL, NULL, NULL));
 		
 		cJSON *array = cJSON_GetObjectItem(stage, "array");
 		if (!cJSON_IsArray(array)){
@@ -147,24 +166,24 @@ prozubi_planlecheniya_foreach(
 
 			char *kod    =     cJSON_GetStringValue(
 							   cJSON_GetObjectItem(item, "kod"));
-			if (!kod) kod = "";
+			if (!kod) kod = strdup("");
 
 			char *title  =     cJSON_GetStringValue(
 							   cJSON_GetObjectItem(item, "title"));
-			if (!title) title = "";
+			if (!title) title = strdup("");
 
 			char *price_str   =cJSON_GetStringValue(
 							   cJSON_GetObjectItem(item, "price"));
-			if (!price_str) price_str = "";
+			if (!price_str) price_str = strdup("");
 
 			char *count_str   =cJSON_GetStringValue(
 							   cJSON_GetObjectItem(item, "count"));
-			if (!count_str) count_str = "";
+			if (!count_str) count_str = strdup("");
 
 			int price = atoi(price_str);
 			int count = atoi(count_str);
 			int total = price * count;
-			char total_str[32];
+			char *total_str = malloc(32);
 			sprintf(total_str, "%d", total);
 
 			/* callback item */
@@ -180,39 +199,39 @@ prozubi_planlecheniya_foreach(
 		}
 
 		/* callback stage price and duration */
-		char stage_price_title[64];
+		char *stage_price_title = malloc(64);
 		sprintf(stage_price_title, "Итого за %d этап:", stage_i + 1);
-		char stage_price_str[32];
+		char *stage_price_str = malloc(32);
 		sprintf(stage_price_str, "%d", stage_price);
 		callback(
 			userdata, stage_ptr, _planlecheniya_new(
 				p, planlecheniya, PLANLECHENIYA_TYPE_STAGE_PRICE, stage_i, -1, 
-				stage_price_title, "", "", "", stage_price_str));
+				stage_price_title, NULL, NULL, NULL, stage_price_str));
 		
-		char stage_duration_str[32];
+		char *stage_duration_str = malloc(32);
 		sprintf(stage_duration_str, "%d", duration);
 		callback(
 			userdata, stage_ptr, _planlecheniya_new(
 				p, planlecheniya, PLANLECHENIYA_TYPE_STAGE_DURATION, stage_i, -1, 
-				"Продолжительность этапа (мес.):", "", "", stage_duration_str, ""));
+				strdup("Продолжительность этапа (мес.):"), NULL, NULL, stage_duration_str, ""));
 		
 		stage_i++;
 	}
 
 	/* callback total price and duration */
-	char total_price_str[32];
+	char *total_price_str = malloc(32);
 	sprintf(total_price_str, "%d", total_price);
 	callback(
 		userdata, NULL, _planlecheniya_new(
 			p, planlecheniya, PLANLECHENIYA_TYPE_TOTAL_PRICE, -1, -1, 
-			"Общая стоимость по плану:", "", NULL, NULL, total_price_str));
+			strdup("Общая стоимость по плану:"), NULL, NULL, NULL, total_price_str));
 		
-	char total_duration_str[32];
+	char *total_duration_str = malloc(32);
 	sprintf(total_duration_str, "%d", total_duration);
 	callback(
 		userdata, NULL, _planlecheniya_new(
 			p, planlecheniya, PLANLECHENIYA_TYPE_TOTAL_PRICE, -1, -1, 
-			"Общая продолжительность лечения (мес.):", "", NULL, total_duration_str, NULL));
+			strdup("Общая продолжительность лечения (мес.):"), NULL, NULL, total_duration_str, NULL));
 }
 
 static cJSON *
