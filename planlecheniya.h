@@ -2,7 +2,7 @@
  * File              : planlecheniya.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.04.2023
- * Last Modified Date: 03.06.2023
+ * Last Modified Date: 04.06.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -13,7 +13,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include "kdata2/kdata2.h"
+#include "prozubilib_conf.h"
 #include "log.h"
+#include "alloc.h"
 #include "kdata2/cYandexDisk/cJSON.h"
 
 typedef enum PLANLECHENIYA_TYPE {
@@ -26,33 +28,69 @@ typedef enum PLANLECHENIYA_TYPE {
 	
 } PLANLECHENIYA_TYPE;
 
+struct planlecheniya_t {
+	cJSON *planlecheniya;
+	PLANLECHENIYA_TYPE type;
+	int stageIndex;
+	int itemIndex;
+	char * title;
+	char * kod;
+	char * price;
+	char * count;
+	char * total;
+};
+
+struct planlecheniya_t *
+_planlecheniya_new(
+		prozubi_t *p,
+		cJSON *planlecheniya,
+		PLANLECHENIYA_TYPE type,
+		int stageIndex,
+		int itemIndex,
+		char * title,
+		char * kod,
+		char * price,
+		char * count,
+		char * total)
+{
+	struct planlecheniya_t *t =
+			NEW(struct planlecheniya_t,
+					if (p->on_error)
+						p->on_error(p->on_error_data,
+						STR_ERR("can't allocate planlecheniya_t")), 
+					return NULL);
+
+	t->planlecheniya = planlecheniya;
+	t->type          = type;
+	t->stageIndex    = stageIndex;
+	t->itemIndex     = itemIndex;
+	t->title         = title;
+	t->kod           = kod;
+	t->price         = price;
+	t->count         = count;
+	t->total         = total;
+
+	return t;
+}
 
 static void
 prozubi_planlecheniya_foreach(
-		kdata2_t *kdata,
+		prozubi_t *p,
 		cJSON *planlecheniya,
 		void * userdata,
 		void * (*callback)(
 			void *userdata,
 			void *parent,
-			cJSON *json,
-			PLANLECHENIYA_TYPE type,
-			int index,
-			char * title,
-			char * kod,
-			char * price,
-			char * count,
-			char * total
-			)
+			struct planlecheniya_t *t)
 		)
 {
-	if (!kdata)
+	if (!p)
 		return;
 
 	if (!cJSON_IsArray(planlecheniya)){
-		if (kdata->on_error)
-			kdata->on_error(kdata->on_error_data,		
-		STR_ERR("%s", "can't read planlecheniya json"));
+		if (p->on_log)
+			p->on_log(p->on_log_data,		
+		STR_ERR("%s", "no planlecheniya json"));
 		return;	
 	}
 
@@ -62,16 +100,16 @@ prozubi_planlecheniya_foreach(
 	cJSON *stage;
 	cJSON_ArrayForEach(stage, planlecheniya){
 		if (!cJSON_IsObject(stage)){
-			if (kdata->on_error)
-				kdata->on_error(kdata->on_error_data,			
+			if (p->on_error)
+				p->on_error(p->on_error_data,			
 			STR_ERR("can't read planlecheniya stage %d", stage_i));
 			continue;	
 		}
 		
 		cJSON *time = cJSON_GetObjectItem(stage, "time");
 		if (!cJSON_IsString(time)){
-			if (kdata->on_error)
-				kdata->on_error(kdata->on_error_data,			
+			if (p->on_error)
+				p->on_error(p->on_error_data,			
 			STR_ERR("can't read planlecheniya time of stage %d", stage_i));
 			continue;	
 		}		
@@ -83,15 +121,15 @@ prozubi_planlecheniya_foreach(
 		/* callback stage */
 		char stage_str[64];
 		sprintf(stage_str, "Этап №%d", stage_i + 1);
-		cJSON *stage_to_return = stage;
 		void *stage_ptr = callback(
-				userdata, NULL, stage_to_return, PLANLECHENIYA_TYPE_STAGE,
-				stage_i, stage_str, "", 0, 0, 0);
+				userdata, NULL, _planlecheniya_new(
+					p, planlecheniya, PLANLECHENIYA_TYPE_STAGE, stage_i, -1, 
+					stage_str, "", NULL, NULL, NULL));
 		
 		cJSON *array = cJSON_GetObjectItem(stage, "array");
 		if (!cJSON_IsArray(array)){
-			if (kdata->on_error)
-				kdata->on_error(kdata->on_error_data,			
+			if (p->on_error)
+				p->on_error(p->on_error_data,			
 			STR_ERR("can't read planlecheniya array of stage %d", stage_i));
 			continue;	
 		}		
@@ -101,9 +139,9 @@ prozubi_planlecheniya_foreach(
 		cJSON *item;
 		cJSON_ArrayForEach(item, array){
 			if (!cJSON_IsObject(item)){
-				if (kdata->on_error)
-					kdata->on_error(kdata->on_error_data,				
-				STR_ERR("can't read planlecheniya item %d of stage %d", item_i, stage_i));
+				if (p->on_error)
+					p->on_error(p->on_error_data,				
+					STR_ERR("can't read planlecheniya item %d of stage %d", item_i, stage_i));
 				continue;	
 			}
 
@@ -130,10 +168,10 @@ prozubi_planlecheniya_foreach(
 			sprintf(total_str, "%d", total);
 
 			/* callback item */
-			cJSON *item_to_return = item;
-			callback(userdata, stage_ptr, item_to_return, PLANLECHENIYA_TYPE_ITEM,
-					item_i, title, kod, 
-					price_str, count_str, total_str);
+			callback(
+				userdata, stage_ptr, _planlecheniya_new(
+					p, planlecheniya, PLANLECHENIYA_TYPE_ITEM, stage_i, item_i, 
+					title, kod, price_str, count_str, total_str));
 			
 			stage_price += total; 
 			total_price += total;
@@ -146,38 +184,40 @@ prozubi_planlecheniya_foreach(
 		sprintf(stage_price_title, "Итого за %d этап:", stage_i + 1);
 		char stage_price_str[32];
 		sprintf(stage_price_str, "%d", stage_price);
-		callback(userdata, stage_ptr, item, PLANLECHENIYA_TYPE_STAGE_PRICE,
-				item_i, stage_price_title, "", 
-				0, 0, stage_price_str);
-
+		callback(
+			userdata, stage_ptr, _planlecheniya_new(
+				p, planlecheniya, PLANLECHENIYA_TYPE_STAGE_PRICE, stage_i, -1, 
+				stage_price_title, "", "", "", stage_price_str));
+		
 		char stage_duration_str[32];
 		sprintf(stage_duration_str, "%d", duration);
-		callback(userdata, stage_ptr, item, PLANLECHENIYA_TYPE_STAGE_DURATION,
-				item_i, "Продолжительность этапа (мес.):", "", 
-				0, stage_duration_str, 0);
+		callback(
+			userdata, stage_ptr, _planlecheniya_new(
+				p, planlecheniya, PLANLECHENIYA_TYPE_STAGE_DURATION, stage_i, -1, 
+				"Продолжительность этапа (мес.):", "", "", stage_duration_str, ""));
 		
-
 		stage_i++;
 	}
 
 	/* callback total price and duration */
 	char total_price_str[32];
 	sprintf(total_price_str, "%d", total_price);
-	callback(userdata, NULL, planlecheniya, PLANLECHENIYA_TYPE_TOTAL_PRICE,
-			0, "Общая стоимость по плану:", "", 
-			0, 0, total_price_str);
-
+	callback(
+		userdata, NULL, _planlecheniya_new(
+			p, planlecheniya, PLANLECHENIYA_TYPE_TOTAL_PRICE, -1, -1, 
+			"Общая стоимость по плану:", "", NULL, NULL, total_price_str));
+		
 	char total_duration_str[32];
 	sprintf(total_duration_str, "%d", total_duration);
-	callback(userdata, NULL, planlecheniya, PLANLECHENIYA_TYPE_TOTAL_DURATION,
-			0, "Общая продолжительность лечения (мес.):", "", 
-			0, total_duration_str, 0);
-	
+	callback(
+		userdata, NULL, _planlecheniya_new(
+			p, planlecheniya, PLANLECHENIYA_TYPE_TOTAL_PRICE, -1, -1, 
+			"Общая продолжительность лечения (мес.):", "", NULL, total_duration_str, NULL));
 }
 
 static cJSON *
 prozubi_planlecheniya_add_stage(
-		kdata2_t *kdata,
+		prozubi_t *kdata,
 		cJSON *planlecheniya
 		)
 {
@@ -204,7 +244,7 @@ prozubi_planlecheniya_add_stage(
 
 static cJSON *
 prozubi_planlecheniya_add_item(
-		kdata2_t *kdata,
+		prozubi_t *kdata,
 		cJSON *planlecheniya,
 		int stage_index,
 		const char *title,
@@ -278,7 +318,7 @@ prozubi_planlecheniya_add_item(
 
 static cJSON_bool
 prozubi_planlecheniya_set_item_title(
-		kdata2_t *kdata,
+		prozubi_t *kdata,
 		cJSON *planlecheniya,
 		int stage_index,
 		int item_index,
@@ -338,7 +378,7 @@ prozubi_planlecheniya_set_item_title(
 
 static cJSON_bool
 prozubi_planlecheniya_set_item_kod(
-		kdata2_t *kdata,
+		prozubi_t *kdata,
 		cJSON *planlecheniya,
 		int stage_index,
 		int item_index,
@@ -398,7 +438,7 @@ prozubi_planlecheniya_set_item_kod(
 
 static cJSON_bool
 prozubi_planlecheniya_set_item_price(
-		kdata2_t *kdata,
+		prozubi_t *kdata,
 		cJSON *planlecheniya,
 		int stage_index,
 		int item_index,
@@ -475,7 +515,7 @@ prozubi_planlecheniya_set_item_price(
 
 static cJSON_bool
 prozubi_planlecheniya_set_item_count(
-		kdata2_t *kdata,
+		prozubi_t *kdata,
 		cJSON *planlecheniya,
 		int stage_index,
 		int item_index,
@@ -552,7 +592,7 @@ prozubi_planlecheniya_set_item_count(
 
 static cJSON_bool
 prozubi_planlecheniya_set_stage_duration(
-		kdata2_t *kdata,
+		prozubi_t *kdata,
 		cJSON *planlecheniya,
 		int stage_index,
 		int duration
