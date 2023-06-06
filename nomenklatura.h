@@ -2,7 +2,7 @@
  * File              : nomenklatura.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 11.05.2023
- * Last Modified Date: 25.05.2023
+ * Last Modified Date: 06.06.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -102,7 +102,7 @@ prozubi_nomenklatura_foreach(
 
 	/* start SQLite request for parent*/
 	sqlite3_stmt *stmt_p;
-	if(sqlite3_prepare_v2(db, SQL, -1, &stmt_p, NULL)){
+	if(sqlite3_prepare_v2(db, SQL_p, -1, &stmt_p, NULL)){
 		if (kdata->on_error)
 			kdata->on_error(kdata->on_error_data,				
 			STR_ERR("sqlite3_prepare_v2: %s: %s", SQL_p, sqlite3_errmsg(db)));	
@@ -152,7 +152,7 @@ prozubi_nomenklatura_foreach(
 		
 		/* create SQL string */
 		char SQL_c[BUFSIZ] = "";
-		sprintf(SQL_c, "%s WHERE headName = '%s'", SQL, p.name);
+		sprintf(SQL_c, "%s WHERE headName = '%s'", SQL_c, p.name);
 
 		/* start SQLite request */
 		if(sqlite3_prepare_v2(db, SQL_c, -1, &stmt_c, NULL)){
