@@ -155,9 +155,13 @@ prozubi_nomenklatura_foreach(
 		
 		strcat(SQL_c, "1 FROM ");
 		strcat(SQL_c, NOMENKLATURA_TABL);
-		
-		sprintf(SQL_c, "%s WHERE headName = '%s'", SQL_c, c->name);
+		strcat(SQL_c, " WHERE headName = '");
+		strcat(SQL_c, c->name);
+		strcat(SQL_c, "'");
 
+		if (p->on_log)
+			p->on_log(p->on_log_data, STR("SQL: %s\n", SQL_c));		
+		
 		/* start SQLite request */
 		if(sqlite3_prepare_v2(db, SQL_c, -1, &stmt_c, NULL)){
 			if (p->on_error)
