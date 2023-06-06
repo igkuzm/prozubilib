@@ -62,7 +62,7 @@ _nomenklatura_new(prozubi_t *p)
 				STR_ERR("%s", "cant allocate memory")),
 			return NULL);
 	
-	#define NOMENKLATURA_COLUMN_INT(title)
+	#define NOMENKLATURA_COLUMN_INT(title) c->title = -1;
 	#define NOMENKLATURA_COLUMN_TEX(title) c->title = NULL;
 	NOMENKLATURA_COLUMNS
 	#undef NOMENKLATURA_COLUMN_INT
@@ -78,7 +78,7 @@ prozubi_nomenklatura_foreach(
 		void * (*callback)(
 			void * user_data,
 			void * parent,
-			nomenklatura_t *p
+			nomenklatura_t *ptr
 			)
 		)
 {
