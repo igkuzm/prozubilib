@@ -2,7 +2,7 @@
  * File              : prices.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 25.05.2023
+ * Last Modified Date: 21.07.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -253,5 +253,13 @@ prozubi_prices_free(struct price_t *d){
 		d = NULL;
 	}
 }
+
+static int prozubi_price_remove(
+		kdata2_t *p, struct price_t *c
+		)
+{
+	return kdata2_remove_for_uuid(p, PRICES_TABLENAME, c->id);
+}
+
 
 #endif /* ifndef PRICES_H */
