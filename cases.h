@@ -2,7 +2,7 @@
  * File              : cases.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 06.05.2023
- * Last Modified Date: 29.05.2023
+ * Last Modified Date: 22.07.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef CASES_H
@@ -888,7 +888,6 @@ prozubi_cases_list_foreach(
 		void * (*item_callback)(
 			void *user_data,
 			void * parent,
-			bool has_children,
 			struct case_list_node *n
 			)	
 		)
@@ -914,7 +913,7 @@ prozubi_cases_list_foreach(
 	}
 	
 	title = cJSON_GetStringValue(jparent); 
-	parent = item_callback(user_data, NULL, true, 
+	parent = item_callback(user_data, NULL, 
 			_case_list_node_new(p, c, c, title, -1, -1, NULL));
 	
 	cJSON *root = cJSON_GetObjectItem(json, "children");
@@ -950,14 +949,14 @@ prozubi_cases_list_foreach(
 				}
 				array[i] = NULL; // NULL-terminate array
 			}
-			item_callback(user_data, parent, false, 
+			item_callback(user_data, parent, 
 					_case_list_node_new(p, c, NULL, title, key, type, array));
 
 		} else if (cJSON_IsObject(element)){
 			/* handle object */
 			cJSON *jparent = cJSON_GetObjectItem(element, "parent");
 			title = cJSON_GetStringValue(jparent); 
-			void *new_parent = item_callback(user_data, parent, true,
+			void *new_parent = item_callback(user_data, parent,
 									_case_list_node_new(p, c, NULL, title, -1, -1, NULL));
 			
 			cJSON *child = cJSON_GetObjectItem(element, "children");
@@ -985,7 +984,7 @@ prozubi_cases_list_foreach(
 						}
 						array[i] = NULL; // NULL-terminate array
 					}
-					item_callback(user_data, new_parent, false,
+					item_callback(user_data, new_parent,
 							_case_list_node_new(p, c, NULL, title, key, type, array));
 				}
 			}
