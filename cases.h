@@ -2,7 +2,7 @@
  * File              : cases.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 06.05.2023
- * Last Modified Date: 22.07.2023
+ * Last Modified Date: 23.07.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef CASES_H
@@ -17,8 +17,8 @@
 
 #include "enum.h"
 #include "alloc.h"
-#include "date-time/time_local.h"
 
+#include <time.h>
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
@@ -306,10 +306,9 @@ _prozubi_cases_list_new(
 	cJSON_AddItemToObject(json, "id", cJSON_CreateString(c->id));
 
 	/* get date */
-	struct tm tm;
-	sec_to_tm(c->date, &tm);
+	struct tm *tm = localtime(&c->date);
 	char date[11];
-	strftime(date, 11, "%d.%m.%Y", &tm);
+	strftime(date, 11, "%d.%m.%Y", tm);
 
 	/* set title */
 	char title[BUFSIZ] = "";
