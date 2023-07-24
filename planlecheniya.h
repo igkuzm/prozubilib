@@ -2,7 +2,7 @@
  * File              : planlecheniya.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.04.2023
- * Last Modified Date: 04.06.2023
+ * Last Modified Date: 24.07.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -261,6 +261,26 @@ prozubi_planlecheniya_add_stage(
 	return stage;
 }
 
+static void
+prozubi_planlecheniya_remove_stage(
+		prozubi_t *kdata,
+		cJSON *planlecheniya,
+		int stage_index
+		)
+{
+	if (!kdata)
+		return;
+
+	if (!cJSON_IsArray(planlecheniya)){
+		if (kdata->on_error)
+			kdata->on_error(kdata->on_error_data,		
+			STR_ERR("%s", "can't read planlecheniya json"));
+		return;	
+	}
+	cJSON_DeleteItemFromArray(planlecheniya, stage_index);			
+}
+
+
 static cJSON *
 prozubi_planlecheniya_add_item(
 		prozubi_t *kdata,
@@ -334,6 +354,47 @@ prozubi_planlecheniya_add_item(
 	}
 	return NULL;
 }
+
+static void
+prozubi_planlecheniya_remove_item(
+		prozubi_t *kdata,
+		cJSON *planlecheniya,
+		int stage_index,
+		int item_index
+		)
+{
+	if (!kdata)
+		return;
+
+	if (!cJSON_IsArray(planlecheniya)){
+		if (kdata->on_error)
+			kdata->on_error(kdata->on_error_data,		
+			STR_ERR("%s", "can't read planlecheniya json"));
+		return;	
+	}
+
+	int i = 0;
+	cJSON *stage;
+	cJSON_ArrayForEach(stage, planlecheniya){
+		if (!cJSON_IsObject(stage)){
+			if (kdata->on_error)
+				kdata->on_error(kdata->on_error_data,			
+			STR_ERR("can't read planlecheniya stage %d", i));
+			continue;	
+		}
+		if (stage_index == i){
+			cJSON *array = cJSON_GetObjectItem(stage, "array");
+			if (!cJSON_IsArray(array)){
+				if (kdata->on_error)
+					kdata->on_error(kdata->on_error_data,				
+					STR_ERR("can't read array of stage %d", i));
+				return;	
+			}
+			cJSON_DeleteItemFromArray(array, item_index);			
+		}
+	}
+}
+
 
 static cJSON_bool
 prozubi_planlecheniya_set_item_title(
