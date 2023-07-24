@@ -373,28 +373,23 @@ prozubi_planlecheniya_remove_item(
 		return;	
 	}
 
-	int i = 0;
-	cJSON *stage;
-	cJSON_ArrayForEach(stage, planlecheniya){
-		if (!cJSON_IsObject(stage)){
-			if (kdata->on_error)
-				kdata->on_error(kdata->on_error_data,			
-			STR_ERR("can't read planlecheniya stage %d", i));
-			continue;	
-		}
-		if (stage_index == i){
-			cJSON *array = cJSON_GetObjectItem(stage, "array");
-			if (!cJSON_IsArray(array)){
-				if (kdata->on_error)
-					kdata->on_error(kdata->on_error_data,				
-					STR_ERR("can't read array of stage %d", i));
-				return;	
-			}
-			cJSON_DeleteItemFromArray(array, item_index);			
-		}
-		//iterate
-		i++;
+	cJSON *stage = cJSON_GetArrayItem(planlecheniya, stage_index);
+	if (!cJSON_IsObject(stage)){
+		if (kdata->on_error)
+			kdata->on_error(kdata->on_error_data,			
+		STR_ERR("can't read planlecheniya stage %d", stage_index));
+		return;	
 	}
+	
+	cJSON *array = cJSON_GetObjectItem(stage, "array");
+	if (!cJSON_IsArray(array)){
+		if (kdata->on_error)
+			kdata->on_error(kdata->on_error_data,				
+			STR_ERR("can't read array of stage %d", stage_index));
+		return;	
+	}
+	
+	cJSON_DeleteItemFromArray(array, item_index);			
 }
 
 
