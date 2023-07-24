@@ -2,7 +2,7 @@
  * File              : planlecheniya.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.04.2023
- * Last Modified Date: 24.07.2023
+ * Last Modified Date: 25.07.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -392,6 +392,8 @@ prozubi_planlecheniya_remove_item(
 			}
 			cJSON_DeleteItemFromArray(array, item_index);			
 		}
+		//iterate
+		i++;
 	}
 }
 
