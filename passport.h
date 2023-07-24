@@ -2,7 +2,7 @@
  * File              : passport.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 25.05.2023
+ * Last Modified Date: 24.07.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -139,6 +139,7 @@ PASSPORT_COLUMNS
 #define PASSPORT_COLUMN_DATE(member, number, title) \
 				case number:\
 				{\
+					p->member = 0;\
 					int col_type = sqlite3_column_type(stmt, i);\
 					if (col_type == SQLITE_INTEGER) {\
 						p->member = sqlite3_column_int64(stmt, i);\
