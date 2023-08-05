@@ -2,7 +2,7 @@
  * File              : template.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 25.05.2023
+ * Last Modified Date: 29.07.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -110,6 +110,7 @@ static void
 prozubi_template_foreach(
 		kdata2_t   *kdata,
 		const char *templatename,
+		const char *predicate,
 		void       *user_data,
 		int        (*callback)(void *user_data, struct template_t *p)
 		)
@@ -136,6 +137,9 @@ prozubi_template_foreach(
 	strcat(SQL, TEMPLATES_TABLENAME);
 	if (templatename)
 		strcat(SQL, STR(" WHERE ZTEMPLATENAME = '%s'", templatename));
+	strcat(SQL, " ");
+	if (predicate)
+		strcat(SQL, predicate);
 
 	/* start SQLite request */
 	int res;

@@ -2,7 +2,7 @@
  * File              : prices.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 21.07.2023
+ * Last Modified Date: 29.07.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -110,6 +110,7 @@ prozubi_price_new(
 static void 
 prozubi_price_foreach(
 		kdata2_t   *kdata,
+		const char *predicate,
 		void       *user_data,
 		int        (*callback)(void *user_data, struct price_t *p)
 		)
@@ -134,6 +135,9 @@ prozubi_price_foreach(
 	
 	strcat(SQL, "ZRECORDNAME FROM ");
 	strcat(SQL, PRICES_TABLENAME);
+	strcat(SQL, " ");
+	if (predicate)
+		strcat(SQL, predicate);
 
 	/* start SQLite request */
 	int res;

@@ -10,6 +10,8 @@ AC_PROG_CC
 
 AC_CANONICAL_HOST
 
+AC_CHECK_HEADER([tiffio.h],[],[AC_MSG_ERROR([Please install libtiff])],[])
+
 case "${host_os}" in
     cygwin*|mingw*)
         build_windows=yes;;

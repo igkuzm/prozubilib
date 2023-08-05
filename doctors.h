@@ -2,7 +2,7 @@
  * File              : doctors.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 25.05.2023
+ * Last Modified Date: 29.07.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -132,6 +132,7 @@ prozubi_doctor_new(
 static void 
 prozubi_doctor_foreach(
 		kdata2_t   *kdata,
+		const char *predicate,
 		void       *user_data,
 		int        (*callback)(void *user_data, struct doctor_t *d)
 		)
@@ -158,6 +159,9 @@ prozubi_doctor_foreach(
 	
 	strcat(SQL, "ZRECORDNAME FROM ");
 	strcat(SQL, DOCTORS_TABLENAME);
+	strcat(SQL, " ");
+	if (predicate)
+		strcat(SQL, predicate);
 
 	/* start SQLite request */
 	int res;

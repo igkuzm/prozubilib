@@ -2,7 +2,7 @@
  * File              : passport.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 24.07.2023
+ * Last Modified Date: 29.07.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -82,6 +82,7 @@ PASSPORT_COLUMNS
 static void 
 prozubi_passport_foreach(
 		kdata2_t *kdata,
+		const char *predicate,
 		void     *user_data,
 		int      (*callback)(void *user_data, struct passport_t *p)
 		)
@@ -108,6 +109,9 @@ PASSPORT_COLUMNS
 	
 	strcat(SQL, "ZRECORDNAME FROM ");
 	strcat(SQL, PASSPORT_TABLENAME);
+	strcat(SQL, " ");
+	if (predicate)
+		strcat(SQL, predicate);
 	strcat(SQL, " ORDER BY ZFAMILIYA ASC, ZIMIA ASC, ZOTCHESTVO ASC");
 
 	/* start SQLite request */

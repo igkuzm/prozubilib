@@ -20,7 +20,6 @@ endif
 
 libprozubilib_la_SOURCES = \
 	prozubilib.c \
-	date-time/strftime.c\
-	date-time/strptime.c
+	stb_image.c
 
-libprozubilib_la_LIBADD =  $(SQLITE3_LINK) -lcurl $(CURL_LIBDIR) $(ADD_OBJECTS)
+libprozubilib_la_LIBADD =  $(SQLITE3_LINK) -lcurl $(CURL_LIBDIR) $(ADD_OBJECTS) -ltiff

@@ -2,7 +2,7 @@
  * File              : cases.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 06.05.2023
- * Last Modified Date: 23.07.2023
+ * Last Modified Date: 29.07.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef CASES_H
@@ -433,7 +433,7 @@ prozubi_case_new_for_patient(prozubi_t *p, char patientid[37]){
 								p->on_error(p->on_error_data,\
 							STR_ERR("can't allocate string with len: %ld", len+1)), break);\
 						strncpy(str, (const char *)value, len);\
-						str[len] = 0;\
+						str[len-1] = 0;\
 						c->member = str;\
 						c->len_##member = len;\
 					} else {\
@@ -546,6 +546,7 @@ static void
 prozubi_cases_foreach(
 		prozubi_t   *p,
 		const char *patient_id,
+		const char *predicate,
 		void       *user_data,
 		int        (*callback)(void *user_data, struct case_t *c)
 		)
@@ -574,8 +575,11 @@ prozubi_cases_foreach(
 	
 	strcat(SQL, "ZRECORDNAME FROM ");
 	strcat(SQL, CASES_TABLENAME);
+	strcat(SQL, " ");
 	if (patient_id)
 		strcat(SQL, STR(" WHERE ZPATIENTID = '%s'", patient_id));
+	if (predicate)
+		strcat(SQL, predicate);
 	strcat(SQL, " ORDER BY ZDATE ASC");
 
 	/* start SQLite request */
