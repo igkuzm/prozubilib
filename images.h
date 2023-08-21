@@ -2,7 +2,7 @@
  * File              : images.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 29.07.2023
+ * Last Modified Date: 21.08.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -143,7 +143,7 @@ prozubi_image_set_image_raw(
 			_prozubi_image_jpg_write_func,
 			&s, 
 			width, height, channels, 
-			raw_image, 100); 
+			raw_image, 80); 
 
 	if (res == 0){
 		if (p->on_error)
