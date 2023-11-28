@@ -2,7 +2,7 @@
  * File              : doctors.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 29.07.2023
+ * Last Modified Date: 28.11.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -259,5 +259,14 @@ prozubi_doctor_free(struct doctor_t *d){
 		d = NULL;
 	}
 }
+
+static int prozubi_doctor_remove(
+		kdata2_t *p, struct doctor_t *c
+		)
+{
+	return kdata2_remove_for_uuid(p, DOCTORS_TABLENAME, c->id);
+}
+
+
 
 #endif /* ifndef DOCTORS_H */

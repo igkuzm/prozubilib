@@ -2,7 +2,7 @@
  * File              : passport.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 29.07.2023
+ * Last Modified Date: 28.11.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -237,11 +237,9 @@ prozubi_passport_new(
 #define PASSPORT_COLUMN_DATE(member, number, title)\
 	p->member = member;
 #define PASSPORT_COLUMN_TEXT(member, number, title)\
-	p->member = MALLOC(strlen(member) + 1,\
-			if (kdata->on_error)\
-				kdata->on_error(kdata->on_error_data,\
-			STR_ERR("can't allocate memory: %ld", strlen(member) + 1)), return NULL);\
-	strcpy(p->member, member);
+	if (!member)\
+		member = "";\
+	p->member = strdup(member);
 			
 	PASSPORT_COLUMNS
 
