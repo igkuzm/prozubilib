@@ -2,7 +2,7 @@
  * File              : nomenklatura.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 11.05.2023
- * Last Modified Date: 30.07.2023
+ * Last Modified Date: 28.11.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -231,12 +231,7 @@ prozubi_nomenklatura_foreach(
 						{\
 							size_t len = sqlite3_column_bytes(stmt_c, i);\
 							const unsigned char *value = sqlite3_column_text(stmt_c, i);\
-							c->title = MALLOC(len + 1,\
-									if (p->on_error)\
-										p->on_error(p->on_error_data,\
-										STR_ERR("cant allocate memory len: %ld", len + 1)),\
-									break);\
-							strncpy(c->title, (const char *)value, len);\
+							c->title = strndup((char*)value, len);\
 							c->title[len] = 0;\
 							break;\
 						};				

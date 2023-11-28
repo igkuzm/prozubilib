@@ -194,13 +194,7 @@ prozubi_doctor_foreach(
 					size_t len = sqlite3_column_bytes(stmt, i);\
 					const unsigned char *value = sqlite3_column_text(stmt, i);\
 					if (value){\
-						char *str = MALLOC(len + 1,\
-							if (kdata->on_error)\
-								kdata->on_error(kdata->on_error_data,\
-							STR_ERR("can't allocate string with len: %ld", len+1)), break);\
-						strncpy(str, (const char *)value, len);\
-						str[len] = 0;\
-						d->member = str;\
+						d->member = strndup((char*)value, len);\
 						d->len_##member = len;\
 					} else {\
 						d->member = NULL;\
@@ -214,8 +208,7 @@ prozubi_doctor_foreach(
 					size_t len = sqlite3_column_bytes(stmt, i);\
 					const void *value = sqlite3_column_blob(stmt, i);\
 					if (DOCTORS_DATA_TYPE_##type == DOCTORS_DATA_TYPE_cJSON){\
-						cJSON *json = cJSON_Parse(value);\
-						d->member = json;\
+						d->member = cJSON_Parse((char*)value);\
 						d->len_##member = 0;\
 					}\
 					break;\

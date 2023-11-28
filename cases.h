@@ -2,7 +2,7 @@
  * File              : cases.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 06.05.2023
- * Last Modified Date: 29.07.2023
+ * Last Modified Date: 28.11.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef CASES_H
@@ -428,13 +428,7 @@ prozubi_case_new_for_patient(prozubi_t *p, char patientid[37]){
 					size_t len = sqlite3_column_bytes(stmt, i);\
 					const unsigned char *value = sqlite3_column_text(stmt, i);\
 					if (value){\
-						char *str = MALLOC(len + 1,\
-							if (p->on_error)\
-								p->on_error(p->on_error_data,\
-							STR_ERR("can't allocate string with len: %ld", len+1)), break);\
-						strncpy(str, (const char *)value, len);\
-						str[len-1] = 0;\
-						c->member = str;\
+						c->member = strndup((char*)value, len);\
 						c->len_##member = len;\
 					} else {\
 						c->member = NULL;\
@@ -450,8 +444,7 @@ prozubi_case_new_for_patient(prozubi_t *p, char patientid[37]){
 					const void *value = sqlite3_column_blob(stmt, i);\
 					if (value){\
 						if (CASES_DATA_TYPE_##type == CASES_DATA_TYPE_cJSON){\
-							cJSON *json = cJSON_ParseWithLength(value, len);\
-							c->member = json;\
+							c->member = cJSON_ParseWithLength(value, len);\
 							c->len_##member = -1;\
 						}\
 					} else {\
@@ -623,13 +616,7 @@ prozubi_cases_foreach(
 					size_t len = sqlite3_column_bytes(stmt, i);\
 					const unsigned char *value = sqlite3_column_text(stmt, i);\
 					if (value){\
-						char *str = MALLOC(len + 1,\
-						if (p->on_error)\
-							p->on_error(p->on_error_data,\
-							STR_ERR("can't allocate string with len: %ld", len+1)), break);\
-						strncpy(str, (const char *)value, len);\
-						str[len] = 0;\
-						c->member = str;\
+						c->member = strndup((char*)value, len);\
 						c->len_##member = len;\
 					} else {\
 						c->member = NULL;\
@@ -645,8 +632,7 @@ prozubi_cases_foreach(
 					const void *value = sqlite3_column_blob(stmt, i);\
 					if (value){\
 						if (CASES_DATA_TYPE_##type == CASES_DATA_TYPE_cJSON){\
-							cJSON *json = cJSON_ParseWithLength(value, len);\
-							c->member = json;\
+							c->member = cJSON_ParseWithLength(value, len);\
 							c->len_##member = -1;\
 						}\
 					} else {\
@@ -1030,13 +1016,8 @@ static int prozubi_case_set_##number (prozubi_t *p, struct case_t *c, const char
 		return -1;\
 	if(c->member)\
 		free(c->member);\
-	size_t len = strlen(text);\
-   	c->member = MALLOC(len + 1,\
-			if (p->on_error)\
-				p->on_error(p->on_error_data,\
-			STR_ERR("can't allocate size: %ld", len + 1)), return -1);\
-	strncpy(c->member, text, len);\
-	c->len_##member = len;\
+	c->member = strdup(text);\
+	c->len_##member = strlen(text);\
 	return 0;\
 }
 		CASES_COLUMNS

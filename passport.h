@@ -159,13 +159,7 @@ PASSPORT_COLUMNS
 					size_t len = sqlite3_column_bytes(stmt, i);\
 					const unsigned char *value = sqlite3_column_text(stmt, i);\
 					if (value){\
-						char *str = MALLOC(len + 1,\
-							if (kdata->on_error)\
-								kdata->on_error(kdata->on_error_data,\
-							STR_ERR("can't allocate string with len: %ld", len+1)), break);\
-						strncpy(str, (const char *)value, len);\
-						str[len] = 0;\
-						p->member = str;\
+						p->member = strndup((char*)value, len);\
 						p->len_##member = len;\
 					} else {\
 						p->member = NULL;\
@@ -348,13 +342,8 @@ static int prozubi_passport_set_##number (kdata2_t *p, struct passport_t *c,\
 			return -1;\
 	if(c->member)\
 		free(c->member);\
-	size_t len = strlen(text);\
-   	c->member = MALLOC(len + 1,\
-			if (p->on_error)\
-				p->on_error(p->on_error_data,\
-			STR_ERR("can't allocate size: %ld", len + 1)), return -1);\
-	strncpy(c->member, text, len);\
-	c->len_##member = len;\
+	c->member = strdup(text);\
+	c->len_##member = strlen(text);\
 	return 0;\
 }
 		PASSPORT_COLUMNS
