@@ -2,7 +2,7 @@
  * File              : cases.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 06.05.2023
- * Last Modified Date: 28.11.2023
+ * Last Modified Date: 29.11.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef CASES_H
@@ -983,7 +983,7 @@ prozubi_cases_list_foreach(
 
 #define CASES_COLUMN_DATE(member, number, title)\
 static int prozubi_case_set_##number (prozubi_t *p, struct case_t *c, time_t t){\
-	if (kdata2_set_number_for_uuid(p, CASES_TABLENAME, title, t, c->id))\
+	if (!kdata2_set_number_for_uuid(p, CASES_TABLENAME, title, t, c->id))\
 		return -1;\
 	c->member = t;\
 	return 0;\
@@ -995,7 +995,7 @@ static int prozubi_case_set_##number (prozubi_t *p, struct case_t *c,\
 	if (CASES_DATA_TYPE_##type == CASES_DATA_TYPE_cJSON){\
 		char *str = cJSON_Print(data);\
 		if (str){\
-			if (kdata2_set_data_for_uuid(p, CASES_TABLENAME, title,\
+			if (!kdata2_set_data_for_uuid(p, CASES_TABLENAME, title,\
 					(void *)str, strlen(str), c->id))\
 			{\
 				free(str);\
@@ -1012,7 +1012,7 @@ static int prozubi_case_set_##number (prozubi_t *p, struct case_t *c,\
 }
 #define CASES_COLUMN_TEXT(member, number, title)\
 static int prozubi_case_set_##number (prozubi_t *p, struct case_t *c, const char *text){\
-	if (kdata2_set_text_for_uuid(p, CASES_TABLENAME, title, text, c->id))\
+	if (!kdata2_set_text_for_uuid(p, CASES_TABLENAME, title, text, c->id))\
 		return -1;\
 	if(c->member)\
 		free(c->member);\

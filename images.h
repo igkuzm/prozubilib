@@ -2,7 +2,7 @@
  * File              : images.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 21.08.2023
+ * Last Modified Date: 29.11.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -161,7 +161,7 @@ prozubi_image_set_image_raw(
 		p->on_log(p->on_log_data,
 				STR("set image data with %ld bytes", i->len_data));
 
-	if (kdata2_set_data_for_uuid(p, IMAGES_TABLENAME, 
+	if (!kdata2_set_data_for_uuid(p, IMAGES_TABLENAME, 
 				"ZIMAGEDATA", i->data, i->len_data, i->id))
 		return -1;
 	return 0;
@@ -480,7 +480,7 @@ prozubi_image_free(struct image_t *i){
 
 #define IMAGES_COLUMN_DATE(member, number, title)\
 static int prozubi_image_set_##number (kdata2_t *p, struct image_t *c, time_t t){\
-	if (kdata2_set_number_for_uuid(p, IMAGES_TABLENAME, title, t, c->id))\
+	if (!kdata2_set_number_for_uuid(p, IMAGES_TABLENAME, title, t, c->id))\
 		return -1;\
 	c->member = t;\
 	return 0;\
@@ -490,7 +490,7 @@ static int prozubi_image_set_##number (kdata2_t *p, struct image_t *c,\
 	   	void *data, size_t len)\
 {\
 	if (IMAGES_DATA_TYPE_##type == IMAGES_DATA_TYPE_void){\
-		if (kdata2_set_data_for_uuid(p, IMAGES_TABLENAME, title, data, len, c->id))\
+		if (!kdata2_set_data_for_uuid(p, IMAGES_TABLENAME, title, data, len, c->id))\
 			return -1;\
 		if(c->member)\
 			free(c->member);\
@@ -505,7 +505,7 @@ static int prozubi_image_set_##number (kdata2_t *p, struct image_t *c,\
 }
 #define IMAGES_COLUMN_TEXT(member, number, title)\
 static int prozubi_image_set_##number (kdata2_t *p, struct image_t *c, const char *text){\
-	if (kdata2_set_text_for_uuid(p, IMAGES_TABLENAME, title, text, c->id))\
+	if (!kdata2_set_text_for_uuid(p, IMAGES_TABLENAME, title, text, c->id))\
 		return -1;\
 	if(c->member)\
 		free(c->member);\

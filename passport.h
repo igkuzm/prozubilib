@@ -2,7 +2,7 @@
  * File              : passport.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 28.11.2023
+ * Last Modified Date: 29.11.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -328,7 +328,7 @@ static int prozubi_passport_set_##number (kdata2_t *p, struct passport_t *c,\
 		time_t t, bool update)\
 {\
 	if (update)\
-		if (kdata2_set_number_for_uuid(p, PASSPORT_TABLENAME, title, t, c->id))\
+		if (!kdata2_set_number_for_uuid(p, PASSPORT_TABLENAME, title, t, c->id))\
 			return -1;\
 	c->member = t;\
 	return 0;\
@@ -338,7 +338,7 @@ static int prozubi_passport_set_##number (kdata2_t *p, struct passport_t *c,\
 		const char *text, bool update)\
 {\
 	if (update)\
-		if (kdata2_set_text_for_uuid(p, PASSPORT_TABLENAME, title, text, c->id))\
+		if (!kdata2_set_text_for_uuid(p, PASSPORT_TABLENAME, title, text, c->id))\
 			return -1;\
 	if(c->member)\
 		free(c->member);\

@@ -2,7 +2,7 @@
  * File              : prices.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 28.11.2023
+ * Last Modified Date: 29.11.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -206,7 +206,7 @@ static int prozubi_prices_set_##number (kdata2_t *p, struct price_t *c,\
 		const char *text, bool update)\
 {\
 	if (update)\
-		if (kdata2_set_text_for_uuid(p, PRICES_TABLENAME, title, text, c->id))\
+		if (!kdata2_set_text_for_uuid(p, PRICES_TABLENAME, title, text, c->id))\
 			return -1;\
 	if(c->member)\
 		free(c->member);\
