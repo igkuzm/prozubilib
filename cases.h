@@ -2,7 +2,7 @@
  * File              : cases.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 06.05.2023
- * Last Modified Date: 29.11.2023
+ * Last Modified Date: 30.11.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef CASES_H
@@ -1003,7 +1003,7 @@ static int prozubi_case_set_##number (prozubi_t *p, struct case_t *c,\
 			}\
 			if(c->member)\
 				cJSON_free(c->member);\
-			c->member = data;\
+			c->member = cJSON_Parse(str);\
 			c->len_##member = -1;\
 			free(str);\
 		}\
