@@ -90,7 +90,7 @@ prozubi_bill_foreach(
 		prozubi_t *p,
 		cJSON *bill,
 		void * userdata,
-		void * (*callback)(
+		void (*callback)(
 			void *userdata,
 			struct bill_t *t)
 		)
