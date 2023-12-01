@@ -359,7 +359,7 @@ prozubi_bill_set_item_price(
 }
 
 static cJSON_bool
-prozubi_set_item_count(
+prozubi_bill_set_item_count(
 		prozubi_t *kdata,
 		cJSON *bill,
 		int item_index,
