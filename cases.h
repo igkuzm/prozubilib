@@ -2,7 +2,7 @@
  * File              : cases.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 06.05.2023
- * Last Modified Date: 30.11.2023
+ * Last Modified Date: 01.12.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef CASES_H
@@ -358,6 +358,17 @@ prozubi_planlecheniya_new(struct case_t *c)
 	
 	cJSON *json = cJSON_CreateArray(); 
 	c->planlecheniya = json;
+	return json;
+}
+
+static cJSON *
+prozubi_bill_new(struct case_t *c)
+{
+	if (c->bill)
+		cJSON_free(c->bill);
+	
+	cJSON *json = cJSON_CreateArray(); 
+	c->bill = json;
 	return json;
 }
 
