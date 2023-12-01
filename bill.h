@@ -163,7 +163,7 @@ prozubi_bill_foreach(
 }
 
 static cJSON *
-bill_add_item(
+prozubi_bill_add_item(
 		prozubi_t *kdata,
 		cJSON *bill,
 		const char *title,
