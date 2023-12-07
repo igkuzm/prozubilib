@@ -2,14 +2,13 @@
  * File              : documents.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 25.07.2023
- * Last Modified Date: 29.07.2023
+ * Last Modified Date: 05.12.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef DOCUMENTS_H
 #define DOCUMENTS_H
 
 
-#include <stdint.h>
 #include <time.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -24,221 +23,114 @@
 #include "cases.h"
 #include "prozubilib.h"
 #include "images.h"
+#include "rtf.h"
+#include "ffind.h"
+#include "bill.h"
+#include "strpush.h"
 
 #define OUTFILE "out.rtf"
 
-// convert utf8 miltibite string to rtf code
-static char *
-string_to_rtf(const char *s)
-{
-	if (!s)
-		return NULL;
-	
-	size_t len = strlen(s);
-	char *out = (char *)malloc(len * 6 + 1);
-	if (!out)
-		return NULL;
-	strcpy(out, "");
-
-	char *ptr = (char *)s;
-	uint32_t c32;
-	while(*ptr){
-		// get char
-		uint8_t c = *ptr;
-		if (c >= 252){/* 6-bytes */
-			c32  = (*ptr++ & 0x1)  << 30;  // 0b00000001
-			c32 |= (*ptr++ & 0x3F) << 24;  // 0b00111111
-			c32 |= (*ptr++ & 0x3F) << 18;  // 0b00111111
-			c32 |= (*ptr++ & 0x3F) << 12;  // 0b00111111
-			c32 |= (*ptr++ & 0x3F) << 6;   // 0b00111111
-			c32 |=  *ptr++ & 0x3F;         // 0b00111111
-			sprintf(out, "%s\\u%d ", out, c32);
-		}	
-		else if (c >= 248){/* 5-bytes */
-			c32  = (*ptr++ & 0x3)  << 24;  // 0b00000011
-			c32 |= (*ptr++ & 0x3F) << 18;  // 0b00111111
-			c32 |= (*ptr++ & 0x3F) << 12;  // 0b00111111
-			c32 |= (*ptr++ & 0x3F) << 6;   // 0b00111111
-			c32 |=  *ptr++ & 0x3F;         // 0b00111111
-			sprintf(out, "%s\\u%d ", out, c32);
-		}
-		else if (c >= 240){/* 4-bytes */
-			c32  = (*ptr++ & 0x7)  << 18;  // 0b00000111
-			c32 |= (*ptr++ & 0x3F) << 12;  // 0b00111111
-			c32 |= (*ptr++ & 0x3F) << 6;   // 0b00111111
-			c32 |=  *ptr++ & 0x3F ;        // 0b00111111
-			sprintf(out, "%s\\u%d ", out, c32);
-		}
-		else if (c >= 224){/* 3-bytes */
-			c32  = (*ptr++ & 0xF)  << 12;  // 0b00001111
-			c32 |= (*ptr++ & 0x3F) << 6;   // 0b00111111
-			c32 |=  *ptr++ & 0x3F;         // 0b00111111
-			sprintf(out, "%s\\u%d ", out, c32);
-		}
-		else if (c >= 192){/* 2-bytes */
-			c32  = (*ptr++ & 0x1F) << 6;   // 0b00011111
-			c32 |=  *ptr++ & 0x3F;         // 0b00111111
-			sprintf(out, "%s\\u%d ", out, c32);
-		}
-		else{/* 1-byte */
-			sprintf(out, "%s%c", out, *ptr++);
-		}
-	}
-	strcat(out, " ");
-	return out;
-}
-
-struct pl_table_str{
-	char *str;
-	int len;
-	int mem;
+struct pl_table_data{
+	char *s;
 	char *summa;
 	char *sroki;
 };
 
 static void *
 pl_table_cb(void *d, void *p, struct planlecheniya_t *t){
-	struct pl_table_str *str = (struct pl_table_str *)d;
+	struct pl_table_data *data = (struct pl_table_data *)d;
 	switch (t->type) {
 		case PLANLECHENIYA_TYPE_STAGE:
 			{
 				char title[256];
-					sprintf(title, "\\pard\\par\\ql \\b %s \\b0 \\ \n", t->title);
-				const char *tbl = 
-					"\\pard\\par\\trowd\n"
-					"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb\\brdrs\\clbrdrr\\brdrs\n"
-					"\\cellx400\n"
-					"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb\\brdrs\\clbrdrr\\brdrs\n"
-					"\\cellx7254\n"
-					"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb\\brdrs\\clbrdrr\\brdrs\n"
-					"\\cellx8254\n"
-					"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb\\brdrs\\clbrdrr\\brdrs\n"
-					"\\cellx9254\n"
-					"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb\\brdrs\\clbrdrr\\brdrs\n"
-					"\\cellx10254\n"
-					"\\intbl \\b № \\b0 \\cell\n"
-					"\\intbl \\b Наименование работы (услуги) \\b0 \\cell\n"
-					"\\intbl \\b Количество \\b0 \\cell\n"
-					"\\intbl \\b Цена \\b0 \\cell\n"
-					"\\intbl \\b Сумма \\b0 \\cell\n"
-					"\\row\n"
-					;
-				str->len += strlen(title) + strlen(tbl);
-				if (str->len > str->mem){
-					// realloc
-					str->mem += BUFSIZ;
-					str->str = (char *)realloc(str->str, str->mem);
-					if (!str->str){
-						perror("realloc");
-						exit(EXIT_FAILURE);	
-					} 
-				}
-				strcat(str->str, title);
-				strcat(str->str, tbl);
+					sprintf(title, 
+							"\\pard\\par\\ql \\b %s \\b0 \\ \n", t->title);
+
+				const char *titles[] =
+				{
+					"\\b № \\b0",
+					"\\b Наименование работы (услуги) \\b0"
+					"\\b Количество \\b0"
+					"\\b Цена \\b0"
+					"\\b Сумма \\b0"
+				};
+				int width[] = 
+					{400, 6854, 1000, 1000, 1000};
+				char *tbl = 
+					rtf_table_header(5, titles, width);
+				
+				strpush(&data->s, title);
+				strpush(&data->s, tbl);
+				free(tbl);
 				break;
 			}
 		case PLANLECHENIYA_TYPE_ITEM:
 			{
 				char row[256];
 				sprintf(row, 
-						"\\trowd\n"
-						"\\intbl %d \\cell\n"
-						"\\intbl %s \\cell\n"
-						"\\intbl %s \\cell\n"
-						"\\intbl %s \\cell\n"
-						"\\intbl %s \\cell\n"
-						"\\row\n"
+						"%d=%s=%s=%s=%s"
 						, t->itemIndex + 1
 						, t->title
 						, t->count
 						, t->price
 						, t->total
 				);
-				str->len += strlen(row);
-				if (str->len > str->mem){
-					// realloc
-					str->mem += BUFSIZ;
-					str->str = (char *)realloc(str->str, str->mem);
-					if (!str->str){
-						perror("realloc");
-						exit(EXIT_FAILURE);	
-					} 
-				}
-				strcat(str->str, row);
+				char *tbl = 
+					rtf_table_row_from_string(row, "=");
+				strpush(&data->s, tbl);
+				free(tbl);
 				break;
 			}
 		case PLANLECHENIYA_TYPE_STAGE_PRICE:
 			{
 				char row[256];
 				sprintf(row, 
-						"\\trowd\n"
-						"\\intbl  \\cell\n"
-						"\\intbl \\b %s \\b0 \\cell\n"
-						"\\intbl \\cell\n"
-						"\\intbl \\cell\n"
-						"\\intbl \\b %s руб. \\b0 \\cell\n"
-						"\\row\n"
+						"=\\b %s \\b0==\\b %s руб. \\b0="
 						, t->title
 						, t->total
 				);
-				str->len += strlen(row);
-				if (str->len > str->mem){
-					// realloc
-					str->mem += BUFSIZ;
-					str->str = (char *)realloc(str->str, str->mem);
-					if (!str->str){
-						perror("realloc");
-						exit(EXIT_FAILURE);	
-					} 
-				}
-				strcat(str->str, row);
+				char *tbl = 
+					rtf_table_row_from_string(row, "=");
+				strpush(&data->s, tbl);
+				free(tbl);
 				break;
 			}
 		case PLANLECHENIYA_TYPE_STAGE_DURATION:
 			{
 				char row[256];
 				sprintf(row, 
-						"\\trowd\n"
-						"\\intbl  \\cell\n"
-						"\\intbl \\b %s \\b0 \\cell\n"
-						"\\intbl \\cell\n"
-						"\\intbl \\cell\n"
-						"\\intbl \\b %s мес. \\b0 \\cell\n"
-						"\\row\\lastrow\n"
+						"==\\b %s \\b0===\\b %s мес. \\b0"
 						, t->title
 						, t->count
 				);
-				str->len += strlen(row);
-				if (str->len > str->mem){
-					// realloc
-					str->mem += BUFSIZ;
-					str->str = (char *)realloc(str->str, str->mem);
-					if (!str->str){
-						perror("realloc");
-						exit(EXIT_FAILURE);	
-					} 
-				}
-				strcat(str->str, row);
+				char *tbl = 
+					rtf_table_row_from_string(row, "=");
+				strpush(&data->s, tbl);
+				free(tbl);
 				break;
 			}
 		case PLANLECHENIYA_TYPE_TOTAL_PRICE:
 			{
-				str->summa = (char *)malloc(strlen(t->total) + 1);
-				if (!str->summa){
+				data->summa = 
+					(char *)malloc(strlen(t->total) + 1);
+				if (!data->summa){
 					perror("realloc");
 					exit(EXIT_FAILURE);	
 				}
-				strcpy(str->summa, t->total);
+				strcpy(data->summa, t->total);
 				break;
 			}
 		case PLANLECHENIYA_TYPE_TOTAL_DURATION:
 			{
-				str->sroki = (char *)malloc(strlen(t->count) + strlen(t->title) + 1);
-				if (!str->sroki){
+				data->sroki = 
+					(char *)malloc(
+							strlen(t->count) + strlen(t->title) + 1);
+				if (!data->sroki){
 					perror("realloc");
 					exit(EXIT_FAILURE);	
 				}
-				sprintf(str->sroki, "%s  %s", t->title, t->count);		
+				sprintf(data->sroki, 
+						"%s  %s", t->title, t->count);		
 				break;
 			}
 		default:
@@ -246,26 +138,25 @@ pl_table_cb(void *d, void *p, struct planlecheniya_t *t){
 	}
 }
 
-static void pl_table(prozubi_t *p, cJSON *pl, char **table, char **summa, char **sroki){
-	struct pl_table_str str;
-	str.len = 0;
-	str.mem = BUFSIZ;
-	str.str = (char *)malloc(str.mem);
-	if (!str.str){
-		perror("malloc");
-		exit(EXIT_FAILURE);
-	} 
-	strcpy(str.str, "");
+static void pl_table(
+		prozubi_t *p, cJSON *pl, char **table, 
+		char **summa, char **sroki)
+{
+	struct pl_table_data data;
+	struct str s;
+	str_init(&s);
+	data.s = &s;
 
 	// create RTF table
-	prozubi_planlecheniya_foreach(p, pl, &str, pl_table_cb);
+	prozubi_planlecheniya_foreach(
+			p, pl, &data, pl_table_cb);
 
 	if (table)
-		*table = str.str;
+		*table = data.s->str;
 	if (summa)
-		*summa = str.summa;
+		*summa = data.summa;
 	if (sroki)
-		*sroki = str.sroki;
+		*sroki = data.sroki;
 }
 
 #define PL_TEETH_UP\
@@ -516,7 +407,7 @@ static char *pl_replace(
 	if (index == num){\
 		if (type == PL_TEXT){\
 			char *str = (char *)rep;\
-			return string_to_rtf(str);\
+			return rtf_from_utf8(str);\
 		}\
 		else if (type == PL_NONE){\
 			return (char *)rep;\
@@ -644,5 +535,221 @@ documents_get_plan_lecheniya(
 
 	return OUTFILE;
 }
+
+static void
+akt_table_cb(void *d, struct bill_t *t)
+{
+	struct str *str = (struct str *)d;
+	if (str->str[0] == 0)
+	{
+			const char *tbl = 
+			"\\pard\\par\\trowd\n"	"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb\\brdrs\\clbrdrr\\brdrs\n"
+			"\\cellx400\n"
+			"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb\\brdrs\\clbrdrr\\brdrs\n"
+			"\\cellx7254\n"
+			"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb\\brdrs\\clbrdrr\\brdrs\n"
+			"\\cellx8254\n"
+			"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb\\brdrs\\clbrdrr\\brdrs\n"
+			"\\cellx9254\n"
+			"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb\\brdrs\\clbrdrr\\brdrs\n"
+			"\\cellx10254\n"
+			"\\intbl \\b № \\b0 \\cell\n"
+			"\\intbl \\b Наименование работы (услуги) \\b0 \\cell\n"
+			"\\intbl \\b Количество \\b0 \\cell\n"
+			"\\intbl \\b Цена \\b0 \\cell\n"
+			"\\intbl \\b Сумма \\b0 \\cell\n"
+			"\\row\n"
+			;
+		str_cat(str, tbl);
+	}
+	
+	if (t->type == BILL_TYPE_ITEM)
+	{
+		char row[256];
+		sprintf(row, 
+				"\\trowd\n"
+				"\\intbl %d \\cell\n"
+				"\\intbl %s \\cell\n"
+				"\\intbl %s \\cell\n"
+				"\\intbl %s \\cell\n"
+				"\\intbl %s \\cell\n"
+				"\\row\n"
+				, t->itemIndex + 1
+				, t->title
+				, t->count
+				, t->price
+				, t->total
+		);
+		str_cat(str, row);
+	}
+	else if (t->type == BILL_TYPE_TOTAL_PRICE)
+	{
+		char row[256];
+		sprintf(row, 
+				"\\trowd\n"
+				"\\intbl  \\cell\n"
+				"\\intbl \\b %s \\b0 \\cell\n"
+				"\\intbl \\cell\n"
+				"\\intbl \\cell\n"
+				"\\intbl \\b %s руб. \\b0 \\cell\n"
+				"\\row\\lastrow\n"
+				, t->title
+				, t->total
+		);
+		str_cat(str, row);
+	}
+}
+
+static void akt_table(
+		prozubi_t *p, 
+		cJSON *bill, 
+		char **table)
+{
+	struct str str;
+	str_init(&str);
+
+	// create RTF table
+	prozubi_bill_foreach(p, bill, &str, akt_table_cb);
+
+	if (table)
+		*table = str.str;
+}
+
+#define AKT_REPS\
+	AKT_REP("$date", c->date, PL_DATE)\
+	AKT_REP("$familiya", patient->familiya, PL_TEXT)\
+	AKT_REP("$imia", patient->imia, PL_TEXT)\
+	AKT_REP("$otchestvo", patient->otchestvo, PL_TEXT)\
+	AKT_REP("$table", table, PL_TEXT)\
+	AKT_REP("$doctor", "Семенцов И.В.", PL_TEXT)\
+
+static const char *akt_needle_array[] = 
+{
+	#define AKT_REP(needle, ...) needle,
+AKT_REPS
+	#undef AKT_REP
+	NULL
+};
+
+static char *akt_replace(
+		int index,
+		prozubi_t *p,
+		struct passport_t *patient,
+		struct case_t *c,
+		char *table)
+{
+	int num = 0, i;
+#define AKT_REP(needle, rep, type)\
+	if (index == num){\
+		if (type == PL_TEXT){\
+			char *str = (char *)rep;\
+			return rtf_from_utf8(str);\
+		}\
+		else if (type == PL_NONE){\
+			return (char *)rep;\
+		}\
+		else if (type == PL_DATE){\
+			time_t time = (time_t)rep;\
+			struct tm *tm = localtime(&time);\
+			char *date = (char *)malloc(11);\
+			if (!date) return NULL;\
+			strftime(date, 11, "%d.%m.%Y", tm);\
+			return date;\
+		}\
+	}\
+	num++;
+AKT_REPS
+	#undef AKT_REP
+	return NULL;
+}
+
+static const char * 
+documents_get_plan_atk_sdachi_priema(
+		const char *template_file_path,
+		prozubi_t *p,
+		struct passport_t *patient,
+		struct case_t *c
+		)
+{
+	int i;
+
+	// open template
+	FILE *in = fopen(template_file_path, "r");
+	if (!in){
+		if (p->on_error)
+			p->on_error(p->on_error_data,			
+				STR_ERR("can't read file: %s", 
+				template_file_path));
+		return NULL;	
+	}
+
+	// remove temp file
+	remove(OUTFILE);
+	// open out file
+	FILE *out = fopen(OUTFILE, "w+");
+	if (!in){
+		if (p->on_error)
+			p->on_error(p->on_error_data,			
+				STR_ERR("can't wtite file: %s", OUTFILE));
+		fclose(in);
+		return NULL;	
+	}
+
+	// get table
+	char *table;
+	akt_table(p, c->bill, &table);
+	
+	// parse RTF
+	int ch;
+	while ((ch = fgetc(in)) != EOF) {
+		// check if word starts with '$'
+		if (ch == '$'){
+			// get word
+			char buf[256];
+			i=0;
+			while (
+					ch != ' ' && ch != '\\' && 
+					ch != '.' && ch != '\t' && 
+					ch != '{' && ch != '}' && 
+					ch != '\n' && ch != '\r' && 
+					ch != ',' && ch != EOF
+					)
+			{
+				buf[i++] = ch;
+				ch = fgetc(in);
+			}
+			// terminate buffer
+			buf[i++] = 0;
+			// return last symbol to out
+			fputc(ch, out);
+
+			// convert buf to replace
+			i = 0;
+			char **needles = (char **)pl_needle_array;
+			while (needles[i]) {
+				char *needle = needles[i++];	
+				if (strstr(buf, needle)){
+					char *replace = akt_replace(
+							i-1, p, patient, c, 
+							table);
+					// put replace to out stream
+					if (replace){
+						fputs(replace, out);
+						free(replace);
+					}
+					break;
+				}
+			}
+		} else
+			fputc(ch, out);
+	}
+
+	free(table);
+	fclose(in);
+	fclose(out);
+
+	return OUTFILE;
+}
+
 
 #endif /* ifndef DOCUMENTS_H */
