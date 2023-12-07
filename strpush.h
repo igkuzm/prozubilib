@@ -2,7 +2,7 @@
  * File              : strpush.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 05.12.2023
- * Last Modified Date: 05.12.2023
+ * Last Modified Date: 07.12.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 /**
@@ -32,8 +32,8 @@
  * printf("%s\n", str);
  * strfree(&str); 
  */
-#ifndef STR_H_
-#define STR_H_
+#ifndef STRPUSH_H_
+#define STRPUSH_H_
 
 /* strpush
  * append string to dynamic allocated string

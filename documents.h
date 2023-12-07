@@ -2,7 +2,7 @@
  * File              : documents.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 25.07.2023
- * Last Modified Date: 05.12.2023
+ * Last Modified Date: 07.12.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef DOCUMENTS_H
@@ -27,11 +27,13 @@
 #include "ffind.h"
 #include "bill.h"
 #include "strpush.h"
+#include "str.h"
+
 
 #define OUTFILE "out.rtf"
 
 struct pl_table_data{
-	char *s;
+	struct str *s;
 	char *summa;
 	char *sroki;
 };
@@ -59,8 +61,8 @@ pl_table_cb(void *d, void *p, struct planlecheniya_t *t){
 				char *tbl = 
 					rtf_table_header(5, titles, width);
 				
-				strpush(&data->s, title);
-				strpush(&data->s, tbl);
+				str_cat(data->s, title);
+				str_cat(data->s, tbl);
 				free(tbl);
 				break;
 			}
@@ -77,7 +79,7 @@ pl_table_cb(void *d, void *p, struct planlecheniya_t *t){
 				);
 				char *tbl = 
 					rtf_table_row_from_string(row, "=");
-				strpush(&data->s, tbl);
+				str_cat(data->s, tbl);
 				free(tbl);
 				break;
 			}
@@ -91,7 +93,7 @@ pl_table_cb(void *d, void *p, struct planlecheniya_t *t){
 				);
 				char *tbl = 
 					rtf_table_row_from_string(row, "=");
-				strpush(&data->s, tbl);
+				str_cat(data->s, tbl);
 				free(tbl);
 				break;
 			}
@@ -105,7 +107,7 @@ pl_table_cb(void *d, void *p, struct planlecheniya_t *t){
 				);
 				char *tbl = 
 					rtf_table_row_from_string(row, "=");
-				strpush(&data->s, tbl);
+				str_cat(data->s, tbl);
 				free(tbl);
 				break;
 			}
