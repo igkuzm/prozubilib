@@ -2,7 +2,7 @@
  * File              : cases.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 06.05.2023
- * Last Modified Date: 01.12.2023
+ * Last Modified Date: 12.12.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef CASES_H
@@ -22,6 +22,8 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
+#include "str.h"
+
 
 #define CASES_TABLENAME "ZCASES"
 
@@ -44,7 +46,7 @@ BEGIN_ENUM(CASES_LIST_TYPE)
 END_ENUM(CASES_LIST_TYPE)
 
 BEGIN_ENUM_STRING(CASES_LIST_TYPE) 
-#define CASES_LIST_TYPE_D(element) #element, 
+#define CASES_LIST_TYPE_D(element) (char*)#element, 
 	CASES_LIST_TYPES
 #undef CASES_LIST_TYPE_D 
 END_ENUM_STRING(CASES_LIST_TYPE)	
@@ -54,77 +56,77 @@ static const char *
 _prozubi_cases_list_string =
 "["
 	"["
-		"\"Вид осмотра\", " TO_STR("CASENAME")", "TO_STR("CASES_LIST_TYPE_COMBOBOX")", "
+		"\"Вид осмотра\", " TO_STR("CASENAME")", " TO_STR("CASES_LIST_TYPE_COMBOBOX")", "
 			"[\"Первичный приём\", \"Текущий приём\", \"Этапный осмотр\"]"
 	"],"
 	"["
-		"\"дата\", " TO_STR("CASEDATE")", "TO_STR("CASES_LIST_TYPE_DATE")
+		"\"дата\", " TO_STR("CASEDATE")", " TO_STR("CASES_LIST_TYPE_DATE")
 	"],"
 	"["
-		"\"жалобы\", " TO_STR("CASEZHALOBI")", "TO_STR("CASES_LIST_TYPE_TEXT")
+		"\"жалобы\", " TO_STR("CASEZHALOBI")", " TO_STR("CASES_LIST_TYPE_TEXT")
 	"],"	
 	"["
-		"\"анамнез жизни\", " TO_STR("CASEANAMNEZVITAE")", "TO_STR("CASES_LIST_TYPE_TEXT")
+		"\"анамнез жизни\", " TO_STR("CASEANAMNEZVITAE")", " TO_STR("CASES_LIST_TYPE_TEXT")
 	"],"		
 	"["
-		"\"анамнез заболевания\", " TO_STR("CASEANAMNEZMORBI")", "TO_STR("CASES_LIST_TYPE_TEXT")
+		"\"анамнез заболевания\", " TO_STR("CASEANAMNEZMORBI")", " TO_STR("CASES_LIST_TYPE_TEXT")
 	"],"	
 	"["
-		"\"аллергический анамнез\", " TO_STR("CASEALLERGANAMNEZ")", "TO_STR("CASES_LIST_TYPE_TEXT")
+		"\"аллергический анамнез\", " TO_STR("CASEALLERGANAMNEZ")", " TO_STR("CASES_LIST_TYPE_TEXT")
 	"],"	
 	"{"
 		"\"parent\": \"Общий осмотр\","
 		"\"children\": "
 			"["
 				"["
-					"\"состояние\", " TO_STR("CASESOSTOYANIYE")", "TO_STR("CASES_LIST_TYPE_COMBOBOX")", " 
+					"\"состояние\", " TO_STR("CASESOSTOYANIYE")", " TO_STR("CASES_LIST_TYPE_COMBOBOX")", " 
 						"[\"удовлетворительное\", \"средней степени тяжести\", \"тяжёлое\"]"
 					
 				"],"
 				"["
-					"\"сознание\", " TO_STR("CASESOSOZNANIYE")", "TO_STR("CASES_LIST_TYPE_COMBOBOX")", " 
+					"\"сознание\", " TO_STR("CASESOSOZNANIYE")", " TO_STR("CASES_LIST_TYPE_COMBOBOX")", " 
 						"[\"ясное\", \"спутанное\", \"изменённое\", \"ступор\", \"сопор\"]"
 					
 				"],"			
 				"["
-					"\"положение\", " TO_STR("CASEPOLOZHENIYE")", "TO_STR("CASES_LIST_TYPE_COMBOBOX")", " 
+					"\"положение\", " TO_STR("CASEPOLOZHENIYE")", " TO_STR("CASES_LIST_TYPE_COMBOBOX")", " 
 						"[\"активное\", \"пассивное\", \"вынужденное\"]"
 					
 				"],"				
 				"["
-					"\"со стороны внутренних органов\",  " TO_STR("CASESOSTORONIVNUTRENNIHORGANOV")", "TO_STR("CASES_LIST_TYPE_TEXT")
+					"\"со стороны внутренних органов\",  " TO_STR("CASESOSTORONIVNUTRENNIHORGANOV")", " TO_STR("CASES_LIST_TYPE_TEXT")
 				"]"	
 			"]"
 	"},"
 	"["
-		"\"местно\", " TO_STR("CASEMESTNO")", "TO_STR("CASES_LIST_TYPE_TEXT")
+		"\"местно\", " TO_STR("CASEMESTNO")", " TO_STR("CASES_LIST_TYPE_TEXT")
 	"],"	
 	"["
-		"\"зубная формула\", \"\", "TO_STR("CASES_LIST_TYPE_ZFORMULA")
+		"\"зубная формула\", \"\", " TO_STR("CASES_LIST_TYPE_ZFORMULA")
 	"],"
 	"["
-		"\"инструментальные и рентгенологические методы исследования\",  " TO_STR("CASEINSTRUMENTANDRENTGEN")", "TO_STR("CASES_LIST_TYPE_TEXT")
+		"\"инструментальные и рентгенологические методы исследования\",  " TO_STR("CASEINSTRUMENTANDRENTGEN")", " TO_STR("CASES_LIST_TYPE_TEXT")
 	"],"		
 	"["
-		"\"прикрепить фото/рентген\", \"\", "TO_STR("CASES_LIST_TYPE_XRAY")
+		"\"прикрепить фото/рентген\", \"\", " TO_STR("CASES_LIST_TYPE_XRAY")
 	"],"		
 	"["
-		"\"диагноз\",  " TO_STR("CASEDIAGNOZIS")", "TO_STR("CASES_LIST_TYPE_TEXT")
+		"\"диагноз\",  " TO_STR("CASEDIAGNOZIS")", " TO_STR("CASES_LIST_TYPE_TEXT")
 	"],"		
 	"["
-		"\"план лечения\",  " TO_STR("CASEPLANLECHENIYA")", "TO_STR("CASES_LIST_TYPE_PLANLECHENIYA")
+		"\"план лечения\",  " TO_STR("CASEPLANLECHENIYA")", " TO_STR("CASES_LIST_TYPE_PLANLECHENIYA")
 	"],"		
 	"["
-		"\"проведено лечение\", " TO_STR("CASELECHENIYE")", "TO_STR("CASES_LIST_TYPE_TEXT")
+		"\"проведено лечение\", " TO_STR("CASELECHENIYE")", " TO_STR("CASES_LIST_TYPE_TEXT")
 	"],"		
 	"["
-		"\"рекомендации\",  " TO_STR("CASERECOMENDACII")", "TO_STR("CASES_LIST_TYPE_TEXT")
+		"\"рекомендации\",  " TO_STR("CASERECOMENDACII")", " TO_STR("CASES_LIST_TYPE_TEXT")
 	"],"		
 	"["
-		"\"Следующий визит\", " TO_STR("CASEDATEOFNEXT")", "TO_STR("CASES_LIST_TYPE_DATE")
+		"\"Следующий визит\", " TO_STR("CASEDATEOFNEXT")", " TO_STR("CASES_LIST_TYPE_DATE")
 	"],"		
 	"["
-		"\"Выставить счёт\",  " TO_STR("CASEBILL")", "TO_STR("CASES_LIST_TYPE_BILL")
+		"\"Выставить счёт\",  " TO_STR("CASEBILL")", " TO_STR("CASES_LIST_TYPE_BILL")
 	"]"		
 "]";
 
@@ -143,7 +145,7 @@ BEGIN_ENUM(ZUBFORMULA_TYPE)
 #define ZUBFORMULA_TYPE_DEF(name, title, abbr) DECL_ENUM_ELEMENT(name), 
 	ZUBFORMULA_TYPES
 #undef ZUBFORMULA_TYPE_DEF
-	DECL_ENUM_ELEMENT(ZUBFORMULA_TYPE_COLS_NUM),
+	DECL_ENUM_ELEMENT(ZUBFORMULA_TYPES_NUM),
 END_ENUM(ZUBFORMULA_TYPE)
 
 BEGIN_ENUM_STRING(ZUBFORMULA_TYPE)
@@ -163,8 +165,43 @@ static struct ZUBFORMULA_TYPE_t ZUBFORMULA_TYPE_ARRAY[] =
 #define ZUBFORMULA_TYPE_DEF(name, title, abbr) {name, title, abbr}, 
 	ZUBFORMULA_TYPES
 #undef ZUBFORMULA_TYPES	
-	-1
 };
+	
+#define ZUBFORMULA_TEETH_UP\
+	ZUBFORMULA_TOOTH_UP(Z18)\
+	ZUBFORMULA_TOOTH_UP(Z17)\
+	ZUBFORMULA_TOOTH_UP(Z16)\
+	ZUBFORMULA_TOOTH_UP(Z15)\
+	ZUBFORMULA_TOOTH_UP(Z14)\
+	ZUBFORMULA_TOOTH_UP(Z13)\
+	ZUBFORMULA_TOOTH_UP(Z12)\
+	ZUBFORMULA_TOOTH_UP(Z11)\
+	ZUBFORMULA_TOOTH_UP(Z21)\
+	ZUBFORMULA_TOOTH_UP(Z22)\
+	ZUBFORMULA_TOOTH_UP(Z23)\
+	ZUBFORMULA_TOOTH_UP(Z24)\
+	ZUBFORMULA_TOOTH_UP(Z25)\
+	ZUBFORMULA_TOOTH_UP(Z26)\
+	ZUBFORMULA_TOOTH_UP(Z27)\
+	ZUBFORMULA_TOOTH_UP(Z28)\
+
+#define ZUBFORMULA_TEETH_DOWN\
+	ZUBFORMULA_TOOTH_DOWN(Z48)\
+	ZUBFORMULA_TOOTH_DOWN(Z47)\
+	ZUBFORMULA_TOOTH_DOWN(Z46)\
+	ZUBFORMULA_TOOTH_DOWN(Z45)\
+	ZUBFORMULA_TOOTH_DOWN(Z44)\
+	ZUBFORMULA_TOOTH_DOWN(Z43)\
+	ZUBFORMULA_TOOTH_DOWN(Z42)\
+	ZUBFORMULA_TOOTH_DOWN(Z41)\
+	ZUBFORMULA_TOOTH_DOWN(Z31)\
+	ZUBFORMULA_TOOTH_DOWN(Z32)\
+	ZUBFORMULA_TOOTH_DOWN(Z33)\
+	ZUBFORMULA_TOOTH_DOWN(Z34)\
+	ZUBFORMULA_TOOTH_DOWN(Z35)\
+	ZUBFORMULA_TOOTH_DOWN(Z36)\
+	ZUBFORMULA_TOOTH_DOWN(Z37)\
+	ZUBFORMULA_TOOTH_DOWN(Z38)\
 	
 /*
  * CASES_COLUMN_DATE(struct member, enum number, SQLite column title)
@@ -455,7 +492,7 @@ prozubi_case_new_for_patient(prozubi_t *p, char patientid[37]){
 					const void *value = sqlite3_column_blob(stmt, i);\
 					if (value){\
 						if (CASES_DATA_TYPE_##type == CASES_DATA_TYPE_cJSON){\
-							c->member = cJSON_ParseWithLength(value, len);\
+							c->member = cJSON_ParseWithLength((char*)value, len);\
 							c->len_##member = -1;\
 						}\
 					} else {\
@@ -511,7 +548,7 @@ prozubi_case_new_for_patient(prozubi_t *p, char patientid[37]){
 				case number:\
 				{\
 					char *str = c->member;\
-					if (!str) str = "";\
+					if (!str) str = (char*)"";\
 					kdata2_set_text_for_uuid(p, CASES_TABLENAME, title,\
 						   	str, c->id);\
 					break;\
@@ -643,7 +680,7 @@ prozubi_cases_foreach(
 					const void *value = sqlite3_column_blob(stmt, i);\
 					if (value){\
 						if (CASES_DATA_TYPE_##type == CASES_DATA_TYPE_cJSON){\
-							c->member = cJSON_ParseWithLength(value, len);\
+							c->member = cJSON_ParseWithLength((char*)value, len);\
 							c->len_##member = -1;\
 						}\
 					} else {\
@@ -820,8 +857,8 @@ _case_list_node_new(
 			struct case_t *c,
 			void *allocated_ptr,
 			char * title,
-			enum tagCASES key,
-			enum tagCASES_LIST_TYPE type,
+			int key,
+			int type,
 			char ** array
 		)
 {
@@ -977,7 +1014,7 @@ prozubi_cases_list_foreach(
 					array = NULL;
 					if (type == CASES_LIST_TYPE_COMBOBOX){
 						cJSON *jarray = cJSON_GetArrayItem(child_element, 3); 
-						array = MALLOC(8*10, , break);
+						array = (char**)MALLOC(8*10, , break);
 						cJSON *item; int i = 0;
 						cJSON_ArrayForEach(item, jarray){
 							array[i++] = cJSON_GetStringValue(item); 
@@ -1119,7 +1156,7 @@ static int prozubi_case_update(
 				case number:\
 				{\
 					char *str = c->member;\
-					if (!str) str = "";\
+					if (!str) str = (char*)"";\
 					kdata2_set_text_for_uuid(p, CASES_TABLENAME, str,\
 						   	c->member, c->id);\
 					break;\
@@ -1167,9 +1204,143 @@ prozubi_case_list_node_free_with_case(prozubi_t *p, struct case_list_node *n)
 	}
 
 	if (n->allocated_ptr)
-		prozubi_case_free(n->allocated_ptr);
+		prozubi_case_free((struct case_t *)(n->allocated_ptr));
 		
 	prozubi_case_list_node_free(p, n);
+}
+
+
+/* convert zubformula to RTF string */
+static char * prozubi_case_zubformula_to_rtf(
+	prozubi_t *p, struct case_t *c)
+{
+	struct str s;
+	if (str_init(&s, BUFSIZ )){
+		if (p->on_error)
+			p->on_error(p->on_error_data,
+					STR("can't allocate memory"));
+		return NULL;
+	}
+
+	str_append(&s, 
+		"\\pard\\par\\qc \\b Зубная формула \\b0 \\ \n" 
+		"\\pard\\par\\trowd\\qc\n"
+		"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb"
+		"\\brdrs\\clbrdrr\\brdrs\n"
+		"\\cellx640\n"
+		"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb"
+		"\\brdrs\\clbrdrr\\brdrs\n"
+		"\\cellx1280\n"
+		"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb"
+		"\\brdrs\\clbrdrr\\brdrs\n"
+		"\\cellx1921\n"
+		"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb"
+		"\\brdrs\\clbrdrr\\brdrs\n"
+		"\\cellx2562\n"
+		"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb"
+		"\\brdrs\\clbrdrr\\brdrs\n"
+		"\\cellx3203\n"
+		"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb"
+		"\\brdrs\\clbrdrr\\brdrs\n"
+		"\\cellx3844\n"
+		"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb"
+		"\\brdrs\\clbrdrr\\brdrs\n"
+		"\\cellx4485\n"
+		"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb"
+		"\\brdrs\\clbrdrr\\brdrs\n"
+		"\\cellx5126\n"
+		"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb"
+		"\\brdrs\\clbrdrr\\brdrs\n"
+		"\\cellx5767\n"
+		"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb"
+		"\\brdrs\\clbrdrr\\brdrs\n"
+		"\\cellx6408\n"
+		"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb"
+		"\\brdrs\\clbrdrr\\brdrs\n"
+		"\\cellx7049\n"
+		"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb"
+		"\\brdrs\\clbrdrr\\brdrs\n"
+		"\\cellx7690\n"
+		"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb"
+		"\\brdrs\\clbrdrr\\brdrs\n"
+		"\\cellx8331\n"
+		"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb"
+		"\\brdrs\\clbrdrr\\brdrs\n"
+		"\\cellx8972\n"
+		"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb"
+		"\\brdrs\\clbrdrr\\brdrs\n"
+		"\\cellx9613\n"
+		"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb"
+		"\\brdrs\\clbrdrr\\brdrs\n"
+		"\\cellx10254\n");
+					
+	char up[BUFSIZ];
+	strcpy(up, "");
+#define ZUBFORMULA_TOOTH_UP(n)\
+	const char *v_##n = (char *)prozubi_case_get_##n(c);\
+	if (!v_##n) v_##n = "";\
+	strcat(up, "\\intbl ");\
+	strcat(up, v_##n);\
+	strcat(up, " \\cell\n");\
+
+	ZUBFORMULA_TEETH_UP
+#undef ZUBFORMULA_TEETH_UP
+	strcat(up,
+					"\\row\n"
+					"\\intbl 1.8 \\cell\n"
+					"\\intbl 1.7 \\cell\n"
+					"\\intbl 1.6 \\cell\n"
+					"\\intbl 1.5 \\cell\n"
+					"\\intbl 1.4 \\cell\n"
+					"\\intbl 1.3 \\cell\n"
+					"\\intbl 1.2 \\cell\n"
+					"\\intbl 1.1 \\cell\n"
+					"\\intbl 2.1 \\cell\n"
+					"\\intbl 2.2 \\cell\n"
+					"\\intbl 2.3 \\cell\n"
+					"\\intbl 2.4 \\cell\n"
+					"\\intbl 2.5 \\cell\n"
+					"\\intbl 2.6 \\cell\n"
+					"\\intbl 2.7 \\cell\n"
+					"\\intbl 2.8 \\cell\n"
+					"\\row\n"
+					"\\intbl 4.8 \\cell\n"
+					"\\intbl 4.7 \\cell\n"
+					"\\intbl 4.6 \\cell\n"
+					"\\intbl 4.5 \\cell\n"
+					"\\intbl 4.4 \\cell\n"
+					"\\intbl 4.3 \\cell\n"
+					"\\intbl 4.2 \\cell\n"
+					"\\intbl 4.1 \\cell\n"
+					"\\intbl 3.1 \\cell\n"
+					"\\intbl 3.2 \\cell\n"
+					"\\intbl 3.3 \\cell\n"
+					"\\intbl 3.4 \\cell\n"
+					"\\intbl 3.5 \\cell\n"
+					"\\intbl 3.6 \\cell\n"
+					"\\intbl 3.7 \\cell\n"
+					"\\intbl 3.8 \\cell\n"
+					"\\row\n"
+					);
+
+	str_append(&s, up);
+	
+	char down[BUFSIZ];
+	strcpy(down, "");
+#define ZUBFORMULA_TOOTH_DOWN(n)\
+	const char *v_##n = (char *)prozubi_case_get_##n(c);\
+	if (!v_##n) v_##n = "";\
+	strcat(down, "\\intbl ");\
+	strcat(down, v_##n);\
+	strcat(down, " \\cell\n");\
+
+	ZUBFORMULA_TEETH_DOWN
+#undef ZUBFORMULA_TEETH_DOWN
+	strcat(down, "\\row\\lastrow\n");
+	
+	str_append(&s, down);
+
+	return s.str;
 }
 
 #endif /* ifndef CASES_H */

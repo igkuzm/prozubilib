@@ -2,7 +2,7 @@
  * File              : prices.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 29.11.2023
+ * Last Modified Date: 12.12.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -98,8 +98,10 @@ prozubi_price_new(
 
 	/* set values */
 #define PRICES_COLUMN_TEXT(member, number, title)\
-   	if (member)\
-		kdata2_set_text_for_uuid(kdata, PRICES_TABLENAME, title, member, p->id);	
+  if (member){\
+		kdata2_set_text_for_uuid(kdata, PRICES_TABLENAME, title, member, p->id);\
+		p->member = strdup(member);\
+	}
 	PRICES_COLUMNS
 #undef PRICES_COLUMN_TEXT
 	

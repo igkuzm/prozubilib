@@ -1,77 +1,120 @@
 /**
  * File              : str.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
- * Date              : 04.12.2023
- * Last Modified Date: 04.12.2023
+ * Date              : 06.12.2023
+ * Last Modified Date: 12.12.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
+/**
+ * str.h
+ * Copyright (c) 2023 Igor V. Sementsov <ig.kuzm@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ */
+/**
+ * Simple dynamic string
+ * USAGE:
+ * struct str s;
+ * str_init(&s);
+ * str_append(&s, "Hello");
+ * str_appendf(&s, " %s!", "world");
+ * printf("%s\n", s.str);
+ * free(s.str;
+ */
 
-/* simple dynamic size string */
 #ifndef STR_H_
 #define STR_H_
+#include <stdio.h>
 
-/* str structure */
+/* dynamic string structure */
 struct str {
-	char *str; // null-terminated c string
-	int len;   // string length
-	int size;  // allocated size
+	char *str;   //null-terminated c string
+	int   len;   //length of string (without last null char)
+	int   size;  //allocated size
 };
 
-/* init string */
-static int str_init(struct str *s);
+/* init string - return non-null on error */
+static int str_init(struct str *s, size_t size);
 
-/* append string */
-static void str_cat(
-		struct str *s, const char *str);
+/* append c string */
+static void str_append(struct str *s, const char *str);
 
-/* append formated string */
-#define str_catf(s, fmt, ...)\
-	({\
-		char str[BUFSIZ];\
-		sprintf(str, fmt, __VA_ARGS__);\
-		str_cat(s, str);\
-	 })
+/* append fprint-like formated c string */
+#define str_appendf(s, ...)
 
 /* IMPLIMATION */
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+#include <stdlib.h>
 
-static int str_init(
-		struct str *s)
+int str_init(struct str *s, size_t size)
 {
-	// init string
-	s->str = (char*)malloc(1);
-	if (s->str == NULL)
+	// allocate data
+	s->str = (char*)malloc(size);
+	if (!s->str)
 		return -1;
-	s->str[0] = 0;
-	s->size = 1;
-	s->len = 0;
-	return 0;
-};
 
-static void str_cat(
+	// set dafaults
+	s->str[0]  = 0;
+	s->len     = 0;
+	s->size    = size;
+
+	return 0;
+}
+
+static int _str_realloc(
+		struct str *s, int new_size)
+{
+	while (s->size < new_size){
+		// do realloc
+		void *p = realloc(s->str, s->size + BUFSIZ);
+		if (!p)
+			return -1;
+		s->str = (char*)p;
+		s->size += BUFSIZ;
+	}
+	return 0;
+}
+
+void str_append(
 		struct str *s, const char *str)
 {
-	int len = strlen(str);
-	// realloc string to have enough space
-	int new_size = s->len + len + 1;
-	if (s->size < new_size){
-		char *ptr = 
-			(char *)realloc(s->str, new_size);
-		if (ptr == NULL)
-			return;
-		s->str = ptr;
-		s->size= new_size;
-	}
+	if (!str)
+		return;
 
-	// cat string
-	int i;
-	for (i = 0; i < len; ++i)
-		s->str[s->len++] = str[i];	
+	int len, new_size, i;
 	
-	// terminate string
+	len = strlen(str);
+	new_size = s->len + len + 1;
+	// realloc if not enough size
+	if (_str_realloc(s, new_size))
+		return;
+
+	// append string
+	for (i = 0; i < len; ++i)
+		s->str[s->len++] = str[i];
+  
 	s->str[s->len] = 0;
 }
+
+#undef  str_appendf
+#define str_appendf(s, ...)\
+	({\
+	 char str[BUFSIZ];\
+	 snprintf(str, BUFSIZ-1, __VA_ARGS__);\
+	 str[BUFSIZ-1] = 0;\
+	 str_append(s, str);\
+	 })
 
 #endif /* ifndef STR_H_ */

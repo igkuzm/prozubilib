@@ -7,7 +7,7 @@
  */
 
 /* 
- * Split string function
+ * Get array from string separated by delims
  */
 
 #ifndef STRSPLIT_H__
