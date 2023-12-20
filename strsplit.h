@@ -2,7 +2,7 @@
  * File              : strsplit.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.02.2022
- * Last Modified Date: 05.12.2023
+ * Last Modified Date: 20.12.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -46,7 +46,7 @@ static int strsplit(
 			t=strtok(NULL, delim), ++i) 
 	{
 		arr = 
-			(char **)realloc(arr, (i+2)*8);
+			(char **)realloc(arr, (i+2)*sizeof(char*));
 		arr[i] = strdup(t);
 	}
 

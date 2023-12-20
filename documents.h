@@ -2,7 +2,7 @@
  * File              : documents.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 25.07.2023
- * Last Modified Date: 12.12.2023
+ * Last Modified Date: 20.12.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef DOCUMENTS_H
@@ -37,13 +37,23 @@
 #define DOCUMENTS_TABLENAME "ZDOCUMENTS"
 #define OUTFILE "out.rtf"
 
+typedef enum DOCUMENTS_VALUE_TYPE {
+	DOCUMENTS_VALUE_TYPE_TEXT,
+	DOCUMENTS_VALUE_TYPE_IMAGES,
+	DOCUMENTS_VALUE_TYPE_PLAN_LECHENIYA,
+	DOCUMENTS_VALUE_TYPE_BILL,
+} DOCUMENTS_VALUE_TYPE;
+
 /*
  * DOCUMENTS_COLUMN_TEXT(struct member, enum number, SQLite column title, size)
  */
 #define DOCUMENTS_COLUMNS \
 	DOCUMENTS_COLUMN_TEXT(name,      DOCUMENTSNAME,    "ZNAME")\
 	DOCUMENTS_COLUMN_TEXT(data,      DOCUMENTSDATA,    "ZTEMPLATE")\
-	DOCUMENTS_COLUMN_SARRAY(markers, DOCUMENTSMARKERS, "ZMARKERS")
+	DOCUMENTS_COLUMN_SARRAY(keys,    DOCUMENTSKEYS,    "ZKEYS")\
+	DOCUMENTS_COLUMN_SARRAY(types,   DOCUMENTSTYPES,   "ZTYPES")\
+	DOCUMENTS_COLUMN_SARRAY(vars,    DOCUMENTSVARS,    "ZVARS")\
+	DOCUMENTS_COLUMN_TEXT(sql,       DOCUMENTSQL,      "ZSQL")\
 
 struct document_t {
 	uuid4_str id;         /* uuid of the document */
@@ -436,15 +446,15 @@ static int prozubi_documents_make_rtf(
 	if (!c)
 		return -1;
 
-	if (c->len_markers < 1) {
+	if (c->len_keys < 1) {
 		if (p->on_error)
 			p->on_error(p->on_error_data, 
-					STR("no markers set for document: %s", name));
+					STR("no keys set for document: %s", name));
 		return -1;
 	}
 	// allocate values array
 	char **values = 
-		(char**)malloc(c->len_markers * sizeof(char*));
+		(char**)malloc(c->len_keys * sizeof(char*));
 	if (!values){
 		if (p->on_error)
 			p->on_error(p->on_error_data, 
@@ -457,13 +467,13 @@ static int prozubi_documents_make_rtf(
 	va_start(args, name);
 	
 	int i;
-	for (i = 0; i < c->len_markers; ++i) {
-		char *marker = c->markers[i];
+	for (i = 0; i < c->len_keys; ++i) {
+		char *marker = c->keys[i];
 		char *value = va_arg(args, char *);
 		if (!value){
 			if (p->on_error)
 				p->on_error(p->on_error_data, 
-						STR("no value argument set for marker: %s", 
+						STR("no value set for key: %s", 
 							marker));
 			return -1;
 		}
@@ -472,12 +482,13 @@ static int prozubi_documents_make_rtf(
 	va_end(args);
 	
 	struct prozubi_documents_markers_and_values d =
-		{c->markers, values, c->len_markers};
+		{c->keys, values, c->len_keys};
 	
 	// find markers in text and rename them with values
 	char *out = NULL;
 	int len = 
-		sfind(c->data, &out, c->len_data, (char*)"$", &d, 
+		sfind(c->data, &out, c->len_data,
+			(char*)"$", &d, 
 			prozubi_documents_make_rtf_sfind_cb);
 
 	if (len < 0 || !out){
@@ -504,6 +515,22 @@ static int prozubi_documents_make_rtf(
 
 	return 0;
 }
+
+
+
+
+
+
+/*
+ *
+ *
+ *
+ * OLD
+ *
+ *
+ *
+ *
+ */
 
 struct pl_table_data{
 	struct str *s;
