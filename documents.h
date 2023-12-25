@@ -2,13 +2,14 @@
  * File              : documents.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 25.07.2023
- * Last Modified Date: 21.12.2023
+ * Last Modified Date: 25.12.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef DOCUMENTS_H
 #define DOCUMENTS_H
 
 
+#include <cstdlib>
 #include <stdarg.h>
 #include <time.h>
 #include <stddef.h>
@@ -39,7 +40,7 @@
 
 typedef enum DOCUMENTS_VALUE_TYPE {
 	DOCUMENTS_VALUE_TYPE_TEXT,
-	DOCUMENTS_VALUE_TYPE_IMAGES,
+	DOCUMENTS_VALUE_TYPE_IMAGE,
 	DOCUMENTS_VALUE_TYPE_PLAN_LECHENIYA,
 	DOCUMENTS_VALUE_TYPE_BILL,
 } DOCUMENTS_VALUE_TYPE;
@@ -184,6 +185,98 @@ DOCUMENTS_COLUMNS
 	return t;
 }
 
+#define DOCUMENTS_COLUMN_TEXT(member, number, title)\
+static int prozubi_documents_set_##number(\
+		prozubi_t *p, struct document_t *t,\
+		const char *text, bool update)\
+{\
+	if (update)\
+		if (!kdata2_set_text_for_uuid(\
+					p, DOCUMENTS_TABLENAME, title, text, t->id))\
+			return -1;\
+	if(t->member)\
+		free(t->member);\
+	t->member = strdup(text);\
+	t->len_##member = strlen(text);\
+	return 0;\
+}
+
+#define DOCUMENTS_COLUMN_KARRAY(member, number, title)\
+static int prozubi_documents_set_##number(\
+		prozubi_t *p, struct document_t *t,\
+		const struct documents_key_t *keys,\
+			int len, bool update)\
+{\
+	int i;\
+	if (keys && len > 0){\
+		if (t->member)\
+			free(t->member);\
+		t->member =\
+			(struct documents_key_t *) malloc(\
+					sizeof(struct documents_key_t)*len);\
+		for (i = 0; i < len; ++i)\
+			t->member[i] = member[i];\
+		t->len_##member = len;\
+		if (t->member && update){\
+			cJSON *json, *object;\
+			if (json=cJSON_CreateArray()){\
+				for (i = 0; i < len; ++i) {\
+					if (object=cJSON_CreateObject()){\
+						cJSON_AddItemToObject(\
+								object, "type",\
+								cJSON_CreateNumber(member[i].type));\
+						cJSON_AddItemToObject(\
+								object, "key",\
+								cJSON_CreateString(member[i].key));\
+						cJSON_AddItemToArray(\
+								json, object);\
+					}\
+				}\
+				if (!kdata2_set_text_for_uuid(\
+						p,\
+						DOCUMENTS_TABLENAME,\
+						title,\
+						cJSON_Print(json),\
+						t->id))\
+					return -1;\
+				cJSON_free(json);\
+			}\
+		}\
+	}\
+	return 0;\
+}\
+	
+#define DOCUMENTS_COLUMN_SARRAY(member, number, title)\
+static int prozubi_documents_set_##number(\
+		prozubi_t *p, struct document_t *t,\
+		const char **array, int len, bool update)\
+{\
+	char *str = strjoin(array, len, ", ");\
+	if (str && len > 0){\
+		if (update)\
+			if (!kdata2_set_text_for_uuid(\
+						p, DOCUMENTS_TABLENAME, title, str, t->id))\
+				return -1;\
+		if (t->member)\
+			free(t->member);\
+		t->member = (char**)malloc(len * sizeof(char*));\
+		if (t->member){\
+			int i;\
+			for (i=0;i<len;++i)\
+				t->member[i] = strdup(array[i]);\
+		}\
+		free(str);\
+		return 0;\
+	}\
+	return -1;\
+}
+		
+	DOCUMENTS_COLUMNS
+#undef DOCUMENTS_COLUMN_TEXT			
+#undef DOCUMENTS_COLUMN_KARRAY			
+#undef DOCUMENTS_COLUMN_SARRAY			
+
+
 /* allocate and init new document */
 static struct document_t *
 prozubi_documents_new(
@@ -213,62 +306,15 @@ prozubi_documents_new(
 
 		/* set values */
 #define DOCUMENTS_COLUMN_TEXT(member, number, title)\
-	if (member){\
-		kdata2_set_text_for_uuid(\
-				p, DOCUMENTS_TABLENAME, title, member, t->id);\
-		t->member = strdup(member);\
-		t->len_##member = strlen(member);\
-	}
+	prozubi_documents_set_##number(p, t, member, true);
 
 #define DOCUMENTS_COLUMN_KARRAY(member, number, title)\
-		if (member && len_##member > 0){\
-			t->member =\
-				(struct documents_key_t *) malloc(\
-						sizeof(struct documents_key_t)*len_##member);\
-			if (t->member){\
-				int i; cJSON *json, *object;\
-				if (json=cJSON_CreateArray()){\
-					for (i = 0; i < len_##member; ++i) {\
-						t->member[i] = member[i];\
-						if (object=cJSON_CreateObject()){\
-							cJSON_AddItemToObject(\
-									object, "type",\
-									cJSON_CreateNumber(member[i].type));\
-							cJSON_AddItemToObject(\
-									object, "key",\
-									cJSON_CreateString(member[i].key));\
-							cJSON_AddItemToArray(\
-									json, object);\
-						}\
-					}\
-					kdata2_set_text_for_uuid(\
-							p,\
-							DOCUMENTS_TABLENAME,\
-							title,\
-							cJSON_Print(json),\
-							t->id);\
-					t->len_##member = len_##member;\
-					cJSON_free(json);\
-				}\
-			}\
-		}
+	prozubi_documents_set_##number(\
+			p, t, member, len_##member, true);
 
 #define DOCUMENTS_COLUMN_SARRAY(member, number, title)\
-		if (member && len_##member > 0){\
-			char *str;\
-			if (str = strjoin(member, len_##member, ", ")){\
-				kdata2_set_text_for_uuid(\
-						p, DOCUMENTS_TABLENAME, title, str, t->id);\
-				t->member =\
-					(char**)malloc(len_##member * sizeof(char*));\
-				if (t->member){\
-					int i;\
-					for (i=0;i<len_##member;++i)\
-						t->member[i] = strdup(member[i]);\
-				}\
-				free(str);\
-			}\
-		}
+	prozubi_documents_set_##number(\
+			p, t, member, len_##member, true);
 
 	DOCUMENTS_COLUMNS
 #undef DOCUMENTS_COLUMN_TEXT
@@ -450,89 +496,22 @@ prozubi_documents_foreach(
 	sqlite3_finalize(stmt);
 }
 
-#define DOCUMENTS_COLUMN_TEXT(member, number, title)\
-static int prozubi_documents_set_##number(\
-		kdata2_t *p, struct document_t *c,\
-		const char *text, bool update)\
-{\
-	if (update)\
-		if (!kdata2_set_text_for_uuid(\
-					p, DOCUMENTS_TABLENAME, title, text, c->id))\
-			return -1;\
-	if(c->member)\
-		free(c->member);\
-	c->member = strdup(text);\
-	c->len_##member = strlen(text);\
-	return 0;\
-}
-
-#define DOCUMENTS_COLUMN_KARRAY(member, number, title)\
-static int prozubi_documents_set_##number(\
-		kdata2_t *p, struct document_t *c,\
-		const struct documents_key_t *array,\
-			int len, bool update)\
-{\
-	/* TODO:  <21-12-23, yourname> */
-	char *str = strjoin(array, len, ", ");\
-	if (str && len > 0){\
-		if (update)\
-			if (!kdata2_set_text_for_uuid(\
-						p, DOCUMENTS_TABLENAME, title, str, c->id))\
-				return -1;\
-		if (c->member)\
-			free(c->member);\
-		c->member = (char**)malloc(len * sizeof(char*));\
-		if (c->member){\
-			int i;\
-			for (i=0;i<len;++i)\
-				c->member[i] = strdup(array[i]);\
-		}\
-		free(str);\
-		return 0;\
-	}\
-	return -1;\
-}
-	
-#define DOCUMENTS_COLUMN_SARRAY(member, number, title)\
-static int prozubi_documents_set_##number(\
-		kdata2_t *p, struct document_t *c,\
-		const char **array, int len, bool update)\
-{\
-	char *str = strjoin(array, len, ", ");\
-	if (str && len > 0){\
-		if (update)\
-			if (!kdata2_set_text_for_uuid(\
-						p, DOCUMENTS_TABLENAME, title, str, c->id))\
-				return -1;\
-		if (c->member)\
-			free(c->member);\
-		c->member = (char**)malloc(len * sizeof(char*));\
-		if (c->member){\
-			int i;\
-			for (i=0;i<len;++i)\
-				c->member[i] = strdup(array[i]);\
-		}\
-		free(str);\
-		return 0;\
-	}\
-	return -1;\
-}
-		
-	DOCUMENTS_COLUMNS
-#undef DOCUMENTS_COLUMN_TEXT			
-#undef DOCUMENTS_COLUMN_SARRAY			
-
 static int prozubi_documents_set_text(
-		DOCUMENTS key, kdata2_t *p, struct document_t *c, const char *text, bool update)
+		DOCUMENTS key, prozubi_t *p, struct document_t *t,
+		const char *text, bool update)
 {
 	switch (key) {
-#define DOCUMENTS_COLUMN_TEXT(member, number, title) case number:\
-		return prozubi_documents_set_##number(p, c, text, update);
+#define DOCUMENTS_COLUMN_TEXT(member, number, title)\
+		case number:\
+		return prozubi_documents_set_##number(\
+				p, t, text, update);
+#define DOCUMENTS_COLUMN_KARRAY(member, number, title)
 #define DOCUMENTS_COLUMN_SARRAY(member, number, title)
 		
 		DOCUMENTS_COLUMNS
 
 #undef DOCUMENTS_COLUMN_TEXT			
+#undef DOCUMENTS_COLUMN_KARRAY			
 #undef DOCUMENTS_COLUMN_SARRAY			
 		
 		default:
@@ -541,17 +520,47 @@ static int prozubi_documents_set_text(
 	return -1;
 }
 
-static int prozubi_documents_set_array(
-		DOCUMENTS key, kdata2_t *p, struct document_t *c, const char **array, int len, bool update)
+static int prozubi_documents_set_keys(
+		DOCUMENTS key, prozubi_t *p, struct document_t *t,
+		const struct documents_key_t *keys, int len, 
+		bool update)
 {
 	switch (key) {
-#define DOCUMENTS_COLUMN_SARRAY(member, number, title) case number:\
-		return prozubi_documents_set_##number(p, c, array, len, update);
 #define DOCUMENTS_COLUMN_TEXT(member, number, title)
+#define DOCUMENTS_COLUMN_KARRAY(member, number, title)\
+		case number:\
+		return prozubi_documents_set_##number(\
+				p, t, keys, len, update);
+#define DOCUMENTS_COLUMN_SARRAY(member, number, title)
 		
 		DOCUMENTS_COLUMNS
 
 #undef DOCUMENTS_COLUMN_TEXT			
+#undef DOCUMENTS_COLUMN_KARRAY			
+#undef DOCUMENTS_COLUMN_SARRAY			
+		
+		default:
+			break;
+	}
+	return -1;
+}
+
+static int prozubi_documents_set_vars(
+		DOCUMENTS key, kdata2_t *p, struct document_t *t,
+		const char **array, int len, bool update)
+{
+	switch (key) {
+#define DOCUMENTS_COLUMN_TEXT(member, number, title)
+#define DOCUMENTS_COLUMN_KARRAY(member, number, title)
+#define DOCUMENTS_COLUMN_SARRAY(member, number, title)\
+		case number:\
+		return prozubi_documents_set_##number(\
+				p, t, array, len, update);
+		
+		DOCUMENTS_COLUMNS
+
+#undef DOCUMENTS_COLUMN_TEXT			
+#undef DOCUMENTS_COLUMN_KARRAY			
 #undef DOCUMENTS_COLUMN_SARRAY			
 		
 		default:
@@ -561,86 +570,103 @@ static int prozubi_documents_set_array(
 }
 
 static void
-prozubi_documents_free(struct document_t *d){
-	if (d){
+prozubi_documents_free(struct document_t *t){
+	if (t){
+		int i;
 
-#define DOCUMENTS_COLUMN_TEXT(member, number, title) if(d->member) free(d->member); 
-#define DOCUMENTS_COLUMN_SARRAY(member, number, title) if(d->member) free(d->member); 
+#define DOCUMENTS_COLUMN_TEXT(member, number, title)\
+		if(t->member) free(t->member); 
+
+#define DOCUMENTS_COLUMN_KARRAY(member, number, title)\
+		if(t->member) free(t->member);\ 
+		t->len_##member = 0;
+
+#define DOCUMENTS_COLUMN_SARRAY(member, number, title)\
+		if (t->member){\
+			for (i = 0; i < t->len_##member; ++i)\
+				if (t->member[i])\
+					free(t->member[i]);\
+			free(t->member);\
+		}\
+		t->len_##member = 0;
+		
 		DOCUMENTS_COLUMNS
 #undef DOCUMENTS_COLUMN_TEXT			
+#undef DOCUMENTS_COLUMN_KARRAY			
 #undef DOCUMENTS_COLUMN_SARRAY			
 		
-		free(d);
-		d = NULL;
+		free(t);
 	}
 }
 
 static int prozubi_documents_remove(
-		kdata2_t *p, struct document_t *c
-		)
+		prozubi_t *p, struct document_t *t)
 {
-	return kdata2_remove_for_uuid(p, DOCUMENTS_TABLENAME, c->id);
+	return 
+		kdata2_remove_for_uuid(p,
+				DOCUMENTS_TABLENAME, t->id);
 }
 
 static int prozubi_documents_get_document_cb(
 		void *userdata, struct document_t *p)
 {
-	struct document_t **c = 
+	struct document_t **t = 
 		(struct document_t **)userdata;
 	if (p)
-		*c = p;
+		*t = p;
 	return 0;
 }
 
 static struct document_t *prozubi_documents_get(
-		kdata2_t *p, const char *uuid)
+		prozubi_t *p, const char *uuid)
 {
 	char predicate[BUFSIZ];
-	sprintf(predicate, "WHERE ZRECORDNAME = '%s'", uuid);
+	sprintf(predicate,
+			"WHERE ZRECORDNAME = '%s'", uuid);
 
-	struct document_t *c = NULL;
-	prozubi_documents_foreach(p, predicate, &c, 
+	struct document_t *t = NULL;
+	prozubi_documents_foreach(p, predicate, &t, 
 			prozubi_documents_get_document_cb);
-	if (!c){
+	if (!t){
 		if (p->on_error)
 			p->on_error(p->on_error_data, 
 					STR("no document with uuid: %s", uuid));
 	}
-	return c;
+	return t;
 }
 
 static struct document_t *prozubi_documents_get_with_name(
-		kdata2_t *p, const char *name)
+		prozubi_t *p, const char *name)
 {
 	char predicate[BUFSIZ];
 	sprintf(predicate, "WHERE ZNAME = '%s'", name);
 
-	struct document_t *c = NULL;
-	prozubi_documents_foreach(p, predicate, &c, 
+	struct document_t *t = NULL;
+	prozubi_documents_foreach(p, predicate, &t, 
 			prozubi_documents_get_document_cb);
-	if (!c){
+	if (!t){
 		if (p->on_error)
 			p->on_error(p->on_error_data, 
 					STR("no document with name: %s", name));
 	}
-	return c;
+	return t;
 }
 
-struct prozubi_documents_markers_and_values{
-	char **markers;
+struct prozubi_documents_keys_and_values{
+	documents_key_t *keys;
 	char **values;
 	size_t len;
 };
 
-static int prozubi_documents_make_rtf_sfind_cb(
+static int _prozubi_documents_make_rtf_sfind_cb(
 		char **found, void *data)
 {
-	struct prozubi_documents_markers_and_values *d =
-		(struct prozubi_documents_markers_and_values *)data;
+	struct prozubi_documents_keys_and_values *d =
+		(struct prozubi_documents_keys_and_values *)data;
 
 	int i;
 	for (i = 0; i < d->len; ++i)
-		if (strcmp(d->markers[i], *found) == 0)
+		if (strcmp(d->keys[i].key, *found) == 0)
 			*found = d->values[i];
 
 	return 0;
@@ -648,23 +674,24 @@ static int prozubi_documents_make_rtf_sfind_cb(
 
 /* generate rtf from document - set string values of 
  * document markers as arguments */
-static int prozubi_documents_make_rtf(
-	kdata2_t *p, const char *outfile, const char *name, ...)
+static int _prozubi_documents_make_rtf(
+	prozubi_t *p, const char *outfile, const char *name, ...)
 {
-	struct document_t *c = 
+	struct document_t *t = 
 		prozubi_documents_get_with_name(p, name);
-	if (!c)
+	if (!t)
 		return -1;
 
-	if (c->len_keys < 1) {
+	if (t->len_keys < 1) {
 		if (p->on_error)
 			p->on_error(p->on_error_data, 
-					STR("no keys set for document: %s", name));
+					STR(
+						"no keys set for document: %s", name));
 		return -1;
 	}
 	// allocate values array
 	char **values = 
-		(char**)malloc(c->len_keys * sizeof(char*));
+		(char**)malloc(t->len_keys * sizeof(char*));
 	if (!values){
 		if (p->on_error)
 			p->on_error(p->on_error_data, 
@@ -677,8 +704,8 @@ static int prozubi_documents_make_rtf(
 	va_start(args, name);
 	
 	int i;
-	for (i = 0; i < c->len_keys; ++i) {
-		char *marker = c->keys[i];
+	for (i = 0; i < t->len_keys; ++i) {
+		char *marker = t->keys[i].key;
 		char *value = va_arg(args, char *);
 		if (!value){
 			if (p->on_error)
@@ -691,15 +718,15 @@ static int prozubi_documents_make_rtf(
 	}
 	va_end(args);
 	
-	struct prozubi_documents_markers_and_values d =
-		{c->keys, values, c->len_keys};
+	struct prozubi_documents_keys_and_values d =
+		{t->keys, values, t->len_keys};
 	
-	// find markers in text and rename them with values
+	// find keys in text and rename them with values
 	char *out = NULL;
 	int len = 
-		sfind(c->data, &out, c->len_data,
+		sfind(t->data, &out, t->len_data,
 			(char*)"$", &d, 
-			prozubi_documents_make_rtf_sfind_cb);
+			_prozubi_documents_make_rtf_sfind_cb);
 
 	if (len < 0 || !out){
 		if (p->on_error)
@@ -726,7 +753,135 @@ static int prozubi_documents_make_rtf(
 	return 0;
 }
 
+struct _prozubi_documents_sql_replace_args {
+	/* data */
+	int i; // iter
+	struct document_t *t;
+	prozubi_t *p;
+};
 
+static int _prozubi_documents_sql_replace_args_cb(
+		char **found, void *data)
+{
+	struct _prozubi_documents_sql_replace_args *d =
+		(struct _prozubi_documents_sql_replace_args *)data;
+
+	// check iterate
+	if (d->i <= d->t->len_vars){
+		if (d->p->on_error)
+			d->p->on_error(d->p->on_error_data, 
+					STR("%s", 
+						"too many vars in SQL template"));
+		return -1;
+	}
+		
+	char var[8];
+	sprintf(var, "var%d", d->i);	
+
+	if (strcmp(var, *found) == 0)
+		*found = d->t->vars[d->i];
+
+	d->i++;
+
+	return 0;
+}
+
+static char * _prozubi_documents_create_sql_request(
+		prozubi_t *p, struct document_t *t)
+{
+	char *SQL = NULL;
+	struct _prozubi_documents_sql_replace_args d = 
+		{0, t, p};
+	sfind(t->sql, &SQL, 0, "$",
+			&d,
+			_prozubi_documents_sql_replace_args_cb);	
+	return SQL;
+}
+
+static int _prozubi_documents_get_values_from_sql(
+	prozubi_t *p, struct document_t *t)
+{
+	// array to handle values
+	/*! TODO: USE STRUCT STR! */
+	char **values = 
+		(char **)malloc(sizeof(char*)*t->len_keys);
+	if (!values){
+		if (p->on_error)
+			p->on_error(p->on_error_data,		
+				STR_ERR("can't allocate memory: %d", 
+					sizeof(char*)*t->len_keys));	
+		return -1;
+	}
+
+	char *SQL = 
+		_prozubi_documents_create_sql_request(p, t);
+	if (!SQL)
+		return -1;
+
+	/* start SQLite request */
+	int res;
+	sqlite3_stmt *stmt;
+	
+	res = sqlite3_prepare_v2(
+			p->db, SQL,
+		 	-1, &stmt, NULL);
+	if (res != SQLITE_OK) {
+		if (p->on_error)
+			p->on_error(p->on_error_data,		
+			STR_ERR("sqlite3_prepare_v2: %s: %s", 
+				SQL, sqlite3_errmsg(p->db)));	
+		return -1;
+	}	
+
+	while (sqlite3_step(stmt) != SQLITE_DONE) {
+		// handle with keys/values
+		int i;
+		for (i=0; i<t->len_keys; ++i){
+			// key is column title
+			const char *key = sqlite3_column_name(stmt, i);
+			
+			// check key matches in document_t
+			int k;
+			for (k = 0; k < t->len_keys; ++k) {
+				if (strcmp(key, t->keys[k].key) == 0){
+					// get value by it's type
+					switch (t->keys[k].type) {
+						case DOCUMENTS_VALUE_TYPE_TEXT:
+							{
+								// get text
+								break;
+							}
+						
+						case DOCUMENTS_VALUE_TYPE_IMAGE:
+							{
+								// get image
+								break;
+							}
+					
+						case DOCUMENTS_VALUE_TYPE_PLAN_LECHENIYA:
+							{
+								// get image
+								break;
+							}
+					
+						case DOCUMENTS_VALUE_TYPE_BILL:
+							{
+								// get bill
+								break;
+							}
+					
+						default:
+							break;
+					}
+				}
+			}
+
+		}
+	}	
+
+	free(SQL);
+	return 0;
+}
 
 
 
