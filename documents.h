@@ -2,7 +2,7 @@
  * File              : documents.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 25.07.2023
- * Last Modified Date: 25.12.2023
+ * Last Modified Date: 26.12.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef DOCUMENTS_H
@@ -215,13 +215,14 @@ static int prozubi_documents_set_##number(\
 			(struct documents_key_t *) malloc(\
 					sizeof(struct documents_key_t)*len);\
 		for (i = 0; i < len; ++i)\
-			t->member[i] = member[i];\
+			t->member[i] = keys[i];\
 		t->len_##member = len;\
 		if (t->member && update){\
-			cJSON *json, *object;\
-			if (json=cJSON_CreateArray()){\
+			cJSON *json = cJSON_CreateArray();\
+			if (json){\
 				for (i = 0; i < len; ++i) {\
-					if (object=cJSON_CreateObject()){\
+					cJSON *object = cJSON_CreateObject();\
+					if (object){\
 						cJSON_AddItemToObject(\
 								object, "type",\
 								cJSON_CreateNumber(member[i].type));\
