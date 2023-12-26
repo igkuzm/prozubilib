@@ -34,6 +34,7 @@
 #include "strsplit.h"
 #include "strjoin.h"
 #include "sfind.h"
+#include "rtf.h"
 
 #define DOCUMENTS_TABLENAME "ZDOCUMENTS"
 #define OUTFILE "out.rtf"
@@ -47,8 +48,11 @@ typedef enum DOCUMENTS_VALUE_TYPE {
 
 struct documents_key_t {
 	/* data */
-	DOCUMENTS_VALUE_TYPE type;
-	char key[128];
+	DOCUMENTS_VALUE_TYPE type; // type of value
+	char key[128];             // key without mark '$'
+	bool multiple;             // true if SQL request has
+														 // multiple lines (vaue will
+														 // append for each line)
 };
 
 /*
@@ -229,6 +233,9 @@ static int prozubi_documents_set_##number(\
 						cJSON_AddItemToObject(\
 								object, "key",\
 								cJSON_CreateString(member[i].key));\
+						cJSON_AddItemToObject(\
+								object, "multiple",\
+								cJSON_CreateBool(member[i].multiple));\
 						cJSON_AddItemToArray(\
 								json, object);\
 					}\
@@ -376,12 +383,16 @@ prozubi_documents_from_sql(
 							cJSON_GetObjectItem(object, "type");\
 						cJSON *key = \
 							cJSON_GetObjectItem(object, "key");\
+						cJSON *multiple = \
+							cJSON_GetObjectItem(object, "multiple");\
 						t->member[i].type = (DOCUMENTS_VALUE_TYPE)\
 							cJSON_GetNumberValue(type);\
 						strncpy(t->member[i].key, \
 								cJSON_GetStringValue(key),\
 								sizeof(t->member[i].key)-1);\
 						t->member[i].key[sizeof(t->member[i].key)-1]=0;\
+						t->member[i].multiple = \
+							cJSON_GetNumberValue(multiple);\
 						cJSON_free(json);\
 						i++;\
 					}\
@@ -802,26 +813,22 @@ static char * _prozubi_documents_create_sql_request(
 static int _prozubi_documents_get_values_from_sql(
 	prozubi_t *p, struct document_t *t)
 {
-	// array to handle values
-	/*! TODO: USE STRUCT STR! */
-	char **values = 
-		(char **)malloc(sizeof(char*)*t->len_keys);
-	if (!values){
-		if (p->on_error)
-			p->on_error(p->on_error_data,		
-				STR_ERR("can't allocate memory: %d", 
-					sizeof(char*)*t->len_keys));	
-		return -1;
-	}
+	int i, k, res;
+	sqlite3_stmt *stmt;
+	struct str values[t->len_keys];	// array to handle values
 
+	// init values
+	for (i = 0; i < t->len_keys; ++i)
+		if (str_init(&values[i], BUFSIZ))
+			return -1;
+	
+	// get SQL
 	char *SQL = 
 		_prozubi_documents_create_sql_request(p, t);
 	if (!SQL)
 		return -1;
 
 	/* start SQLite request */
-	int res;
-	sqlite3_stmt *stmt;
 	
 	res = sqlite3_prepare_v2(
 			p->db, SQL,
@@ -836,32 +843,72 @@ static int _prozubi_documents_get_values_from_sql(
 
 	while (sqlite3_step(stmt) != SQLITE_DONE) {
 		// handle with keys/values
-		int i;
 		for (i=0; i<t->len_keys; ++i){
 			// key is column title
 			const char *key = sqlite3_column_name(stmt, i);
 			
 			// check key matches in document_t
-			int k;
 			for (k = 0; k < t->len_keys; ++k) {
 				if (strcmp(key, t->keys[k].key) == 0){
 					// get value by it's type
 					switch (t->keys[k].type) {
 						case DOCUMENTS_VALUE_TYPE_TEXT:
 							{
-								// get text
+								if (values[k].len == 0 || 
+										t->keys[k].multiple)
+								{
+									// get text
+									const unsigned char *value = 
+										sqlite3_column_text(stmt, i);
+									char *rtf_string =
+										rtf_from_utf8((char*)value);
+									// append text to keys
+									if (rtf_string){
+										str_append(
+												&values[k], 
+												rtf_string,
+												strlen(rtf_string));
+										free(rtf_string);
+									}
+								}
+
 								break;
 							}
 						
 						case DOCUMENTS_VALUE_TYPE_IMAGE:
 							{
 								// get image
+								if (values[k].len == 0 || 
+										t->keys[k].multiple)
+								{
+									struct image_t *image = 
+										prozubi_image_from_sql(
+												p, stmt);
+									if (image){
+										char *rtf_string = NULL;
+										int len = 
+											prozubi_image_to_rtf(
+													p, image, &rtf_string);
+										if (rtf_string){
+											str_append(
+													&values[k], 
+													rtf_string, len);
+											free(rtf_string);
+										}
+										prozubi_image_free(image);
+									}
+								}
 								break;
 							}
 					
 						case DOCUMENTS_VALUE_TYPE_PLAN_LECHENIYA:
 							{
-								// get image
+								// get planlecheniya
+								if (values[k].len == 0 || 
+										t->keys[k].multiple)
+								{
+
+								}
 								break;
 							}
 					
@@ -880,6 +927,7 @@ static int _prozubi_documents_get_values_from_sql(
 		}
 	}	
 
+	sqlite3_finalize(stmt);
 	free(SQL);
 	return 0;
 }

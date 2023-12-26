@@ -2,7 +2,7 @@
  * File              : images.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 13.12.2023
+ * Last Modified Date: 26.12.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -33,10 +33,10 @@
  * IMAGES_COLUMN_DATA(struct member, enum number, SQLite column title, type)
  */
 #define IMAGES_COLUMNS \
-	IMAGES_COLUMN_DATE(date,   IMAGEDATE,   "ZLASTMODIFIED"   )\
-	IMAGES_COLUMN_TEXT(title,  IMAGETITLE,  "ZTITLE"          )\
-	IMAGES_COLUMN_TEXT(caseid, IMAGECASEID, "ZCASEID"         )\
-	IMAGES_COLUMN_DATA(data,   IMAGEDATA,   "ZIMAGEDATA", void)
+	IMAGES_COLUMN_DATE(date, IMAGEDATE,   "ZLASTMODIFIED")\
+	IMAGES_COLUMN_TEXT(title, IMAGETITLE,  "ZTITLE"       )\
+	IMAGES_COLUMN_TEXT(caseid, IMAGECASEID, "ZCASEID"      )\
+	IMAGES_COLUMN_DATA(data, IMAGEDATA,   "ZIMAGEDATA", void)
 
 #define IMAGES_DATA_TYPES\
 	IMAGES_DATA_TYPE(void)
@@ -52,9 +52,12 @@ enum image_data_types {
 struct image_t {
 	uuid4_str id;         /* uuid of the image */
 
-#define IMAGES_COLUMN_DATE(member, number, title      ) time_t member; 
-#define IMAGES_COLUMN_TEXT(member, number, title      ) char * member; size_t len_##member; 
-#define IMAGES_COLUMN_DATA(member, number, title, type) type * member; size_t len_##member; 
+#define IMAGES_COLUMN_DATE(member, number, title      )\
+	time_t member; 
+#define IMAGES_COLUMN_TEXT(member, number, title      )\
+	char * member; size_t len_##member; 
+#define IMAGES_COLUMN_DATA(member, number, title, type)\
+	type * member; size_t len_##member; 
 	IMAGES_COLUMNS
 #undef IMAGES_COLUMN_DATE
 #undef IMAGES_COLUMN_TEXT
@@ -63,9 +66,12 @@ struct image_t {
 
 
 BEGIN_ENUM(IMAGES) 
-#define IMAGES_COLUMN_DATE(member, number, title      ) DECL_ENUM_ELEMENT(number), 
-#define IMAGES_COLUMN_TEXT(member, number, title      ) DECL_ENUM_ELEMENT(number), 
-#define IMAGES_COLUMN_DATA(member, number, title, type) DECL_ENUM_ELEMENT(number), 
+#define IMAGES_COLUMN_DATE(member, number, title      )\
+		DECL_ENUM_ELEMENT(number), 
+#define IMAGES_COLUMN_TEXT(member, number, title      )\
+		DECL_ENUM_ELEMENT(number), 
+#define IMAGES_COLUMN_DATA(member, number, title, type)\
+		DECL_ENUM_ELEMENT(number), 
 	IMAGES_COLUMNS
 #undef IMAGES_COLUMN_DATE
 #undef IMAGES_COLUMN_TEXT
@@ -75,9 +81,12 @@ BEGIN_ENUM(IMAGES)
 END_ENUM(IMAGES)
 
 BEGIN_ENUM_STRING(IMAGES) 
-#define IMAGES_COLUMN_DATE(member, number, title      ) DECL_ENUM_STRING_ELEMENT(number), 
-#define IMAGES_COLUMN_TEXT(member, number, title      ) DECL_ENUM_STRING_ELEMENT(number), 
-#define IMAGES_COLUMN_DATA(member, number, title, type) DECL_ENUM_STRING_ELEMENT(number), 
+#define IMAGES_COLUMN_DATE(member, number, title      )\
+		DECL_ENUM_STRING_ELEMENT(number), 
+#define IMAGES_COLUMN_TEXT(member, number, title      )\
+		DECL_ENUM_STRING_ELEMENT(number), 
+#define IMAGES_COLUMN_DATA(member, number, title, type)\
+		DECL_ENUM_STRING_ELEMENT(number), 
 	IMAGES_COLUMNS
 #undef IMAGES_COLUMN_DATE
 #undef IMAGES_COLUMN_TEXT
@@ -88,9 +97,12 @@ static void
 prozubi_images_table_init(struct kdata2_table **images){
 	kdata2_table_init(images, IMAGES_TABLENAME,
 
-#define IMAGES_COLUMN_DATE(member, number, title      ) KDATA2_TYPE_NUMBER, title, 
-#define IMAGES_COLUMN_TEXT(member, number, title      ) KDATA2_TYPE_TEXT, title, 
-#define IMAGES_COLUMN_DATA(member, number, title, type) KDATA2_TYPE_DATA, title, 
+#define IMAGES_COLUMN_DATE(member, number, title      )\
+	KDATA2_TYPE_NUMBER, title, 
+#define IMAGES_COLUMN_TEXT(member, number, title      )\
+	KDATA2_TYPE_TEXT, title, 
+#define IMAGES_COLUMN_DATA(member, number, title, type)\
+	KDATA2_TYPE_DATA, title, 
 	IMAGES_COLUMNS
 #undef IMAGES_COLUMN_DATE
 #undef IMAGES_COLUMN_TEXT
@@ -122,7 +134,8 @@ _prozubi_image_jpg_write_func(
 	}
 	
 	// copy
-	memcpy(&(((char *)s->data)[s->len]), data, size);
+	memcpy(&(((char *)s->data)[s->len]),
+			data, size);
 	s->len += size;
 }
 
@@ -162,10 +175,13 @@ prozubi_image_set_image_raw(
 
 	if (p->on_log)
 		p->on_log(p->on_log_data,
-				STR("set image data with %ld bytes", i->len_data));
+				STR("set image data with %ld bytes", 
+					i->len_data));
 
-	if (!kdata2_set_data_for_uuid(p, IMAGES_TABLENAME, 
-				"ZIMAGEDATA", i->data, i->len_data, i->id))
+	if (!kdata2_set_data_for_uuid(
+				p, IMAGES_TABLENAME, 
+				"ZIMAGEDATA", i->data, 
+				i->len_data, i->id))
 		return -1;
 	return 0;
 }
@@ -184,7 +200,9 @@ prozubi_image_set_image_from_mem(
 	
 	int w, h, c;
 	stbi_uc *image = 
-			stbi_load_from_memory(data, len, &w, &h, &c, 0);
+			stbi_load_from_memory((stbi_uc *)data, len,
+					&w, &h, &c,
+					0);
 	if (!image){
 		if (p->on_error)
 			p->on_error(p->on_error_data,			
@@ -192,8 +210,8 @@ prozubi_image_set_image_from_mem(
 		return -1;
 	}
 	
-	int ret = prozubi_image_set_image_raw(
-			p, i, image, w, h, c);
+	int ret = prozubi_image_set_image_raw(p, i, 
+			image, w, h, c);
 
 	stbi_image_free(image);
 	return ret;
@@ -208,7 +226,8 @@ prozubi_image_set_image_from_file(
 	// try to load file
 	int w=0, h=0, c;
 	stbi_uc *image = 
-		stbi_load(filename, &w, &h, &c, 0);
+		stbi_load(filename, &w, &h, &c,
+				0);
 
 	if (!image){
 		// maybe TIFF?
@@ -239,7 +258,8 @@ prozubi_image_set_image_from_file(
 	}
 
 	int ret = prozubi_image_set_image_raw(
-			p, i, image, w, h, c);
+			p, i, image, w, h, 
+			c);
 	stbi_image_free(image);
 	return ret;
 }
@@ -251,7 +271,8 @@ static struct image_t *_prozubi_image_new(
 	struct image_t *i = NEW(struct image_t, 
 			if (p->on_error)
 				p->on_error(p->on_error_data,			
-			STR_ERR("%s", "can't allocate struct image_t")), 
+			STR_ERR("%s", 
+				"can't allocate struct image_t")), 
 				return NULL);
 
 //set values to NULL
@@ -267,6 +288,61 @@ static struct image_t *_prozubi_image_new(
 	
 	return i;
 }
+
+#define IMAGES_COLUMN_DATE(member, number, title)\
+static int prozubi_image_set_##number(\
+		kdata2_t *p, struct image_t *c, time_t t){\
+	if (!kdata2_set_number_for_uuid(p, IMAGES_TABLENAME,\
+			 	title, t, c->id))\
+		return -1;\
+	c->member = t;\
+	return 0;\
+}
+#define IMAGES_COLUMN_DATA(member, number, title, type)\
+static int prozubi_image_set_##number(\
+		kdata2_t *p, struct image_t *c,\
+	   	void *data, size_t len)\
+{\
+	if (IMAGES_DATA_TYPE_##type == IMAGES_DATA_TYPE_void){\
+		if (!kdata2_set_data_for_uuid(p, IMAGES_TABLENAME,\
+				 	title, data, len, c->id))\
+			return -1;\
+		if(c->member)\
+			free(c->member);\
+		c->member = MALLOC(len,\
+			if (p->on_error)\
+				p->on_error(p->on_error_data,\
+				STR_ERR(\
+					"can't allocate size: %ld"\
+					, len)), return -1);\
+		memcpy(c->member, data, len);\
+		c->len_##member = len;\
+	}\
+	return 0;\
+}
+#define IMAGES_COLUMN_TEXT(member, number, title)\
+static int prozubi_image_set_##number(\
+		kdata2_t *p, struct image_t *c, const char *text){\
+	if (!kdata2_set_text_for_uuid(p, IMAGES_TABLENAME,\
+			 	title, text, c->id))\
+		return -1;\
+	if(c->member)\
+		free(c->member);\
+	size_t len = strlen(text);\
+   	c->member = (char *)MALLOC(len + 1,\
+			if (p->on_error)\
+				p->on_error(p->on_error_data,\
+			STR_ERR(\
+				"can't allocate size: %ld"\
+				, len + 1)), return -1);\
+	strncpy(c->member, text, len);\
+	c->len_##member = len;\
+	return 0;\
+}
+		IMAGES_COLUMNS
+#undef IMAGES_COLUMN_DATE
+#undef IMAGES_COLUMN_TEXT			
+#undef IMAGES_COLUMN_DATA			
 
 /* allocate and init new image */
 static struct image_t *
@@ -309,31 +385,13 @@ prozubi_image_new(
 
 		/* set values */
 #define IMAGES_COLUMN_DATE(member, number, title)\
-   	kdata2_set_number_for_uuid(p, IMAGES_TABLENAME,\
-			 	title, member, i->id);\
-	i->member = member;
+	prozubi_image_set_##number(p, i, member);
+
 #define IMAGES_COLUMN_TEXT(member, number, title)\
-   	if (member){\
-		kdata2_set_text_for_uuid(p, IMAGES_TABLENAME,\
-			 	title, member, i->id);\
-		size_t len = strlen(member);\
-		i->member = (char *)MALLOC(len + 1,\
-				if (p->on_error)\
-					p->on_error(p->on_error_data,\
-				STR_ERR(\
-					"can't allocate size: %ld"\
-					, len + 1)), return NULL);\
-		strncpy(i->member, member, len);\
-		i->len_##member = len;\
-	}
+	prozubi_image_set_##number(p, i, member);
+
 #define IMAGES_COLUMN_DATA(member, number, title, type)\
-	if (member){\
-		if (!prozubi_image_set_image_from_mem(p, i, \
-					data, len_data)){\
-			kdata2_set_data_for_uuid(p, IMAGES_TABLENAME, \
-				title, i->data, i->len_data, i->id);\
-		}\
-	}
+	prozubi_image_set_##number(p, i, member, len_##member);
 
 	IMAGES_COLUMNS
 #undef IMAGES_COLUMN_DATE
@@ -530,61 +588,6 @@ prozubi_image_free(struct image_t *i){
 	}
 }
 
-#define IMAGES_COLUMN_DATE(member, number, title)\
-static int prozubi_image_set_##number(\
-		kdata2_t *p, struct image_t *c, time_t t){\
-	if (!kdata2_set_number_for_uuid(p, IMAGES_TABLENAME,\
-			 	title, t, c->id))\
-		return -1;\
-	c->member = t;\
-	return 0;\
-}
-#define IMAGES_COLUMN_DATA(member, number, title, type)\
-static int prozubi_image_set_##number(\
-		kdata2_t *p, struct image_t *c,\
-	   	void *data, size_t len)\
-{\
-	if (IMAGES_DATA_TYPE_##type == IMAGES_DATA_TYPE_void){\
-		if (!kdata2_set_data_for_uuid(p, IMAGES_TABLENAME,\
-				 	title, data, len, c->id))\
-			return -1;\
-		if(c->member)\
-			free(c->member);\
-		c->member = MALLOC(len,\
-			if (p->on_error)\
-				p->on_error(p->on_error_data,\
-				STR_ERR(\
-					"can't allocate size: %ld"\
-					, len)), return -1);\
-		memcpy(c->member, data, len);\
-		c->len_##member = len;\
-	}\
-	return 0;\
-}
-#define IMAGES_COLUMN_TEXT(member, number, title)\
-static int prozubi_image_set_##number(\
-		kdata2_t *p, struct image_t *c, const char *text){\
-	if (!kdata2_set_text_for_uuid(p, IMAGES_TABLENAME,\
-			 	title, text, c->id))\
-		return -1;\
-	if(c->member)\
-		free(c->member);\
-	size_t len = strlen(text);\
-   	c->member = (char *)MALLOC(len + 1,\
-			if (p->on_error)\
-				p->on_error(p->on_error_data,\
-			STR_ERR(\
-				"can't allocate size: %ld"\
-				, len + 1)), return -1);\
-	strncpy(c->member, text, len);\
-	c->len_##member = len;\
-	return 0;\
-}
-		IMAGES_COLUMNS
-#undef IMAGES_COLUMN_DATE
-#undef IMAGES_COLUMN_TEXT			
-#undef IMAGES_COLUMN_DATA			
-
 static int prozubi_image_set_text(
 		IMAGES key, 
 		kdata2_t *p, 
@@ -668,49 +671,84 @@ static int prozubi_image_set_data(
 static int prozubi_image_remove(
 		kdata2_t *p, struct image_t *c)
 {
-	return kdata2_remove_for_uuid(p, IMAGES_TABLENAME, c->id);
+	return kdata2_remove_for_uuid(p,
+			IMAGES_TABLENAME, c->id);
+}
+
+static unsigned char * _prozubi_image_bin_to_strhex(
+		const unsigned char *bin,
+		unsigned int binsz,
+		unsigned char **result)
+{
+	unsigned char hex_str[] = "0123456789abcdef";
+	unsigned int  i;
+
+	if (!binsz)
+		return NULL;
+	
+	if (!(*result = 
+				(unsigned char *)malloc(binsz * 2 + 1)))
+		return NULL;
+
+	(*result)[binsz * 2] = 0;
+
+	for (i = 0; i < binsz; ++i)
+	{
+		(*result)[i * 2 + 0] = hex_str[(bin[i] >> 4) & 0x0F];
+		(*result)[i * 2 + 1] = hex_str[(bin[i]     ) & 0x0F];
+	}
+
+	return (*result);
 }
 
 /* convert image to RTF string */
-static char * prozubi_image_to_rtf(
-		prozubi_t *p, struct image_t *image)
+static size_t prozubi_image_to_rtf(
+		prozubi_t *p, struct image_t *image, char **rtf)
 {
 	struct str s;
-	if (str_init(&s, image->len_data * 2 + BUFSIZ )){
+	if (str_init(&s, image->len_data * 2 + BUFSIZ))
+	{
 		if (p->on_error)
 			p->on_error(p->on_error_data,
 					STR("can't allocate memory"));
-		return NULL;
+		return 0;
 	}
 
 	// try to load image
 	int x, y, c;
-	if (!stbi_info_from_memory(image->data, 
+	if (!stbi_info_from_memory(
+				(stbi_uc*)image->data, 
 				image->len_data, &x, &y, &c))
 	{
 		if (p->on_error)
 			p->on_error(p->on_error_data,
 					STR("can't load image: %s", image->id));
-		return NULL;
+		return 0;
 	}
 
 	// append image header to rtf
-	str_append(&s, 
+	str_appendf(&s, 
 			"{\\pict\\picw0\\pich0\\picwgoal10254"
 			"\\pichgoal6000\\jpegblip\n");
 	
 	// append image data to rtf
-	int i;
-	for (i = 0; i < image->len_data; i++) {
-		char bit = ((char *)image->data)[i];
-		for (i = 0; i < 2; ++i)	
-			str_appendf(&s, "%02x", bit);
-	}
+	unsigned char *str;
+	_prozubi_image_bin_to_strhex(
+		(unsigned char*)(image->data),
+		image->len_data, &str);
+	str_append(
+			&s, (char*)str, image->len_data*2);
+	free(str);
 	
 	// append image close to rtf
-	str_append(&s, "}\n");
+	str_appendf(&s, "}\n");
+
+	if (rtf)
+		*rtf = s.str;
+	else
+		free(s.str);
 	
-	return s.str;
+	return s.len;
 }
 
 #endif /* ifndef IMAGES_H */

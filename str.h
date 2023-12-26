@@ -2,7 +2,7 @@
  * File              : str.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 06.12.2023
- * Last Modified Date: 12.12.2023
+ * Last Modified Date: 26.12.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 /**
@@ -49,7 +49,8 @@ struct str {
 static int str_init(struct str *s, size_t size);
 
 /* append c string */
-static void str_append(struct str *s, const char *str);
+static void str_append(
+		struct str *s, const char *str, int len);
 
 /* append fprint-like formated c string */
 #define str_appendf(s, ...)
@@ -88,14 +89,13 @@ static int _str_realloc(
 }
 
 void str_append(
-		struct str *s, const char *str)
+		struct str *s, const char *str, int len)
 {
-	if (!str)
+	if (!str || len < 1)
 		return;
 
-	int len, new_size, i;
+	int new_size, i;
 	
-	len = strlen(str);
 	new_size = s->len + len + 1;
 	// realloc if not enough size
 	if (_str_realloc(s, new_size))
@@ -114,7 +114,7 @@ void str_append(
 	 char str[BUFSIZ];\
 	 snprintf(str, BUFSIZ-1, __VA_ARGS__);\
 	 str[BUFSIZ-1] = 0;\
-	 str_append(s, str);\
+	 str_append(s, str, strlen(str));\
 	 })
 
 #endif /* ifndef STR_H_ */
