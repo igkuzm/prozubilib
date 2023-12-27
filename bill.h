@@ -2,7 +2,7 @@
  * File              : bill.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.12.2023
- * Last Modified Date: 01.12.2023
+ * Last Modified Date: 27.12.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -15,6 +15,8 @@
 #include "kdata2/kdata2.h"
 #include "prozubilib_conf.h"
 #include "log.h"
+#include "str.h"
+#include "rtf.h"
 #include "alloc.h"
 #include "kdata2/cYandexDisk/cJSON.h"
 
@@ -402,6 +404,85 @@ prozubi_bill_set_item_count(
 		return cJSON_False;
 	
 	return cJSON_True;
+}
+
+static void _prozubi_bill_to_rtf_cb(
+		void *d, struct bill_t *t)
+{
+	struct str *s = (struct str *)d;
+	if (t->type == BILL_TYPE_ITEM)
+	{
+		str_appendf(s, 
+				"\\trowd\n"
+				"\\intbl %d \\cell\n"
+				"\\intbl %s \\cell\n"
+				"\\intbl %s \\cell\n"
+				"\\intbl %s \\cell\n"
+				"\\intbl %s \\cell\n"
+				"\\row\n"
+				, t->itemIndex + 1
+				, t->title
+				, t->count
+				, t->price
+				, t->total
+		);
+	}
+	else if (t->type == BILL_TYPE_TOTAL_PRICE)
+	{
+		str_appendf(s, 
+				"\\trowd\n"
+				"\\intbl  \\cell\n"
+				"\\intbl \\b %s \\b0 \\cell\n"
+				"\\intbl \\cell\n"
+				"\\intbl \\cell\n"
+				"\\intbl \\b %s руб. \\b0 \\cell\n"
+				"\\row\\lastrow\n"
+				, t->title
+				, t->total
+		);
+	}
+}
+
+static size_t prozubi_bill_to_rtf(
+		prozubi_t *p, cJSON *bill, char **rtf)
+{
+	struct str s;
+	if (str_init(&s, BUFSIZ)){
+		if(p->on_error)
+			p->on_error(p->on_error_data, 
+					STR("can't allocate memory"));
+		return 0;
+	}
+
+	// create RTF table
+	const char *titles[] =
+	{
+		"\\b № \\b0",
+		"\\b Наименование работы (услуги) \\b0"
+		"\\b Количество \\b0"
+		"\\b Цена \\b0"
+		"\\b Сумма \\b0"
+	};
+	int width[] = 
+		{400, 6854, 1000, 1000, 1000};
+	char *tbl = 
+		rtf_table_header(5, titles, width);
+	
+	str_append(
+			&s, tbl, strlen(tbl));
+	free(tbl);
+
+	// fill RTF table
+	prozubi_bill_foreach(
+			p, bill, &s, 
+			_prozubi_bill_to_rtf_cb);
+
+	if (rtf)
+		*rtf = s.str;
+	else
+		free(s.str);
+	
+	return s.len;
 }
 
 #endif /* ifndef BILL_H */
