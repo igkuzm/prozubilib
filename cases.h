@@ -2,7 +2,7 @@
  * File              : cases.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 06.05.2023
- * Last Modified Date: 27.12.2023
+ * Last Modified Date: 15.06.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef CASES_H
@@ -1235,7 +1235,7 @@ static int prozubi_case_set_data(
 	return -1;
 }
 
-static case_t * prozubi_case_get(
+static struct case_t * prozubi_case_get(
 		prozubi_t *p, const char *uuid)
 {
 	/* create SQL string */
