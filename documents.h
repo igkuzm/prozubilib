@@ -2,14 +2,13 @@
  * File              : documents.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 25.07.2023
- * Last Modified Date: 27.12.2023
+ * Last Modified Date: 15.06.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef DOCUMENTS_H
 #define DOCUMENTS_H
 
 
-#include <cstdlib>
 #include <stdarg.h>
 #include <time.h>
 #include <stddef.h>
