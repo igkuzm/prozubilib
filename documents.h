@@ -2,7 +2,7 @@
  * File              : documents.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 25.07.2023
- * Last Modified Date: 29.07.2023
+ * Last Modified Date: 16.06.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef DOCUMENTS_H
@@ -24,87 +24,26 @@
 #include "cases.h"
 #include "prozubilib.h"
 #include "images.h"
+#include "str.h"
+#include "rtf.h"
 
 #define OUTFILE "out.rtf"
 
-// convert utf8 miltibite string to rtf code
-static char *
-string_to_rtf(const char *s)
-{
-	if (!s)
-		return NULL;
-	
-	size_t len = strlen(s);
-	char *out = (char *)malloc(len * 6 + 1);
-	if (!out)
-		return NULL;
-	strcpy(out, "");
-
-	char *ptr = (char *)s;
-	uint32_t c32;
-	while(*ptr){
-		// get char
-		uint8_t c = *ptr;
-		if (c >= 252){/* 6-bytes */
-			c32  = (*ptr++ & 0x1)  << 30;  // 0b00000001
-			c32 |= (*ptr++ & 0x3F) << 24;  // 0b00111111
-			c32 |= (*ptr++ & 0x3F) << 18;  // 0b00111111
-			c32 |= (*ptr++ & 0x3F) << 12;  // 0b00111111
-			c32 |= (*ptr++ & 0x3F) << 6;   // 0b00111111
-			c32 |=  *ptr++ & 0x3F;         // 0b00111111
-			sprintf(out, "%s\\u%d ", out, c32);
-		}	
-		else if (c >= 248){/* 5-bytes */
-			c32  = (*ptr++ & 0x3)  << 24;  // 0b00000011
-			c32 |= (*ptr++ & 0x3F) << 18;  // 0b00111111
-			c32 |= (*ptr++ & 0x3F) << 12;  // 0b00111111
-			c32 |= (*ptr++ & 0x3F) << 6;   // 0b00111111
-			c32 |=  *ptr++ & 0x3F;         // 0b00111111
-			sprintf(out, "%s\\u%d ", out, c32);
-		}
-		else if (c >= 240){/* 4-bytes */
-			c32  = (*ptr++ & 0x7)  << 18;  // 0b00000111
-			c32 |= (*ptr++ & 0x3F) << 12;  // 0b00111111
-			c32 |= (*ptr++ & 0x3F) << 6;   // 0b00111111
-			c32 |=  *ptr++ & 0x3F ;        // 0b00111111
-			sprintf(out, "%s\\u%d ", out, c32);
-		}
-		else if (c >= 224){/* 3-bytes */
-			c32  = (*ptr++ & 0xF)  << 12;  // 0b00001111
-			c32 |= (*ptr++ & 0x3F) << 6;   // 0b00111111
-			c32 |=  *ptr++ & 0x3F;         // 0b00111111
-			sprintf(out, "%s\\u%d ", out, c32);
-		}
-		else if (c >= 192){/* 2-bytes */
-			c32  = (*ptr++ & 0x1F) << 6;   // 0b00011111
-			c32 |=  *ptr++ & 0x3F;         // 0b00111111
-			sprintf(out, "%s\\u%d ", out, c32);
-		}
-		else{/* 1-byte */
-			sprintf(out, "%s%c", out, *ptr++);
-		}
-	}
-	strcat(out, " ");
-	return out;
-}
-
 struct pl_table_str{
-	char *str;
-	int len;
-	int mem;
+	struct str str;
 	char *summa;
 	char *sroki;
 };
 
 static void *
 pl_table_cb(void *d, void *p, struct planlecheniya_t *t){
-	struct pl_table_str *str = (struct pl_table_str *)d;
+	struct pl_table_str *s = (struct pl_table_str *)d;
 	switch (t->type) {
 		case PLANLECHENIYA_TYPE_STAGE:
 			{
-				char title[256];
-					sprintf(title, "\\pard\\par\\ql \\b %s \\b0 \\ \n", t->title);
-				const char *tbl = 
+				str_appendf(&s->str, 
+							"\\pard\\par\\ql \\b %s \\b0 \\ \n", t->title);
+				str_appendf(&s->str, 
 					"\\pard\\par\\trowd\n"
 					"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb\\brdrs\\clbrdrr\\brdrs\n"
 					"\\cellx400\n"
@@ -121,26 +60,12 @@ pl_table_cb(void *d, void *p, struct planlecheniya_t *t){
 					"\\intbl \\b Количество \\b0 \\cell\n"
 					"\\intbl \\b Цена \\b0 \\cell\n"
 					"\\intbl \\b Сумма \\b0 \\cell\n"
-					"\\row\n"
-					;
-				str->len += strlen(title) + strlen(tbl);
-				if (str->len > str->mem){
-					// realloc
-					str->mem += BUFSIZ;
-					str->str = (char *)realloc(str->str, str->mem);
-					if (!str->str){
-						perror("realloc");
-						exit(EXIT_FAILURE);	
-					} 
-				}
-				strcat(str->str, title);
-				strcat(str->str, tbl);
+					"\\row\n");
 				break;
 			}
 		case PLANLECHENIYA_TYPE_ITEM:
 			{
-				char row[256];
-				sprintf(row, 
+				str_appendf(&s->str, 
 						"\\trowd\n"
 						"\\intbl %d \\cell\n"
 						"\\intbl %s \\cell\n"
@@ -152,25 +77,12 @@ pl_table_cb(void *d, void *p, struct planlecheniya_t *t){
 						, t->title
 						, t->count
 						, t->price
-						, t->total
-				);
-				str->len += strlen(row);
-				if (str->len > str->mem){
-					// realloc
-					str->mem += BUFSIZ;
-					str->str = (char *)realloc(str->str, str->mem);
-					if (!str->str){
-						perror("realloc");
-						exit(EXIT_FAILURE);	
-					} 
-				}
-				strcat(str->str, row);
+						, t->total);
 				break;
 			}
 		case PLANLECHENIYA_TYPE_STAGE_PRICE:
 			{
-				char row[256];
-				sprintf(row, 
+				str_appendf(&s->str, 
 						"\\trowd\n"
 						"\\intbl  \\cell\n"
 						"\\intbl \\b %s \\b0 \\cell\n"
@@ -181,23 +93,11 @@ pl_table_cb(void *d, void *p, struct planlecheniya_t *t){
 						, t->title
 						, t->total
 				);
-				str->len += strlen(row);
-				if (str->len > str->mem){
-					// realloc
-					str->mem += BUFSIZ;
-					str->str = (char *)realloc(str->str, str->mem);
-					if (!str->str){
-						perror("realloc");
-						exit(EXIT_FAILURE);	
-					} 
-				}
-				strcat(str->str, row);
 				break;
 			}
 		case PLANLECHENIYA_TYPE_STAGE_DURATION:
 			{
-				char row[256];
-				sprintf(row, 
+				str_appendf(&s->str, 
 						"\\trowd\n"
 						"\\intbl  \\cell\n"
 						"\\intbl \\b %s \\b0 \\cell\n"
@@ -208,37 +108,26 @@ pl_table_cb(void *d, void *p, struct planlecheniya_t *t){
 						, t->title
 						, t->count
 				);
-				str->len += strlen(row);
-				if (str->len > str->mem){
-					// realloc
-					str->mem += BUFSIZ;
-					str->str = (char *)realloc(str->str, str->mem);
-					if (!str->str){
-						perror("realloc");
-						exit(EXIT_FAILURE);	
-					} 
-				}
-				strcat(str->str, row);
 				break;
 			}
 		case PLANLECHENIYA_TYPE_TOTAL_PRICE:
 			{
-				str->summa = (char *)malloc(strlen(t->total) + 1);
-				if (!str->summa){
+				s->summa = (char *)malloc(strlen(t->total) + 1);
+				if (!s->summa){
 					perror("realloc");
 					exit(EXIT_FAILURE);	
 				}
-				strcpy(str->summa, t->total);
+				strcpy(s->summa, t->total);
 				break;
 			}
 		case PLANLECHENIYA_TYPE_TOTAL_DURATION:
 			{
-				str->sroki = (char *)malloc(strlen(t->count) + strlen(t->title) + 1);
-				if (!str->sroki){
+				s->sroki = (char *)malloc(strlen(t->count) + strlen(t->title) + 1);
+				if (!s->sroki){
 					perror("realloc");
 					exit(EXIT_FAILURE);	
 				}
-				sprintf(str->sroki, "%s  %s", t->title, t->count);		
+				sprintf(s->sroki, "%s  %s", t->title, t->count);		
 				break;
 			}
 		default:
@@ -247,25 +136,22 @@ pl_table_cb(void *d, void *p, struct planlecheniya_t *t){
 }
 
 static void pl_table(prozubi_t *p, cJSON *pl, char **table, char **summa, char **sroki){
-	struct pl_table_str str;
-	str.len = 0;
-	str.mem = BUFSIZ;
-	str.str = (char *)malloc(str.mem);
-	if (!str.str){
+	struct pl_table_str s;
+	if (str_init(&s.str, BUFSIZ))
+	{
 		perror("malloc");
 		exit(EXIT_FAILURE);
 	} 
-	strcpy(str.str, "");
 
 	// create RTF table
-	prozubi_planlecheniya_foreach(p, pl, &str, pl_table_cb);
+	prozubi_planlecheniya_foreach(p, pl, &s, pl_table_cb);
 
 	if (table)
-		*table = str.str;
+		*table = s.str.str;
 	if (summa)
-		*summa = str.summa;
+		*summa = s.summa;
 	if (sroki)
-		*sroki = str.sroki;
+		*sroki = s.sroki;
 }
 
 #define PL_TEETH_UP\
@@ -420,8 +306,7 @@ static void pl_zformula(prozubi_t *p, struct case_t *c, char **zformula){
 }
 
 struct pl_images{
-	char *images;
-	size_t size;
+	struct str str;
 	prozubi_t *p;
 };
 
@@ -434,10 +319,13 @@ pl_images_cb(void *d, struct image_t *image){
 					STR("can't load image: NULL"));
 		return 0;
 	}	
-
+	
 	// try to load image
 	int x, y, c;
-	if (!stbi_info_from_memory(image->data, image->len_data, &x, &y, &c)){
+	if (!stbi_info_from_memory(
+				(const stbi_uc *)(image->data), 
+				image->len_data, &x, &y, &c))
+	{
 		if (img->p->on_error)
 			img->p->on_error(img->p->on_error_data,
 					STR("can't load image: %s", image->id));
@@ -445,31 +333,24 @@ pl_images_cb(void *d, struct image_t *image){
 	}
 
 	int i;
-	const char *header = 
-		"{\\pict\\picw0\\pich0\\picwgoal10254\\pichgoal6000\\jpegblip\n";
+	str_appendf(&img->str,
+		"{\\pict\\picw0\\pich0\\picwgoal10254\\pichgoal6000\\jpegblip\n");
 
-	img->size = (image->len_data * 3 + strlen(header));
-
-	img->images = (char *)realloc(img->images, img->size);
-	if (!img->images){
-		perror("malloc");
-		exit(EXIT_FAILURE);
-	} 
-	strcat(img->images, header);
 	for (i = 0; i < image->len_data; i++) {
 		char bit = ((char *)image->data)[i];
-		char s[3];
-		sprintf(s, "%02x", bit);
-		strcat(img->images, s);
+		str_appendf(&img->str, "%02x", bit);
 	}
-	strcat(img->images, "}\n");
+	str_appendf(&img->str, "}\n");
 
 	return 0;
 }
 
 static void 
-pl_images_get(prozubi_t *p, struct case_t *c, struct pl_images *img){
-	prozubi_image_foreach(p, c->id, NULL, img, pl_images_cb);
+pl_images_get(
+		prozubi_t *p, struct case_t *c, struct pl_images *img)
+{
+	prozubi_image_foreach(p, c->id, NULL, 
+			img, pl_images_cb);
 }
 
 #define PL_REPS\
@@ -481,7 +362,7 @@ pl_images_get(prozubi_t *p, struct case_t *c, struct pl_images *img){
 	PL_REP("$image", image, PL_NONE)\
 	PL_REP("$zformula", zformula, PL_TEXT)\
 	PL_REP("$tables", table, PL_TEXT)\
-	PL_REP("$summa", summa, PL_TEXT)\
+	PL_REP("$summa", summa, PL_NONE)\
 	PL_REP("$srokiLecheniya", sroki, PL_TEXT)\
 	PL_REP("$doctor", "Семенцов И.В.", PL_TEXT)\
 
@@ -511,15 +392,16 @@ static char *pl_replace(
 		char *image
 		)
 {
-	int num = 0, i;
+	int num = 0;
 #define PL_REP(needle, rep, type)\
 	if (index == num){\
 		if (type == PL_TEXT){\
-			char *str = (char *)rep;\
-			return string_to_rtf(str);\
+			char *ccc = rtf_from_utf8((char *)rep);\
+			fprintf(stderr, "CCREP: %s\nCCC: %s\n", rep, ccc);\
+			return ccc;\
 		}\
 		else if (type == PL_NONE){\
-			return (char *)rep;\
+			return strdup((char *)rep);\
 		}\
 		else if (type == PL_DATE){\
 			time_t time = (time_t)rep;\
@@ -578,13 +460,10 @@ documents_get_plan_lecheniya(
 
 	// load images
 	struct pl_images img;
-	img.size = 1;
-	img.images = (char *)malloc(img.size);
-	if (!img.images){
+	if (str_init(&img.str, BUFSIZ)){
 		perror("malloc");
-		exit(EXIT_FAILURE);
+		return NULL;
 	}
-	strcpy(img.images, "");
 	pl_images_get(p, c, &img);
 
 	// parse RTF
@@ -607,28 +486,35 @@ documents_get_plan_lecheniya(
 				ch = fgetc(in);
 			}
 			// terminate buffer
-			buf[i++] = 0;
-			// return last symbol to out
-			fputc(ch, out);
+			buf[i] = 0;
+
+			fprintf(stderr, "BUF: %s\n", buf);
 
 			// convert buf to replace
 			i = 0;
 			char **needles = (char **)pl_needle_array;
 			while (needles[i]) {
-				char *needle = needles[i++];	
-				if (strstr(buf, needle)){
+				char *needle = needles[i];	
+				if (strcmp(buf, needle) == 0)
+				{
 					char *replace = pl_replace(
-							i-1, p, patient, c, 
+							i, p, patient, c, 
 							table, summa, sroki, 
-							zformula, img.images);
+							zformula, img.str.str);
 					// put replace to out stream
+					fprintf(stderr, "REPLACE: %s\n", replace);
 					if (replace){
 						fputs(replace, out);
 						free(replace);
 					}
 					break;
 				}
+				i++;
 			}
+			
+			// return last symbol to out
+			fputc(ch, out);
+		
 		} else
 			fputc(ch, out);
 	}
