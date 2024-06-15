@@ -668,7 +668,7 @@ static struct document_t *prozubi_documents_get_with_name(
 }
 
 struct prozubi_documents_keys_and_values{
-	documents_key_t *keys;
+	struct documents_key_t *keys;
 	char **values;
 	size_t len;
 };
