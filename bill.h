@@ -2,7 +2,7 @@
  * File              : bill.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.12.2023
- * Last Modified Date: 27.12.2023
+ * Last Modified Date: 22.08.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -458,19 +458,22 @@ static size_t prozubi_bill_to_rtf(
 	const char *titles[] =
 	{
 		"\\b № \\b0",
-		"\\b Наименование работы (услуги) \\b0"
-		"\\b Количество \\b0"
-		"\\b Цена \\b0"
-		"\\b Сумма \\b0"
+		"\\b Наименование работы (услуги) \\b0",
+		"\\b Количество \\b0",
+		"\\b Цена \\b0",
+		"\\b Сумма \\b0",
 	};
 	int width[] = 
 		{400, 6854, 1000, 1000, 1000};
 	char *tbl = 
 		rtf_table_header(5, titles, width);
 	
+	fprintf(stderr, "OK: \n");
+	
 	str_append(
 			&s, tbl, strlen(tbl));
 	free(tbl);
+	fprintf(stderr, "OK: \n");
 
 	// fill RTF table
 	prozubi_bill_foreach(

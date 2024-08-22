@@ -2,7 +2,7 @@
  * File              : documents.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 25.07.2023
- * Last Modified Date: 16.06.2024
+ * Last Modified Date: 22.08.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef DOCUMENTS_H
@@ -23,6 +23,7 @@
 #include "planlecheniya.h"
 #include "cases.h"
 #include "prozubilib.h"
+#include "bill.h"
 #include "images.h"
 #include "str.h"
 #include "rtf.h"
@@ -42,7 +43,7 @@ pl_table_cb(void *d, void *p, struct planlecheniya_t *t){
 		case PLANLECHENIYA_TYPE_STAGE:
 			{
 				str_appendf(&s->str, 
-							"\\pard\\par\\ql \\b %s \\b0 \\ \n", t->title);
+							"\\pard\\ql \\b %s \\b0 \\ \\par\n", t->title);
 				str_appendf(&s->str, 
 					"\\pard\\par\\trowd\n"
 					"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb\\brdrs\\clbrdrr\\brdrs\n"
@@ -104,7 +105,7 @@ pl_table_cb(void *d, void *p, struct planlecheniya_t *t){
 						"\\intbl \\cell\n"
 						"\\intbl \\cell\n"
 						"\\intbl \\b %s мес. \\b0 \\cell\n"
-						"\\row\\lastrow\n"
+						"\\row\\lastrow\\par\n"
 						, t->title
 						, t->count
 				);
@@ -365,6 +366,10 @@ pl_images_get(
 	PL_REP("$summa", summa, PL_NONE)\
 	PL_REP("$srokiLecheniya", sroki, PL_TEXT)\
 	PL_REP("$doctor", "Семенцов И.В.", PL_TEXT)\
+	PL_REP("$patientID", patient->id, PL_TEXT)\
+	PL_REP("$document", patient->document, PL_TEXT)\
+	PL_REP("$tel", patient->tel, PL_TEXT)\
+	PL_REP("$email", patient->email, PL_TEXT)\
 
 enum {
 	PL_NONE,
@@ -530,5 +535,198 @@ documents_get_plan_lecheniya(
 
 	return OUTFILE;
 }
+
+static const char * 
+documents_get_akt(
+		const char *template_file_path,
+		prozubi_t *p,
+		struct passport_t *patient,
+		struct case_t *c
+		)
+{
+	int i;
+
+	// open template
+	FILE *in = fopen(template_file_path, "r");
+	if (!in){
+		if (p->on_error)
+			p->on_error(p->on_error_data,			
+				STR_ERR("can't read file: %s", 
+				template_file_path));
+		return NULL;	
+	}
+
+	// remove temp file
+	remove(OUTFILE);
+	// open out file
+	FILE *out = fopen(OUTFILE, "w+");
+	if (!in){
+		if (p->on_error)
+			p->on_error(p->on_error_data,			
+				STR_ERR("can't wtite file: %s", OUTFILE));
+		fclose(in);
+		return NULL;	
+	}
+
+	// get table
+	char *bill = NULL;
+	prozubi_bill_to_rtf(p, c->bill, &bill);
+	
+	// parse RTF
+	int ch;
+	while ((ch = fgetc(in)) != EOF) {
+		// check if word starts with '$'
+		if (ch == '$'){
+			// get word
+			char buf[256];
+			i=0;
+			while (
+					ch != ' ' && ch != '\\' && 
+					ch != '.' && ch != '\t' && 
+					ch != '{' && ch != '}' && 
+					ch != '\n' && ch != '\r' && 
+					ch != ',' && ch != EOF
+					)
+			{
+				buf[i++] = ch;
+				ch = fgetc(in);
+			}
+			// terminate buffer
+			buf[i] = 0;
+
+			fprintf(stderr, "BUF: %s\n", buf);
+
+			// convert buf to replace
+			i = 0;
+			char **needles = (char **)pl_needle_array;
+			while (needles[i]) {
+				char *needle = needles[i];	
+				if (strcmp(buf, needle) == 0)
+				{
+					char *replace = pl_replace(
+							i, p, patient, c, 
+							bill, NULL, NULL, 
+							NULL, NULL);
+					// put replace to out stream
+					fprintf(stderr, "REPLACE: %s\n", replace);
+					if (replace){
+						fputs(replace, out);
+						free(replace);
+					}
+					break;
+				}
+				i++;
+			}
+			
+			// return last symbol to out
+			fputc(ch, out);
+		
+		} else
+			fputc(ch, out);
+	}
+
+	if (bill)
+		free(bill);
+
+	fclose(in);
+	fclose(out);
+
+	return OUTFILE;
+}
+
+
+static const char * 
+documents_get_dogovor(
+		const char *template_file_path,
+		prozubi_t *p,
+		struct passport_t *patient
+		)
+{
+	int i;
+
+	// open template
+	FILE *in = fopen(template_file_path, "r");
+	if (!in){
+		if (p->on_error)
+			p->on_error(p->on_error_data,			
+				STR_ERR("can't read file: %s", 
+				template_file_path));
+		return NULL;	
+	}
+
+	// remove temp file
+	remove(OUTFILE);
+	// open out file
+	FILE *out = fopen(OUTFILE, "w+");
+	if (!in){
+		if (p->on_error)
+			p->on_error(p->on_error_data,			
+				STR_ERR("can't wtite file: %s", OUTFILE));
+		fclose(in);
+		return NULL;	
+	}
+
+	struct case_t c;
+	c.date = time(NULL);
+
+	// parse RTF
+	int ch;
+	while ((ch = fgetc(in)) != EOF) {
+		// check if word starts with '$'
+		if (ch == '$'){
+			// get word
+			char buf[256];
+			i=0;
+			while (
+					ch != ' ' && ch != '\\' && 
+					ch != '.' && ch != '\t' && 
+					ch != '{' && ch != '}' && 
+					ch != '\n' && ch != '\r' && 
+					ch != ',' && ch != EOF
+					)
+			{
+				buf[i++] = ch;
+				ch = fgetc(in);
+			}
+			// terminate buffer
+			buf[i] = 0;
+
+			fprintf(stderr, "BUF: %s\n", buf);
+
+			// convert buf to replace
+			i = 0;
+			char **needles = (char **)pl_needle_array;
+			while (needles[i]) {
+				char *needle = needles[i];	
+				if (strcmp(buf, needle) == 0)
+				{
+					char *replace = pl_replace(
+							i, p, patient, &c, 
+							NULL, NULL, NULL, 
+							NULL, NULL);
+					// put replace to out stream
+					fprintf(stderr, "REPLACE: %s\n", replace);
+					if (replace){
+						fputs(replace, out);
+						free(replace);
+					}
+					break;
+				}
+				i++;
+			}
+			
+			// return last symbol to out
+			fputc(ch, out);
+		
+		} else
+			fputc(ch, out);
+	}
+
+	fclose(in);
+	fclose(out);
+
+	return OUTFILE;
+}
+
 
 #endif /* ifndef DOCUMENTS_H */
