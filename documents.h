@@ -370,6 +370,17 @@ pl_images_get(
 	PL_REP("$document", patient->document, PL_TEXT)\
 	PL_REP("$tel", patient->tel, PL_TEXT)\
 	PL_REP("$email", patient->email, PL_TEXT)\
+	PL_REP("$zhalobi", c->zhalobi, PL_TEXT)\
+	PL_REP("$anamnezMorbi", c->anamnezmorbi, PL_TEXT)\
+	PL_REP("$sostoyaniye", c->sostoyanie, PL_TEXT)\
+	PL_REP("$soznaniye", c->soznaniye, PL_TEXT)\
+	PL_REP("$polozheniye", c->polozheniye, PL_TEXT)\
+	PL_REP("$soStoroniVnutrennihOrganov", c->sostoyanievnutrennihorganov, PL_TEXT)\
+	PL_REP("$mestno", c->mestno, PL_TEXT)\
+	PL_REP("$instrumentAndRentgen", c->instrumentandrentgen, PL_TEXT)\
+	PL_REP("$diagnozis", c->diagnozis, PL_TEXT)\
+	PL_REP("$lecheniye", c->lecheniye, PL_TEXT)\
+	PL_REP("$recomendacii", c->recomendacii, PL_TEXT)\
 
 enum {
 	PL_NONE,
@@ -535,6 +546,98 @@ documents_get_plan_lecheniya(
 
 	return OUTFILE;
 }
+
+static const char * 
+documents_get_case(
+		const char *template_file_path,
+		prozubi_t *p,
+		struct passport_t *patient,
+		struct case_t *c
+		)
+{
+	int i;
+
+	// open template
+	FILE *in = fopen(template_file_path, "r");
+	if (!in){
+		if (p->on_error)
+			p->on_error(p->on_error_data,			
+				STR_ERR("can't read file: %s", 
+				template_file_path));
+		return NULL;	
+	}
+
+	// remove temp file
+	remove(OUTFILE);
+	// open out file
+	FILE *out = fopen(OUTFILE, "w+");
+	if (!in){
+		if (p->on_error)
+			p->on_error(p->on_error_data,			
+				STR_ERR("can't wtite file: %s", OUTFILE));
+		fclose(in);
+		return NULL;	
+	}
+
+	// parse RTF
+	int ch;
+	while ((ch = fgetc(in)) != EOF) {
+		// check if word starts with '$'
+		if (ch == '$'){
+			// get word
+			char buf[256];
+			i=0;
+			while (
+					ch != ' ' && ch != '\\' && 
+					ch != '.' && ch != '\t' && 
+					ch != '{' && ch != '}' && 
+					ch != '\n' && ch != '\r' && 
+					ch != ',' && ch != EOF
+					)
+			{
+				buf[i++] = ch;
+				ch = fgetc(in);
+			}
+			// terminate buffer
+			buf[i] = 0;
+
+			fprintf(stderr, "BUF: %s\n", buf);
+
+			// convert buf to replace
+			i = 0;
+			char **needles = (char **)pl_needle_array;
+			while (needles[i]) {
+				char *needle = needles[i];	
+				if (strcmp(buf, needle) == 0)
+				{
+					char *replace = pl_replace(
+							i, p, patient, c, 
+							NULL, NULL, NULL, 
+							NULL, NULL);
+					// put replace to out stream
+					fprintf(stderr, "REPLACE: %s\n", replace);
+					if (replace){
+						fputs(replace, out);
+						free(replace);
+					}
+					break;
+				}
+				i++;
+			}
+			
+			// return last symbol to out
+			fputc(ch, out);
+		
+		} else
+			fputc(ch, out);
+	}
+
+	fclose(in);
+	fclose(out);
+
+	return OUTFILE;
+}
+
 
 static const char * 
 documents_get_akt(
