@@ -2,7 +2,7 @@
  * File              : doctors.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 29.11.2023
+ * Last Modified Date: 24.08.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -99,7 +99,7 @@ prozubi_doctor_new(
 	struct doctor_t *d = NEW(struct doctor_t, 
 			if (kdata->on_error)
 				kdata->on_error(kdata->on_error_data,			
-			STR_ERR("%s", "can't allocate struct doctor_t")), return NULL);
+			STR_ERR("%s", "can't allocate struct doctor_t")); return NULL);
 	if (!id){
 		/* create new uuid */
 		UUID4_STATE_T state; UUID4_T identifier;
@@ -180,7 +180,7 @@ prozubi_doctor_foreach(
 		struct doctor_t *d = NEW(struct doctor_t, 
 			if (kdata->on_error)
 				kdata->on_error(kdata->on_error_data,				
-				STR_ERR("%s", "can't allocate struct doctor_t")), return);
+				STR_ERR("%s", "can't allocate struct doctor_t")); return);
 	
 		/* iterate columns */
 		int i;

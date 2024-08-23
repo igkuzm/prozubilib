@@ -2,7 +2,7 @@
  * File              : bill.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.12.2023
- * Last Modified Date: 22.08.2024
+ * Last Modified Date: 24.08.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -53,7 +53,7 @@ _bill_new(
 			NEW(struct bill_t,
 					if (p->on_error)
 						p->on_error(p->on_error_data,
-						STR_ERR("can't allocate bill_t")), 
+						STR_ERR("can't allocate bill_t")); 
 					return NULL);
 
 	t->bill          = bill;
@@ -447,7 +447,7 @@ static size_t prozubi_bill_to_rtf(
 		prozubi_t *p, cJSON *bill, char **rtf)
 {
 	struct str s;
-	if (str_init(&s, BUFSIZ)){
+	if (str_init(&s)){
 		if(p->on_error)
 			p->on_error(p->on_error_data, 
 					STR("can't allocate memory"));

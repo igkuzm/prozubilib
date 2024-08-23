@@ -2,7 +2,7 @@
  * File              : template.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 28.11.2023
+ * Last Modified Date: 24.08.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -79,7 +79,7 @@ prozubi_template_new(
 	struct template_t *t = NEW(struct template_t, 
 			if (kdata->on_error)
 				kdata->on_error(kdata->on_error_data,			
-				STR_ERR("%s", "can't allocate struct template_t")), return NULL);
+				STR_ERR("%s", "can't allocate struct template_t")); return NULL);
 	
 	if (!id){
 		/* create new uuid */
@@ -158,7 +158,7 @@ prozubi_template_foreach(
 		struct template_t *t = NEW(struct template_t, 
 			if (kdata->on_error)
 				kdata->on_error(kdata->on_error_data,				
-				STR_ERR("%s", "can't allocate struct template_t")), return);
+				STR_ERR("%s", "can't allocate struct template_t")); return);
 	
 		/* iterate columns */
 		int i;

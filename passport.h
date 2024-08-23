@@ -2,7 +2,7 @@
  * File              : passport.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 29.11.2023
+ * Last Modified Date: 24.08.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -132,7 +132,7 @@ PASSPORT_COLUMNS
 		struct passport_t *p = NEW(struct passport_t, 
 			if (kdata->on_error)
 				kdata->on_error(kdata->on_error_data,				
-				STR_ERR("%s", "can't allocate struct passport_t")), return);
+				STR_ERR("%s", "can't allocate struct passport_t")); return);
 
 		/* iterate columns */
 		int i;
@@ -210,7 +210,7 @@ prozubi_passport_new(
 	struct passport_t *p = NEW(struct passport_t, 
 			if (kdata->on_error)
 				kdata->on_error(kdata->on_error_data,			
-			STR_ERR("%s", "can't allocate struct passport_t")), return NULL);
+			STR_ERR("%s", "can't allocate struct passport_t")); return NULL);
 
 	if (!id){
 		/* create new uuid */

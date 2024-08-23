@@ -2,7 +2,7 @@
  * File              : cases.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 06.05.2023
- * Last Modified Date: 15.06.2024
+ * Last Modified Date: 24.08.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef CASES_H
@@ -373,7 +373,7 @@ static struct case_t *
 _prozubi_case_new(){
 	/* allocate case_t */
 	struct case_t *c = NEW(struct case_t, 
-			, return NULL);
+			return NULL);
 	
 	/* init values to NULL */
 #define CASES_COLUMN_DATE(member, number, title      ) c->member = time(NULL); 
@@ -979,7 +979,7 @@ _case_list_node_new(
 		NEW(struct case_list_node,
 			if (p->on_error)
 				p->on_error(p->on_error_data,
-				STR_ERR("can't allocate struct case_list_node")), 
+				STR_ERR("can't allocate struct case_list_node")); 
 			return NULL);
 
 	n->c = c;
@@ -1098,7 +1098,7 @@ prozubi_cases_list_foreach(
 			if (type == CASES_LIST_TYPE_COMBOBOX){
 				cJSON *jarray = 
 					cJSON_GetArrayItem(element, 3); 
-				array =(char**) MALLOC(8*10, , break);
+				array =(char**) MALLOC(8*10,  break);
 				cJSON *item; int i = 0;
 				cJSON_ArrayForEach(item, jarray){
 					array[i++] = cJSON_GetStringValue(item); 
@@ -1150,7 +1150,7 @@ prozubi_cases_list_foreach(
 						cJSON *jarray = 
 							cJSON_GetArrayItem(
 									child_element, 3); 
-						array = (char**)MALLOC(8*10, , break);
+						array = (char**)MALLOC(8*10,  break);
 						cJSON *item; int i = 0;
 						cJSON_ArrayForEach(item, jarray){
 							array[i++] = cJSON_GetStringValue(item); 
@@ -1368,7 +1368,8 @@ static size_t prozubi_case_zubformula_to_rtf(
 	prozubi_t *p, struct case_t *c, char **rtf)
 {
 	struct str s;
-	if (str_init(&s, BUFSIZ )){
+	if (str_init(&s))
+	{
 		if (p->on_error)
 			p->on_error(p->on_error_data,
 					STR("can't allocate memory"));

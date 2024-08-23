@@ -2,9 +2,10 @@
  * File              : str.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 06.12.2023
- * Last Modified Date: 26.12.2023
+ * Last Modified Date: 24.08.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
+
 /**
  * str.h
  * Copyright (c) 2023 Igor V. Sementsov <ig.kuzm@gmail.com>
@@ -23,6 +24,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
+
 /**
  * Simple dynamic string
  * USAGE:
@@ -46,30 +48,33 @@ struct str {
 };
 
 /* init string - return non-null on error */
-static int str_init(struct str *s, size_t size);
+static int str_init(struct str *s);
 
 /* append c string */
 static void str_append(
 		struct str *s, const char *str, int len);
 
 /* append fprint-like formated c string */
-#define str_appendf(s, ...)
+#define str_appendf(pStruct_str, ...)
 
 /* IMPLIMATION */
 #include <string.h>
 #include <stdlib.h>
 
-int str_init(struct str *s, size_t size)
+int str_init(struct str *s)
 {
+	if (!s)
+		return -1;
+
 	// allocate data
-	s->str = (char*)malloc(size);
+	s->str = (char*)malloc(BUFSIZ);
 	if (!s->str)
 		return -1;
 
 	// set dafaults
 	s->str[0]  = 0;
 	s->len     = 0;
-	s->size    = size;
+	s->size    = BUFSIZ;
 
 	return 0;
 }
@@ -109,12 +114,12 @@ void str_append(
 }
 
 #undef  str_appendf
-#define str_appendf(s, ...)\
+#define str_appendf(pStruct_str, ...)\
 	({\
-	 char str[BUFSIZ];\
-	 snprintf(str, BUFSIZ-1, __VA_ARGS__);\
-	 str[BUFSIZ-1] = 0;\
-	 str_append(s, str, strlen(str));\
+	 char __str[BUFSIZ];\
+	 snprintf(__str, BUFSIZ-1, __VA_ARGS__);\
+	 __str[BUFSIZ-1] = 0;\
+	 str_append(pStruct_str, __str, strlen(__str));\
 	 })
 
 #endif /* ifndef STR_H_ */

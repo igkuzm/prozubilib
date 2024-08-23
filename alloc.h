@@ -2,52 +2,61 @@
  * File              : alloc.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 22.02.2022
- * Last Modified Date: 30.04.2023
+ * Last Modified Date: 24.08.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
-#ifndef k_lib_alloc_h__
-#define k_lib_alloc_h__
+/**
+ * alloc.h
+ * Copyright (c) 2022 Igor V. Sementsov <ig.kuzm@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/* safe memory allocation */
+
+#ifndef ALLOC_H
+#define ALLOC_H
+
 
 #include <stdlib.h>
+#include <string.h>
 
-// memory allocation helpers
-#define MALLOC(size, message, ret)	\
+#define MALLOC(_size, _on_error) \
 ({\
-void *const ___p = malloc(size);\
-if (!___p) {\
-  message;\
-  ret;\
-}\
-___p;\
+	void *_p = malloc(_size);\
+	if (!_p) {\
+		_on_error;\
+	} else { \
+		memset(_p,0,_size);\
+	} \
+	_p;\
 })
 
-#define REALLOC(ptr, size, message, ret)	\
-({	\
-void* const ___s = ptr;\
-void *const ___p = realloc(___s, size);\
-if (!___p) {\
-  message;\
-  ret;\
-}\
-___p;\
-})
-
-#define FREE(ptr) \
+#define REALLOC(_ptr, _size, _on_error) \
 ({\
-	if (ptr)\
-		free(ptr);\
-	ptr = NULL;\
+	void *_ret = _ptr; \
+	void *_p = realloc(_ptr, _size);\
+	if (!_p){\
+		_on_error;\
+	} else { \
+		ret = _p; \
+	}\
+	ret;\
 })
 
-#define NEW(T, message, ret) ((T *)MALLOC(sizeof(T), message, ret))
+#define NEW(T, _on_error)\
+	((T *)MALLOC(sizeof(T), _on_error))
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif // k_lib_alloc_h__
+#endif /* ifndef ALLOC_H */

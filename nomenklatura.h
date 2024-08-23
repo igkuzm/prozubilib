@@ -2,7 +2,7 @@
  * File              : nomenklatura.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 11.05.2023
- * Last Modified Date: 28.11.2023
+ * Last Modified Date: 24.08.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -59,7 +59,7 @@ _nomenklatura_new(prozubi_t *p)
 	nomenklatura_t *c = NEW(nomenklatura_t,
 			if (p->on_error)
 				p->on_error(p->on_error_data,		
-				STR_ERR("%s", "cant allocate memory")),
+				STR_ERR("%s", "cant allocate memory"));
 			return NULL);
 	
 	#define NOMENKLATURA_COLUMN_INT(title) c->title = -1;

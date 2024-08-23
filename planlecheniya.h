@@ -2,7 +2,7 @@
  * File              : planlecheniya.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.04.2023
- * Last Modified Date: 27.12.2023
+ * Last Modified Date: 24.08.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -60,7 +60,7 @@ _planlecheniya_new(
 					if (p->on_error)
 						p->on_error(p->on_error_data,
 						STR_ERR(
-							"can't allocate planlecheniya_t")), 
+							"can't allocate planlecheniya_t")); 
 					return NULL);
 
 	t->planlecheniya = planlecheniya;
@@ -857,7 +857,7 @@ static size_t prozubi_planlecheniya_to_rtf(
 		prozubi_t *p, cJSON *planlecheniya, char **rtf)
 {
 	struct str s;
-	if (str_init(&s, BUFSIZ)){
+	if (str_init(&s)){
 		if(p->on_error)
 			p->on_error(p->on_error_data, 
 					STR("can't allocate memory"));

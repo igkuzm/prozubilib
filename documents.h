@@ -2,7 +2,7 @@
  * File              : documents.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 25.07.2023
- * Last Modified Date: 22.08.2024
+ * Last Modified Date: 24.08.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef DOCUMENTS_H
@@ -138,7 +138,7 @@ pl_table_cb(void *d, void *p, struct planlecheniya_t *t){
 
 static void pl_table(prozubi_t *p, cJSON *pl, char **table, char **summa, char **sroki){
 	struct pl_table_str s;
-	if (str_init(&s.str, BUFSIZ))
+	if (str_init(&s.str))
 	{
 		perror("malloc");
 		exit(EXIT_FAILURE);
@@ -476,7 +476,7 @@ documents_get_plan_lecheniya(
 
 	// load images
 	struct pl_images img;
-	if (str_init(&img.str, BUFSIZ)){
+	if (str_init(&img.str)){
 		perror("malloc");
 		return NULL;
 	}

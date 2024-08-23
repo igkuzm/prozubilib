@@ -2,7 +2,7 @@
  * File              : prices.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 12.12.2023
+ * Last Modified Date: 24.08.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -80,7 +80,7 @@ prozubi_price_new(
 	struct price_t *p = NEW(struct price_t, 
 		if (kdata->on_error)
 			kdata->on_error(kdata->on_error_data,			
-			STR_ERR("%s", "can't allocate struct price_t")), return NULL);
+			STR_ERR("%s", "can't allocate struct price_t")); return NULL);
 
 	if (!id){
 		/* create new uuid */
@@ -158,7 +158,7 @@ prozubi_price_foreach(
 		struct price_t *p = NEW(struct price_t, 
 			if (kdata->on_error)
 				kdata->on_error(kdata->on_error_data,				
-				STR_ERR("%s", "can't allocate struct price_t")), return);
+				STR_ERR("%s", "can't allocate struct price_t")); return);
 
 		/* iterate columns */
 		int i;

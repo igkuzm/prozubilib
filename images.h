@@ -2,7 +2,7 @@
  * File              : images.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 26.12.2023
+ * Last Modified Date: 24.08.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -272,7 +272,7 @@ static struct image_t *_prozubi_image_new(
 			if (p->on_error)
 				p->on_error(p->on_error_data,			
 			STR_ERR("%s", 
-				"can't allocate struct image_t")), 
+				"can't allocate struct image_t")); 
 				return NULL);
 
 //set values to NULL
@@ -314,7 +314,7 @@ static int prozubi_image_set_##number(\
 				p->on_error(p->on_error_data,\
 				STR_ERR(\
 					"can't allocate size: %ld"\
-					, len)), return -1);\
+					, len)); return -1);\
 		memcpy(c->member, data, len);\
 		c->len_##member = len;\
 	}\
@@ -334,7 +334,7 @@ static int prozubi_image_set_##number(\
 				p->on_error(p->on_error_data,\
 			STR_ERR(\
 				"can't allocate size: %ld"\
-				, len + 1)), return -1);\
+				, len + 1)); return -1);\
 	strncpy(c->member, text, len);\
 	c->len_##member = len;\
 	return 0;\
@@ -444,7 +444,7 @@ prozubi_image_from_sql(
 							p->on_error(p->on_error_data,\
 						STR_ERR(\
 							"can't allocate string with len: %ld",\
-						 	len+1)), break);\
+						 	len+1)); break);\
 					strncpy(str, (const char *)value, len);\
 					str[len] = 0;\
 					image->member = str;\
@@ -468,7 +468,7 @@ prozubi_image_from_sql(
 							p->on_error(p->on_error_data,\
 						STR_ERR(\
 							"can't allocate data with len: %ld",\
-						 	len)), break);\
+						 	len)); break);\
 					memcpy(data, value, len);\
 					image->member = data;\
 					image->len_##member = len;\
@@ -706,7 +706,7 @@ static size_t prozubi_image_to_rtf(
 		prozubi_t *p, struct image_t *image, char **rtf)
 {
 	struct str s;
-	if (str_init(&s, image->len_data * 2 + BUFSIZ))
+	if (str_init(&s))
 	{
 		if (p->on_error)
 			p->on_error(p->on_error_data,

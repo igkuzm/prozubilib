@@ -2,7 +2,7 @@
  * File              : diagnosis.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 30.05.2023
- * Last Modified Date: 30.05.2023
+ * Last Modified Date: 24.08.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef DIAGNOSIS_H
@@ -68,9 +68,9 @@ prozubi_diagnosis_get(
 			struct case_t *c
 		)
 {
-	char *str = MALLOC(BUFSIZ, 
+	char *str = (char*)MALLOC(BUFSIZ, 
 			if (p->on_error)
-				p->on_error(p->on_error_data, "can't allocate memory"), 
+				p->on_error(p->on_error_data, "can't allocate memory"); 
 			return NULL);
 	str[0] = 0;
 	int i;
