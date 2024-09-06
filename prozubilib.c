@@ -120,7 +120,9 @@ prozubi_stop_sync(
 		return -1;
 	}
 	
-	return pthread_kill(p->tid, SIGTERM);
+	//return pthread_kill(p->tid, SIGTERM);
+	/* TODO: kill thread */
+	return 0;
 }
 
 int
