@@ -22,4 +22,4 @@ libprozubilib_la_SOURCES = \
 	prozubilib.c \
 	stb_image.c
 
-libprozubilib_la_LIBADD =  $(SQLITE3_LINK) -lcurl $(CURL_LIBDIR) $(ADD_OBJECTS) -ltiff -lm -lpthread
+libprozubilib_la_LIBADD =  $(SQLITE3_LINK) -lcurl $(CURL_LIBDIR) $(ADD_OBJECTS) -ltiff -lm -pthread
