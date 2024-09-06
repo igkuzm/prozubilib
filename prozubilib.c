@@ -2,7 +2,7 @@
  * File              : prozubilib.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 17.04.2023
- * Last Modified Date: 02.06.2023
+ * Last Modified Date: 07.09.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -11,6 +11,7 @@
 
 #include "kdata2/kdata2.h"
 
+#define _OPEN_THREADS
 #include <pthread.h>
 #include <signal.h>
 
