@@ -2,7 +2,7 @@
  * File              : passport.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 24.08.2024
+ * Last Modified Date: 07.09.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -33,10 +33,11 @@
 	PASSPORT_COLUMN_TEXT(comment,     PASSPORTCOMMENT,     "ZCOMMENT"    )\
 	PASSPORT_COLUMN_TEXT(tel,         PASSPORTTEL,         "ZTEL"        )\
 	PASSPORT_COLUMN_TEXT(email,       PASSPORTEMAIL,       "ZEMAIL"      )\
+	PASSPORT_COLUMN_TEXT(patientid,   PATIENTID,           "ZPATIENTID"  )\
 	PASSPORT_COLUMN_DATE(dateofbirth, PASSPORTDATEOFBIRTH, "ZDATEOFBIRTH")
 
 struct passport_t {
-	uuid4_str id;              /* uuid of the passport (patientid) */
+	uuid4_str id;              /* uuid of the passport (patientid/recordname) */
 
 #define PASSPORT_COLUMN_DATE(member, number, title) time_t member; 
 #define PASSPORT_COLUMN_TEXT(member, number, title) char * member; size_t len_##member; 
