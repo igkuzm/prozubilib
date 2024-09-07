@@ -25,6 +25,7 @@
  * PASSPORT_COLUMN_TEXT(struct member, enum number, SQLite column title, size)
  */
 #define PASSPORT_COLUMNS \
+	PASSPORT_COLUMN_TEXT(patientid,   PATIENTID,           "ZPATIENTID"  )\
 	PASSPORT_COLUMN_TEXT(familiya,    PASSPORTFAMILIYA,    "ZFAMILIYA"   )\
 	PASSPORT_COLUMN_TEXT(imia,        PASSPOTIMIA,         "ZIMIA"       )\
 	PASSPORT_COLUMN_TEXT(otchestvo,   PASSPORTOTCHESTVO,   "ZOTCHESTVO"  )\
@@ -33,7 +34,6 @@
 	PASSPORT_COLUMN_TEXT(comment,     PASSPORTCOMMENT,     "ZCOMMENT"    )\
 	PASSPORT_COLUMN_TEXT(tel,         PASSPORTTEL,         "ZTEL"        )\
 	PASSPORT_COLUMN_TEXT(email,       PASSPORTEMAIL,       "ZEMAIL"      )\
-	PASSPORT_COLUMN_TEXT(patientid,   PATIENTID,           "ZPATIENTID"  )\
 	PASSPORT_COLUMN_DATE(dateofbirth, PASSPORTDATEOFBIRTH, "ZDATEOFBIRTH")
 
 struct passport_t {
