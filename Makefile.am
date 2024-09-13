@@ -1,4 +1,5 @@
 #config to create static prozubi lib with automake
+#ACLOCAL_AMFLAGS="-I m4"
 
 SUBDIRS = kdata2
 

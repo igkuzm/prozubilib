@@ -2,13 +2,11 @@
  * File              : prozubilib.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 17.04.2023
- * Last Modified Date: 07.09.2024
+ * Last Modified Date: 13.09.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
 #include "prozubilib.h"
-#include "log.h"
-
 #include "kdata2/kdata2.h"
 
 #define _OPEN_THREADS
@@ -26,7 +24,7 @@ prozubi_init(
 		)
 {
 	if (on_log)
-		on_log(on_log_data, STR_LOG("%s", "init..."));
+		on_log(on_log_data, STR_ERR("%s", "init..."));
 	
 	/* check filepath */
 	if (!filepath) {
@@ -38,7 +36,7 @@ prozubi_init(
 	/* check token */
 	if (!token)
 		if (on_log)
-			on_log(on_log_data, STR_LOG("%s", "token is NULL"));
+			on_log(on_log_data, STR_ERR("%s", "token is NULL"));
 
 	/* init tables */
 	struct kdata2_table *zcases;	
@@ -77,8 +75,7 @@ int _prozubi_check_lib(prozubi_t *p){
 	}
 	/* check SQLite database */
 	if (!p->db) {
-		if (p->on_error)
-			p->on_error(p->on_error_data, STR_ERR("%s", "SQLite database is NULL"));
+		ON_ERR(p, "SQLite database is NULL");
 		return -1;
 	}	
 
@@ -97,8 +94,7 @@ prozubi_set_token(
 	
 	/* check token */
 	if (!token){
-		if (p->on_error)
-			p->on_error(p->on_error_data, STR_ERR("%s", "SQLite database is NULL"));
+		ON_ERR(p, "token is NULL");
 		return -1;
 	}
 	
