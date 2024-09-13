@@ -2,7 +2,7 @@
  * File              : bill.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.12.2023
- * Last Modified Date: 24.08.2024
+ * Last Modified Date: 13.09.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -14,7 +14,6 @@
 #include <string.h>
 #include "kdata2/kdata2.h"
 #include "prozubilib_conf.h"
-#include "log.h"
 #include "str.h"
 #include "rtf.h"
 #include "alloc.h"
@@ -51,9 +50,7 @@ _bill_new(
 {
 	struct bill_t *t =
 			NEW(struct bill_t,
-					if (p->on_error)
-						p->on_error(p->on_error_data,
-						STR_ERR("can't allocate bill_t")); 
+					ON_ERR(p, "can't allocate bill_t"); 
 					return NULL);
 
 	t->bill          = bill;
@@ -101,9 +98,7 @@ prozubi_bill_foreach(
 		return;
 
 	if (!cJSON_IsArray(bill)){
-		if (p->on_log)
-			p->on_log(p->on_log_data,		
-		STR_ERR("%s", "no bill json"));
+		ON_ERR(p, "no bill json");
 		return;	
 	}
 
@@ -111,9 +106,8 @@ prozubi_bill_foreach(
 	cJSON *item;
 	cJSON_ArrayForEach(item, bill){
 		if (!cJSON_IsObject(item)){
-			if (p->on_error)
-				p->on_error(p->on_error_data,				
-				STR_ERR("can't read planlecheniya item %d", item_i));
+			ON_ERR(p, 
+					STR("can't read planlecheniya item %d", item_i));
 			continue;	
 		}
 
@@ -178,9 +172,7 @@ prozubi_bill_add_item(
 		return NULL;
 
 	if (!cJSON_IsArray(bill)){
-		if (kdata->on_error)
-			kdata->on_error(kdata->on_error_data,		
-			STR_ERR("%s", "can't read bill json"));
+		ON_ERR(kdata, "can't read bill json");
 		return NULL;	
 	}
 
@@ -232,17 +224,13 @@ prozubi_bill_remove_item(
 		return;
 
 	if (!cJSON_IsArray(bill)){
-		if (kdata->on_error)
-			kdata->on_error(kdata->on_error_data,		
-			STR_ERR("%s", "can't read bill json"));
+		ON_ERR(kdata, "can't read bill json");
 		return;	
 	}
 
 	cJSON *item = cJSON_GetArrayItem(bill, item_index);
 	if (!cJSON_IsObject(item)){
-		if (kdata->on_error)
-			kdata->on_error(kdata->on_error_data,			
-		STR_ERR("can't read bill item %d", item_index));
+		ON_ERR(kdata, STR("can't read bill item %d", item_index));
 		return;	
 	}
 	
@@ -262,17 +250,13 @@ prozubi_bill_set_item_title(
 		return cJSON_False;	
 
 	if (!cJSON_IsArray(bill)){
-		if (kdata->on_error)
-			kdata->on_error(kdata->on_error_data,		
-			STR_ERR("%s", "can't read bill json"));
+		ON_ERR(kdata, "can't read bill json");
 		return cJSON_False;	
 	}
 
 	cJSON *item = cJSON_GetArrayItem(bill, item_index);
 	if (!cJSON_IsObject(item)){
-		if (kdata->on_error)
-			kdata->on_error(kdata->on_error_data,			
-		STR_ERR("can't read bill item %d", item_index));
+		ON_ERR(kdata, STR("can't read bill item %d", item_index));
 		return cJSON_False;	
 	}
 	
@@ -293,17 +277,13 @@ prozubi_bill_set_item_kod(
 		return cJSON_False;	
 
 	if (!cJSON_IsArray(bill)){
-		if (kdata->on_error)
-			kdata->on_error(kdata->on_error_data,		
-			STR_ERR("%s", "can't read bill json"));
+		ON_ERR(kdata, "can't read bill json");
 		return cJSON_False;	
 	}
 
 	cJSON *item = cJSON_GetArrayItem(bill, item_index);
 	if (!cJSON_IsObject(item)){
-		if (kdata->on_error)
-			kdata->on_error(kdata->on_error_data,			
-		STR_ERR("can't read bill item %d", item_index));
+		ON_ERR(kdata, STR("can't read bill item %d", item_index));
 		return cJSON_False;	
 	}
 	
@@ -324,17 +304,13 @@ prozubi_bill_set_item_price(
 		return cJSON_False;	
 
 	if (!cJSON_IsArray(bill)){
-		if (kdata->on_error)
-			kdata->on_error(kdata->on_error_data,		
-			STR_ERR("%s", "can't read bill json"));
+		ON_ERR(kdata, "can't read bill json");
 		return cJSON_False;	
 	}
 
 	cJSON *item = cJSON_GetArrayItem(bill, item_index);
 	if (!cJSON_IsObject(item)){
-		if (kdata->on_error)
-			kdata->on_error(kdata->on_error_data,			
-		STR_ERR("can't read bill item %d", item_index));
+		ON_ERR(kdata, STR("can't read bill item %d", item_index));
 		return cJSON_False;	
 	}
 	
@@ -372,17 +348,13 @@ prozubi_bill_set_item_count(
 		return cJSON_False;	
 
 	if (!cJSON_IsArray(bill)){
-		if (kdata->on_error)
-			kdata->on_error(kdata->on_error_data,		
-			STR_ERR("%s", "can't read bill json"));
+		ON_ERR(kdata, "can't read bill json");
 		return cJSON_False;	
 	}
 
 	cJSON *item = cJSON_GetArrayItem(bill, item_index);
 	if (!cJSON_IsObject(item)){
-		if (kdata->on_error)
-			kdata->on_error(kdata->on_error_data,			
-		STR_ERR("can't read bill item %d", item_index));
+		ON_ERR(kdata, STR("can't read bill item %d", item_index));
 		return cJSON_False;	
 	}
 	
@@ -448,9 +420,7 @@ static size_t prozubi_bill_to_rtf(
 {
 	struct str s;
 	if (str_init(&s)){
-		if(p->on_error)
-			p->on_error(p->on_error_data, 
-					STR("can't allocate memory"));
+		ON_ERR(p, "can't allocate memory");
 		return 0;
 	}
 

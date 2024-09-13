@@ -9,10 +9,6 @@
 #include "prozubilib.h"
 #include "kdata2/kdata2.h"
 
-#define _OPEN_THREADS
-#include <pthread.h>
-#include <signal.h>
-
 prozubi_t *
 prozubi_init(
 		const char *filepath,
@@ -111,12 +107,12 @@ prozubi_stop_sync(
 		return -1;
 	
 	if (!p->tid){
-		if (p->on_error)
-			p->on_error(p->on_error_data, STR_ERR("%s", "thread id is NULL"));		
+		ON_ERR(p, "thread id is NULL");
 		return -1;
 	}
 	
-	return pthread_kill(p->tid, SIGTERM);
+	p->do_update = false;
+	return 0;
 }
 
 int
@@ -127,8 +123,12 @@ prozubi_start_sync(
 	/* check prozubi */
 	if (_prozubi_check_lib(p))
 		return -1;
+
+	// try to join thread
+	p->do_update = false;
+	if (p->tid)
+		pthread_join(p->tid, NULL);
 	
 	_yd_daemon_init(p);	
 	return 0;
-
 }

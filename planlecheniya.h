@@ -2,7 +2,7 @@
  * File              : planlecheniya.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.04.2023
- * Last Modified Date: 24.08.2024
+ * Last Modified Date: 13.09.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -14,7 +14,6 @@
 #include <string.h>
 #include "kdata2/kdata2.h"
 #include "prozubilib_conf.h"
-#include "log.h"
 #include "alloc.h"
 #include "kdata2/cYandexDisk/cJSON.h"
 #include "rtf.h"
