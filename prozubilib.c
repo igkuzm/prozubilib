@@ -55,11 +55,12 @@ prozubi_init(
 
 	/* init kdata */ 
 	kdata2_t *kdata;
-	kdata2_init(&kdata, filepath, token,
+	if (kdata2_init(&kdata, filepath, token,
 		   on_error_data, on_error, on_log_data, on_log,	
 			60,
 			zcases, zdoctors, zimages, zpassport, zprices, ztemplates,
-			NULL);
+			NULL))
+	  return NULL;
 
 	return kdata;
 }
