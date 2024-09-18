@@ -2,7 +2,7 @@
  * File              : cases.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 06.05.2023
- * Last Modified Date: 24.08.2024
+ * Last Modified Date: 18.09.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef CASES_H
@@ -294,19 +294,33 @@ BEGIN_ENUM(CASES)
 #undef CASES_COLUMN_DATE
 #undef CASES_COLUMN_TEXT
 #undef CASES_COLUMN_DATA
-
-	DECL_ENUM_ELEMENT(CASES_COLS_NUM),
-END_ENUM(CASES)
+DECL_ENUM_ELEMENT(CASES_COLS_NUM), END_ENUM(CASES)
 
 BEGIN_ENUM_STRING(CASES)
-#define CASES_COLUMN_DATE(member, number, title      ) DECL_ENUM_STRING_ELEMENT(number), 
-#define CASES_COLUMN_TEXT(member, number, title      ) DECL_ENUM_STRING_ELEMENT(number), 
-#define CASES_COLUMN_DATA(member, number, title, type) DECL_ENUM_STRING_ELEMENT(number), 
+#define CASES_COLUMN_DATE(member, number, title)  DECL_ENUM_STRING_ELEMENT(number),
+#define CASES_COLUMN_TEXT(member, number, title)  DECL_ENUM_STRING_ELEMENT(number),
+#define CASES_COLUMN_DATA(member, number, title, type) DECL_ENUM_STRING_ELEMENT(number),
 	CASES_COLUMNS
 #undef CASES_COLUMN_DATE
 #undef CASES_COLUMN_TEXT
 #undef CASES_COLUMN_DATA
-END_ENUM_STRING(CASES)	
+END_ENUM_STRING(CASES)
+
+
+static const char *gn_CASES[] = {
+#define CASES_COLUMN_DATE(member, number, title) (const char *)#member,
+#define CASES_COLUMN_TEXT(member, number, title) (const char *)#member,
+#define CASES_COLUMN_DATA(member, number, title, type) (const char *)#member,
+   CASES_COLUMNS
+#undef CASES_COLUMN_DATE
+#undef CASES_COLUMN_TEXT
+#undef CASES_COLUMN_DATA
+   NULL
+};											   
+
+static const char* getNameCASES(enum tagCASES index){
+  return gn_CASES[index];
+}
 
 static void	
 prozubi_cases_table_init(struct kdata2_table **cases){
