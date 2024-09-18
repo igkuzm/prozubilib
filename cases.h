@@ -299,9 +299,9 @@ BEGIN_ENUM(CASES)
 END_ENUM(CASES)
 
 BEGIN_ENUM_STRING(CASES)
-#define CASES_COLUMN_DATE(member, number, title      ) DECL_ENUM_STRING_ELEMENT(member), 
-#define CASES_COLUMN_TEXT(member, number, title      ) DECL_ENUM_STRING_ELEMENT(member), 
-#define CASES_COLUMN_DATA(member, number, title, type) DECL_ENUM_STRING_ELEMENT(member), 
+#define CASES_COLUMN_DATE(member, number, title      ) DECL_ENUM_STRING_ELEMENT(number), 
+#define CASES_COLUMN_TEXT(member, number, title      ) DECL_ENUM_STRING_ELEMENT(number), 
+#define CASES_COLUMN_DATA(member, number, title, type) DECL_ENUM_STRING_ELEMENT(number), 
 	CASES_COLUMNS
 #undef CASES_COLUMN_DATE
 #undef CASES_COLUMN_TEXT
