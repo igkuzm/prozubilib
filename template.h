@@ -248,4 +248,13 @@ prozubi_template_free(struct template_t *d){
 	}
 }
 
+static int prozubi_template_remove(
+		kdata2_t *p, struct template_t *t
+		)
+{
+	return kdata2_remove_for_uuid(p,
+		 	TEMPLATES_TABLENAME, t->id);
+}
+
+
 #endif /* ifndef TEMPLATES_H */
