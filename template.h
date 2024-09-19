@@ -2,7 +2,7 @@
  * File              : template.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 24.08.2024
+ * Last Modified Date: 19.09.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -201,6 +201,38 @@ prozubi_template_foreach(
 	}	
 
 	sqlite3_finalize(stmt);
+}
+
+#define TEMPLATES_COLUMN_TEXT(member, number, title)\
+static int prozubi_template_set_##number (kdata2_t *p, struct template_t *t,\
+		const char *text, bool update)\
+{\
+	if (update)\
+		if (!kdata2_set_text_for_uuid(p, TEMPLATES_TABLENAME, title, text, t->id))\
+			return -1;\
+	if(t->member)\
+		free(t->member);\
+	t->member = strdup(text);\
+	t->len_##member = strlen(text);\
+	return 0;\
+}
+		TEMPLATES_COLUMNS
+#undef TEMPLATES_COLUMN_TEXT			
+
+static int prozubi_template_set(
+		TEMPLATES key, kdata2_t *p, struct template_t *t, const char *text, bool update)
+{
+	switch (key) {
+#define TEMPLATES_COLUMN_TEXT(member, number, title) case number:\
+		return prozubi_template_set_##number(p, t, text, update);\
+		
+		TEMPLATES_COLUMNS
+#undef TEMPLATES_COLUMN_TEXT			
+		
+		default:
+			break;
+	}
+	return -1;
 }
 
 static void
