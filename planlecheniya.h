@@ -502,7 +502,7 @@ prozubi_planlecheniya_set_item_title(
 		return cJSON_False;	
 	}
 
-	cJSON *stage;
+	cJSON *stage =
 		cJSON_GetArrayItem(
 				planlecheniya, stage_index);
 	if (stage){
