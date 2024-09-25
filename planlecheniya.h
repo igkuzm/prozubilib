@@ -2,7 +2,7 @@
  * File              : planlecheniya.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.04.2023
- * Last Modified Date: 13.09.2024
+ * Last Modified Date: 25.09.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -493,7 +493,7 @@ prozubi_planlecheniya_set_item_title(
 		)
 {
 	if (!kdata)
-		return 0;
+		return cJSON_False;
 
 	if (!cJSON_IsArray(planlecheniya)){
 		if (kdata->on_error)
@@ -518,7 +518,7 @@ prozubi_planlecheniya_set_item_title(
 
 		cJSON *item =
 			cJSON_GetArrayItem(array, item_index);
-		if (item_index){
+		if (item){
 			return cJSON_ReplaceItemInObject(
 					item, "title", 
 					cJSON_CreateString(title));
