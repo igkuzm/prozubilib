@@ -2,7 +2,7 @@
  * File              : planlecheniya.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.04.2023
- * Last Modified Date: 25.09.2024
+ * Last Modified Date: 27.09.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -40,6 +40,16 @@ struct planlecheniya_t {
 	char * count;
 	char * total;
 };
+
+#define _planlecheniya_on_error(p, ret, ...)\
+({\
+ if (p->on_error){\
+	char _s[BUFSIZ];\
+	sprintf(_s, __VA_ARGS__);\
+	p->on_error(p->on_error_data, _s);\
+ }\
+	ret;\
+})
 
 static struct planlecheniya_t *
 _planlecheniya_new(
@@ -94,6 +104,19 @@ prozubi_planlecheniya_free(struct planlecheniya_t *t)
 	free(t);
 }
 
+static int _planlecheniya_check(
+		prozubi_t *p,
+		cJSON *planlecheniya)
+{
+	if (!p)
+		return -1;
+
+	if (!cJSON_IsArray(planlecheniya))
+		_planlecheniya_on_error(p, return -1, 
+				"no planlecheniya json");
+	return 0;
+}
+
 static void
 prozubi_planlecheniya_foreach(
 		prozubi_t *p,
@@ -105,41 +128,26 @@ prozubi_planlecheniya_foreach(
 			struct planlecheniya_t *t)
 		)
 {
-	if (!p)
+	if (_planlecheniya_check(p, planlecheniya))
 		return;
-
-	if (!cJSON_IsArray(planlecheniya)){
-		if (p->on_log)
-			p->on_log(p->on_log_data,		
-		STR_ERR("%s", "no planlecheniya json"));
-		return;	
-	}
 
 	int total_price = 0;
 	int total_duration = 0;
 	int stage_i = 0;
 	cJSON *stage;
 	cJSON_ArrayForEach(stage, planlecheniya){
-		if (!cJSON_IsObject(stage)){
-			if (p->on_error)
-				p->on_error(p->on_error_data,			
-			STR_ERR("can't read planlecheniya stage %d",
-				stage_i));
-			continue;	
-		}
+		if (!cJSON_IsObject(stage))
+			_planlecheniya_on_error(p, continue, 
+					"can't read planlecheniya stage %d", stage_i);
 		
 		cJSON *time = cJSON_GetObjectItem(
 				stage, "time");
-		if (!cJSON_IsString(time)){
-			if (p->on_error)
-				p->on_error(p->on_error_data,			
-			STR_ERR(
-				"can't read planlecheniya time of stage %d", 
-				stage_i));
-			continue;	
-		}		
+		if (!cJSON_IsString(time))
+			_planlecheniya_on_error(p, continue, 
+					"can't read planlecheniya time of stage %d", stage_i);
+		
 		char * duration_str = cJSON_GetStringValue(time);
-		if (!duration_str) duration_str = "";
+		if (!duration_str) duration_str = (char *)"";
 		int duration = atoi(duration_str);
 		total_duration += duration;
 
@@ -155,27 +163,18 @@ prozubi_planlecheniya_foreach(
 		
 		cJSON *array = cJSON_GetObjectItem(
 				stage, "array");
-		if (!cJSON_IsArray(array)){
-			if (p->on_error)
-				p->on_error(p->on_error_data,			
-			STR_ERR(
-				"can't read planlecheniya array of"
-				" stage: %d", stage_i));
-			continue;	
-		}		
+		if (!cJSON_IsArray(array))
+			_planlecheniya_on_error(p, continue, 
+					"can't read planlecheniya array of stage %d", stage_i);
 		
 		int stage_price = 0;
 		int item_i = 0;
 		cJSON *item;
 		cJSON_ArrayForEach(item, array){
-			if (!cJSON_IsObject(item)){
-				if (p->on_error)
-					p->on_error(p->on_error_data,				
-							STR_ERR(
-								"can't read planlecheniya item %d"
-								" of stage %d", item_i, stage_i));
-				continue;	
-			}
+			if (!cJSON_IsObject(item))
+				_planlecheniya_on_error(p, continue, 
+						"can't read planlecheniya item %d of stage %d", 
+						item_i, stage_i);
 
 			char *kod = 
 				cJSON_GetStringValue(
@@ -291,20 +290,12 @@ prozubi_planlecheniya_foreach(
 
 static cJSON *
 prozubi_planlecheniya_add_stage(
-		prozubi_t *kdata,
+		prozubi_t *p,
 		cJSON *planlecheniya
 		)
 {
-	if (!kdata)
+	if (_planlecheniya_check(p, planlecheniya))
 		return NULL;
-
-	if (!cJSON_IsArray(planlecheniya)){
-		if (kdata->on_error)
-			kdata->on_error(kdata->on_error_data,		
-			STR_ERR(
-				"%s", "can't read planlecheniya json"));
-		return NULL;	
-	}
 
 	/* add new stage */
 	cJSON *stage = cJSON_CreateObject();
@@ -321,29 +312,157 @@ prozubi_planlecheniya_add_stage(
 
 static void
 prozubi_planlecheniya_remove_stage(
-		prozubi_t *kdata,
+		prozubi_t *p,
 		cJSON *planlecheniya,
 		int stage_index
 		)
 {
-	if (!kdata)
+	if (_planlecheniya_check(p, planlecheniya))
 		return;
 
-	if (!cJSON_IsArray(planlecheniya)){
-		if (kdata->on_error)
-			kdata->on_error(kdata->on_error_data,		
-			STR_ERR(
-				"%s", "can't read planlecheniya json"));
-		return;	
-	}
 	cJSON_DeleteItemFromArray(
 			planlecheniya, stage_index);			
+}
+
+static cJSON *
+_planlecheniya_get_stage(
+		prozubi_t *p,
+		cJSON *planlecheniya,
+		int stage_index)
+{
+	if (_planlecheniya_check(p, planlecheniya))
+		return NULL;
+	
+	cJSON *stage = 
+		cJSON_GetArrayItem(planlecheniya, stage_index);
+
+	if (!stage)	
+		_planlecheniya_on_error(p, return NULL, 
+				"can't read planlecheniya array of stage %d", 
+				stage_index);
+	
+	return stage;
+}
+
+static cJSON *
+_planlecheniya_get_stage_items_array(
+		prozubi_t *p,
+		cJSON *planlecheniya,
+		int stage_index)
+{
+	cJSON *stage = 
+		_planlecheniya_get_stage(p, planlecheniya, stage_index);
+	if (!stage)
+		return NULL;
+
+	cJSON *items_array = 
+		cJSON_GetObjectItem(stage, "array");
+	if (!cJSON_IsArray(items_array))
+		_planlecheniya_on_error(p, return NULL, 
+				"can't get items array of stage %d", 
+				stage_index);
+	return items_array;
+}
+
+static cJSON *
+_planlecheniya_get_item(
+		prozubi_t *p,
+		cJSON *planlecheniya,
+		int stage_index,
+		int item_index)
+{
+	cJSON *items_array = 
+		_planlecheniya_get_stage_items_array(
+				p, planlecheniya, stage_index);
+	if (!items_array)
+		return NULL;
+
+	cJSON *item = 
+		cJSON_GetArrayItem(items_array, item_index);
+	if (!cJSON_IsObject(item))
+		_planlecheniya_on_error(p, return NULL, 
+				"can't get item %d of stage %d",
+				item_index, stage_index);	
+	return item;
+}
+
+static cJSON *
+prozubi_planlecheniya_insert_item(
+		prozubi_t *p,
+		cJSON *planlecheniya,
+		int stage_index,
+		int item_index,
+		const char *title,
+		const char *kod,
+		int price,
+		int count
+		)
+{
+	cJSON *items_array = 
+		_planlecheniya_get_stage_items_array(
+				p, planlecheniya, stage_index);
+	if (!items_array)
+		return NULL;
+
+	int index = item_index;
+	if (item_index == -1)
+		index = cJSON_GetArraySize(items_array);
+	
+	cJSON *item = cJSON_CreateObject();
+
+	char number[32];
+	sprintf(number, "%d", index+1);
+	cJSON_AddItemToObject(
+			item, "number", 
+			cJSON_CreateString(number));
+	cJSON_AddItemToObject(
+			item, "isItem", 
+			cJSON_CreateString("1"));
+	cJSON_AddItemToObject(
+			item, "kod", 
+			cJSON_CreateString(kod));
+	cJSON_AddItemToObject(
+			item, "title", 
+			cJSON_CreateString(title));
+	char price_str[32];
+	sprintf(price_str, "%d", price);
+	cJSON_AddItemToObject(
+			item, "price", 
+			cJSON_CreateString(price_str));
+	char count_str[32];
+	sprintf(count_str, "%d", count);
+	cJSON_AddItemToObject(
+			item, "count", 
+			cJSON_CreateString(count_str));
+	char child_str[32];
+	sprintf(child_str, "%d", index);
+	cJSON_AddItemToObject(
+			item, "childIndex", 
+			cJSON_CreateString(child_str));
+	char total_str[32];
+	sprintf(total_str, "%d", price * count);
+	cJSON_AddItemToObject(
+			item, "total", 
+			cJSON_CreateString(total_str));
+	char parent_str[32];
+	sprintf(parent_str, "%d", stage_index);
+	cJSON_AddItemToObject(
+			item, "parentIndex", 
+			cJSON_CreateString(parent_str));
+
+	if (item_index == -1)
+		cJSON_AddItemToArray(items_array, item);
+	else 
+		cJSON_InsertItemInArray(
+			items_array, item_index, item);
+
+	return item;
 }
 
 
 static cJSON *
 prozubi_planlecheniya_add_item(
-		prozubi_t *kdata,
+		prozubi_t *p,
 		cJSON *planlecheniya,
 		int stage_index,
 		const char *title,
@@ -352,390 +471,173 @@ prozubi_planlecheniya_add_item(
 		int count
 		)
 {
-	if (!kdata)
-		return NULL;
-
-	if (!cJSON_IsArray(planlecheniya)){
-		if (kdata->on_error)
-			kdata->on_error(kdata->on_error_data,		
-			STR_ERR(
-				"%s", "can't read planlecheniya json"));
-		return NULL;	
-	}
-
-	int i = 0;
-	cJSON *stage;
-	cJSON_ArrayForEach(stage, planlecheniya){
-		if (!cJSON_IsObject(stage)){
-			if (kdata->on_error)
-				kdata->on_error(kdata->on_error_data,			
-			STR_ERR(
-				"can't read planlecheniya stage %d", i));
-			continue;	
-		}
-		if (stage_index == i){
-			cJSON *array = 
-				cJSON_GetObjectItem(stage, "array");
-			if (!cJSON_IsArray(array)){
-				if (kdata->on_error)
-					kdata->on_error(kdata->on_error_data,				
-					STR_ERR(
-						"can't read array of stage %d", i));
-				return NULL;	
-			}
-			int index = cJSON_GetArraySize(array);
-
-			cJSON *item = cJSON_CreateObject();
-
-			char number[32];
-			sprintf(number, "%d", index+1);
-			cJSON_AddItemToObject(
-					item, "number", 
-					cJSON_CreateString(number));
-			cJSON_AddItemToObject(
-					item, "isItem", 
-					cJSON_CreateString("1"));
-			cJSON_AddItemToObject(
-					item, "kod", 
-					cJSON_CreateString(kod));
-			cJSON_AddItemToObject(
-					item, "title", 
-					cJSON_CreateString(title));
-			char price_str[32];
-			sprintf(price_str, "%d", price);
-			cJSON_AddItemToObject(
-					item, "price", 
-					cJSON_CreateString(price_str));
-			char count_str[32];
-			sprintf(count_str, "%d", count);
-			cJSON_AddItemToObject(
-					item, "count", 
-					cJSON_CreateString(count_str));
-			char child_str[32];
-			sprintf(child_str, "%d", index);
-			cJSON_AddItemToObject(
-					item, "childIndex", 
-					cJSON_CreateString(child_str));
-			char total_str[32];
-			sprintf(total_str, "%d", price * count);
-			cJSON_AddItemToObject(
-					item, "total", 
-					cJSON_CreateString(total_str));
-			char parent_str[32];
-			sprintf(parent_str, "%d", i);
-			cJSON_AddItemToObject(
-					item, "parentIndex", 
-					cJSON_CreateString(parent_str));
-
-			cJSON_AddItemToArray(array, item);
-
-			return item;
-			}		
-		//iterate
-		i++;
-	}
-	return NULL;
+	return prozubi_planlecheniya_insert_item(
+			p, planlecheniya, stage_index, -1, 
+			title, kod, price, count);
 }
 
 static void
 prozubi_planlecheniya_remove_item(
-		prozubi_t *kdata,
+		prozubi_t *p,
 		cJSON *planlecheniya,
 		int stage_index,
 		int item_index
 		)
 {
-	if (!kdata)
+	cJSON *items_array = 
+		_planlecheniya_get_stage_items_array(
+				p, planlecheniya, stage_index);
+	if (!items_array)
 		return;
-
-	if (!cJSON_IsArray(planlecheniya)){
-		if (kdata->on_error)
-			kdata->on_error(kdata->on_error_data,		
-			STR_ERR(
-				"%s", "can't read planlecheniya json"));
-		return;	
-	}
-
-	cJSON *stage = 
-		cJSON_GetArrayItem(
-				planlecheniya, stage_index);
-	if (!cJSON_IsObject(stage)){
-		if (kdata->on_error)
-			kdata->on_error(kdata->on_error_data,			
-		STR_ERR(
-			"can't read planlecheniya stage %d", 
-			stage_index));
-		return;	
-	}
 	
-	cJSON *array = 
-		cJSON_GetObjectItem(stage, "array");
-	if (!cJSON_IsArray(array)){
-		if (kdata->on_error)
-			kdata->on_error(kdata->on_error_data,				
-			STR_ERR(
-				"can't read array of stage %d", 
-				stage_index));
-		return;	
-	}
-	
-	cJSON_DeleteItemFromArray(array, item_index);			
+	cJSON_DeleteItemFromArray(
+			items_array, item_index);			
 }
 
 
 static cJSON_bool
 prozubi_planlecheniya_set_item_title(
-		prozubi_t *kdata,
+		prozubi_t *p,
 		cJSON *planlecheniya,
 		int stage_index,
 		int item_index,
 		const char *title
 		)
 {
-	if (!kdata)
+	cJSON *item = 
+		_planlecheniya_get_item(
+				p, planlecheniya, stage_index, item_index);
+	if (!item)
 		return cJSON_False;
-
-	if (!cJSON_IsArray(planlecheniya)){
-		if (kdata->on_error)
-			kdata->on_error(kdata->on_error_data,		
-		STR_ERR("%s", "can't read planlecheniya json"));
-		return cJSON_False;	
-	}
-
-	cJSON *stage =
-		cJSON_GetArrayItem(
-				planlecheniya, stage_index);
-	if (stage){
-		cJSON *array = 
-			cJSON_GetObjectItem(stage, "array");
-		if (!cJSON_IsArray(array)){
-			if (kdata->on_error)
-				kdata->on_error(kdata->on_error_data,				
-				STR_ERR("can't read array of stage %d", 
-					stage_index));
-			return cJSON_False;	
-		}
-
-		cJSON *item =
-			cJSON_GetArrayItem(array, item_index);
-		if (item){
-			return cJSON_ReplaceItemInObject(
-					item, "title", 
-					cJSON_CreateString(title));
-		}
-	}
-	return cJSON_False;
+	
+	return cJSON_ReplaceItemInObject(
+			item, "title", 
+			cJSON_CreateString(title));
 }
 
 static cJSON_bool
 prozubi_planlecheniya_set_item_kod(
-		prozubi_t *kdata,
+		prozubi_t *p,
 		cJSON *planlecheniya,
 		int stage_index,
 		int item_index,
 		const char *kod
 		)
 {
-	if (!kdata)
-		return 0;
-
-	if (!cJSON_IsArray(planlecheniya)){
-		if (kdata->on_error)
-			kdata->on_error(kdata->on_error_data,		
-			STR_ERR(
-				"%s", "can't read planlecheniya json"));
+	cJSON *item = 
+		_planlecheniya_get_item(
+				p, planlecheniya, stage_index, item_index);
+	if (!item)
 		return cJSON_False;
-	}
-
-	cJSON *stage =
-		cJSON_GetArrayItem(
-				planlecheniya, stage_index);
-	if (stage){
-		cJSON *array = 
-			cJSON_GetObjectItem(stage, "array");
-		if (!cJSON_IsArray(array)){
-			if (kdata->on_error)
-				kdata->on_error(kdata->on_error_data,				
-				STR_ERR("can't read array of stage %d", 
-					stage_index));
-			return cJSON_False;	
-		}
-
-		cJSON *item =
-			cJSON_GetArrayItem(array, item_index);
-		if (item){
-			return cJSON_ReplaceItemInObject(
-					item, "kod", 
-					cJSON_CreateString(kod));
-		}
-	}
-	return cJSON_False;
+	
+	return cJSON_ReplaceItemInObject(
+			item, "kod", 
+			cJSON_CreateString(kod));
 }
 
 static cJSON_bool
 prozubi_planlecheniya_set_item_price(
-		prozubi_t *kdata,
+		prozubi_t *p,
 		cJSON *planlecheniya,
 		int stage_index,
 		int item_index,
 		int price
 		)
 {
-	if (!kdata)
-		return 0;
-
-	if (!cJSON_IsArray(planlecheniya)){
-		if (kdata->on_error)
-			kdata->on_error(kdata->on_error_data,		
-			STR_ERR(
-				"%s", "can't read planlecheniya json"));
+	cJSON *item = 
+		_planlecheniya_get_item(
+				p, planlecheniya, stage_index, item_index);
+	if (!item)
 		return cJSON_False;
-	}
+	
+	char *count;
+	cJSON *count_j = 
+		cJSON_GetObjectItem(item, "count"); 
+	if (count_j)
+		count = cJSON_GetStringValue(count_j);
+	if (!count)
+		count = (char*)"";
 
-	cJSON *stage =
-		cJSON_GetArrayItem(
-				planlecheniya, stage_index);
-	if (stage){
-		cJSON *array = 
-			cJSON_GetObjectItem(stage, "array");
-		if (!cJSON_IsArray(array)){
-			if (kdata->on_error)
-				kdata->on_error(kdata->on_error_data,				
-				STR_ERR("can't read array of stage %d", 
-					stage_index));
-			return cJSON_False;	
-		}
+	char price_str[32];
+	sprintf(price_str, "%d", price);
+	if (!cJSON_ReplaceItemInObject(
+				item, "price", 
+				cJSON_CreateString(price_str)))
+		return cJSON_False;
 
-		cJSON *item =
-			cJSON_GetArrayItem(array, item_index);
-		if (item){
-			char *count;
-			cJSON *count_j = 
-				cJSON_GetObjectItem(item, "count"); 
-			if (count_j)
-				count = cJSON_GetStringValue(count_j);
-			if (!count)
-				count = (char*)"";
-
-			char price_str[32];
-			sprintf(price_str, "%d", price);
-			if (!cJSON_ReplaceItemInObject(
-						item, "price", 
-						cJSON_CreateString(price_str)))
-				return cJSON_False;
-
-			char total[32];
-			sprintf(total, "%d", 
-					price * atoi(count));
-			if (!cJSON_ReplaceItemInObject(
-						item, "total", 
-						cJSON_CreateString(total)))
-				return cJSON_False;
+	char total[32];
+	sprintf(total, "%d", 
+			price * atoi(count));
+	if (!cJSON_ReplaceItemInObject(
+				item, "total", 
+				cJSON_CreateString(total)))
+		return cJSON_False;
 			
-			return cJSON_True;
-		}
-	}
-	return cJSON_False;
+	return cJSON_True;
 }
 
 static cJSON_bool
 prozubi_planlecheniya_set_item_count(
-		prozubi_t *kdata,
+		prozubi_t *p,
 		cJSON *planlecheniya,
 		int stage_index,
 		int item_index,
 		int count
 		)
 {
-	if (!kdata)
-		return 0;
-
-	if (!cJSON_IsArray(planlecheniya)){
-		if (kdata->on_error)
-			kdata->on_error(kdata->on_error_data,		
-			STR_ERR(
-				"%s", "can't read planlecheniya json"));
+	cJSON *item = 
+		_planlecheniya_get_item(
+				p, planlecheniya, stage_index, item_index);
+	if (!item)
 		return cJSON_False;
-	}
+	
+	char *price;
+	cJSON *price_j =
+		cJSON_GetObjectItem(item, "price"); 
+	if (price_j)
+		price = cJSON_GetStringValue(price_j);
+	if (!price)
+		price = (char*)"";
 
-	cJSON *stage =
-		cJSON_GetArrayItem(
-				planlecheniya, stage_index);
-	if (stage){
-		cJSON *array = 
-			cJSON_GetObjectItem(stage, "array");
-		if (!cJSON_IsArray(array)){
-			if (kdata->on_error)
-				kdata->on_error(kdata->on_error_data,				
-				STR_ERR("can't read array of stage %d", 
-					stage_index));
-			return cJSON_False;	
-		}
+	char count_str[32];
+	sprintf(count_str, "%d", count);
+	if (!cJSON_ReplaceItemInObject(item, "count", 
+				cJSON_CreateString(count_str)))
+		return cJSON_False;
 
-		cJSON *item =
-			cJSON_GetArrayItem(array, item_index);
-		if (item){
-			char *price;
-			cJSON *price_j =
-				cJSON_GetObjectItem(item, "price"); 
-			if (price_j)
-				price = cJSON_GetStringValue(price_j);
-			if (!price)
-				price = (char*)"";
-
-			char count_str[32];
-			sprintf(count_str, "%d", count);
-			if (!cJSON_ReplaceItemInObject(item, "count", 
-						cJSON_CreateString(count_str)))
-				return cJSON_False;
-
-			char total[32];
-			sprintf(total, "%d", 
-					count * atoi(price));
-			if (!cJSON_ReplaceItemInObject(
-						item, "total", 
-						cJSON_CreateString(total)))
-				return cJSON_False;
+	char total[32];
+	sprintf(total, "%d", 
+			count * atoi(price));
+	if (!cJSON_ReplaceItemInObject(
+				item, "total", 
+				cJSON_CreateString(total)))
+		return cJSON_False;
 			
-			return cJSON_True;
-		}
-	}
-	return cJSON_False;
+	return cJSON_True;
 }
 
 static cJSON_bool
 prozubi_planlecheniya_set_stage_duration(
-		prozubi_t *kdata,
+		prozubi_t *p,
 		cJSON *planlecheniya,
 		int stage_index,
 		int duration
 		)
 {
-	if (!kdata)
-		return 0;
-
-	if (!cJSON_IsArray(planlecheniya)){
-		if (kdata->on_error)
-			kdata->on_error(kdata->on_error_data,		
-			STR_ERR(
-				"%s", "can't read planlecheniya json"));
+	cJSON *stage = 
+		_planlecheniya_get_stage(p, planlecheniya, stage_index);
+	if (!stage)
 		return cJSON_False;
-	}
 
-	cJSON *stage =
-		cJSON_GetArrayItem(
-				planlecheniya, stage_index);
-		if (stage){
-			char duration_str[32];
-			sprintf(duration_str, "%d", duration);
-			if (!cJSON_ReplaceItemInObject(stage, 
-						"time", 
-						cJSON_CreateString(
-							duration_str)))
-				return cJSON_False;
-			return cJSON_True;
-		}
-	return cJSON_False;
+	char duration_str[32];
+	sprintf(duration_str, "%d", duration);
+	if (!cJSON_ReplaceItemInObject(stage, 
+				"time", 
+				cJSON_CreateString(
+					duration_str)))
+		return cJSON_False;
+	
+	return cJSON_True;
 }
 
 static void * _prozubi_planlecheniya_to_rtf_cb(
@@ -856,12 +758,9 @@ static size_t prozubi_planlecheniya_to_rtf(
 		prozubi_t *p, cJSON *planlecheniya, char **rtf)
 {
 	struct str s;
-	if (str_init(&s)){
-		if(p->on_error)
-			p->on_error(p->on_error_data, 
-					STR("can't allocate memory"));
-		return 0;
-	}
+	if (str_init(&s))
+		_planlecheniya_on_error(p, return 0, 
+				"can't allocate memory");
 
 	// create RTF table
 	prozubi_planlecheniya_foreach(
@@ -879,49 +778,32 @@ static size_t prozubi_planlecheniya_to_rtf(
 static int prozubi_planlecheniya_get_price_total(
 		prozubi_t *p, cJSON *planlecheniya)
 {
-	if (!cJSON_IsArray(planlecheniya)){
-		if (p->on_log)
-			p->on_log(p->on_log_data,		
-		STR_ERR("%s", "no planlecheniya json"));
-		return -1;	
-	}
+	if (_planlecheniya_check(p, planlecheniya))
+		return -1;
 
 	int total_price = 0;
 	int stage_i = 0;
 	cJSON *stage;
 	cJSON_ArrayForEach(stage, planlecheniya){
-		if (!cJSON_IsObject(stage)){
-			if (p->on_error)
-				p->on_error(p->on_error_data,			
-			STR_ERR(
-				"can't read planlecheniya stage %d", 
-				stage_i));
-			continue;	
-		}
+		if (!cJSON_IsObject(stage))
+			_planlecheniya_on_error(p, continue, 
+				"can't read planlecheniya stage %d", stage_i);
+		
 		cJSON *array = 
 			cJSON_GetObjectItem(stage, "array");
-		if (!cJSON_IsArray(array)){
-			if (p->on_error)
-				p->on_error(p->on_error_data,			
-			STR_ERR(
-				"can't read planlecheniya array of"
-				" stage: %d", stage_i));
-			continue;	
-		}		
+		if (!cJSON_IsArray(array))
+			_planlecheniya_on_error(p, continue, 
+				"can't read items array of stage %d", stage_i);
 		
 		int stage_price = 0;
 		int item_i = 0;
 		cJSON *item;
 		cJSON_ArrayForEach(item, array){
-			if (!cJSON_IsObject(item)){
-				if (p->on_error)
-					p->on_error(p->on_error_data,				
-					STR_ERR(
+			if (!cJSON_IsObject(item))
+				_planlecheniya_on_error(p, continue, 
 						"can't read planlecheniya item %d"
 						" of stage %d", 
-						item_i, stage_i));
-				continue;	
-			}
+						item_i, stage_i);
 
 			char *price_str = 
 				cJSON_GetStringValue(
@@ -951,36 +833,23 @@ static int prozubi_planlecheniya_get_price_total(
 static int prozubi_planlecheniya_get_duration_total(
 		prozubi_t *p, cJSON *planlecheniya)
 {
-	if (!cJSON_IsArray(planlecheniya)){
-		if (p->on_log)
-			p->on_log(p->on_log_data,		
-		STR_ERR("%s", "no planlecheniya json"));
-		return -1;	
-	}
-
+	if (_planlecheniya_check(p, planlecheniya))
+		return -1;
+	
 	int total_duration = 0;
 	int stage_i = 0;
 	cJSON *stage;
 	cJSON_ArrayForEach(stage, planlecheniya){
-		if (!cJSON_IsObject(stage)){
-			if (p->on_error)
-				p->on_error(p->on_error_data,			
-			STR_ERR(
-				"can't read planlecheniya stage %d", 
-				stage_i));
-			continue;	
-		}
-		
+		if (!cJSON_IsObject(stage))
+			_planlecheniya_on_error(p, continue, 
+				"can't read planlecheniya stage %d", stage_i);
+					
 		cJSON *time = 
 			cJSON_GetObjectItem(stage, "time");
-		if (!cJSON_IsString(time)){
-			if (p->on_error)
-				p->on_error(p->on_error_data,			
-			STR_ERR(
-				"can't read planlecheniya time of stage %d", 
-				stage_i));
-			continue;	
-		}		
+		if (!cJSON_IsString(time))
+			_planlecheniya_on_error(p, continue, 
+				"can't read time of stage %d", stage_i);
+		
 		char * duration_str = cJSON_GetStringValue(time);
 		if (!duration_str) duration_str = (char*)"";
 		int duration = atoi(duration_str);
