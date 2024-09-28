@@ -2,7 +2,7 @@
  * File              : documents.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 25.07.2023
- * Last Modified Date: 24.08.2024
+ * Last Modified Date: 28.09.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef DOCUMENTS_H
@@ -501,6 +501,9 @@ documents_get_plan_lecheniya(
 				buf[i++] = ch;
 				ch = fgetc(in);
 			}
+			// return last symbol to out
+			fputc(ch, out);
+			
 			// terminate buffer
 			buf[i] = 0;
 
@@ -598,6 +601,9 @@ documents_get_case(
 				buf[i++] = ch;
 				ch = fgetc(in);
 			}
+			// return last symbol to out
+			fputc(ch, out);
+			
 			// terminate buffer
 			buf[i] = 0;
 
@@ -694,6 +700,9 @@ documents_get_akt(
 				buf[i++] = ch;
 				ch = fgetc(in);
 			}
+			// return last symbol to out
+			fputc(ch, out);
+			
 			// terminate buffer
 			buf[i] = 0;
 
@@ -791,6 +800,9 @@ documents_get_dogovor(
 				buf[i++] = ch;
 				ch = fgetc(in);
 			}
+			// return last symbol to out
+			fputc(ch, out);
+			
 			// terminate buffer
 			buf[i] = 0;
 

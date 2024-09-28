@@ -2,7 +2,7 @@
  * File              : rtf.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 04.12.2023
- * Last Modified Date: 22.08.2024
+ * Last Modified Date: 28.09.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -10,11 +10,11 @@
 
 #ifndef RTF_H_
 #define RTF_H_
+#include <stdio.h>
 
 /* rtf_from_utf8
  * return string with rtf code from utf8 multibite 
- * sting or NULL on error
- */
+ * sting or NULL on error */
 static char *
 rtf_from_utf8(const char *s);
 
@@ -23,8 +23,7 @@ rtf_from_utf8(const char *s);
  * or NULL on error
  * %coln   - number of columns
  * %titles - array of columns titles
- * %width  - array of columns width
- */
+ * %width  - array of columns width */
 static char *
 rtf_table_header(int coln, const char *titles[], int *width);
 
@@ -32,8 +31,7 @@ rtf_table_header(int coln, const char *titles[], int *width);
  * return string with rtf code of table row
  * or NULL on error
  * %coln  - number of columns
- * %colv  - columns values
- */
+ * %colv  - columns values */
 static char *
 rtf_table_row(int coln, char *colv[]);
 
@@ -41,14 +39,16 @@ rtf_table_row(int coln, char *colv[]);
  * return string with rtf code of table row
  * or NULL on error
  * %colv  - string with columns values separeted by delim
- * %delim - string with delim chars
- */
+ * %delim - string with delim chars */
 static char *
 rtf_table_row_from_string(
 		const char *colv, const char *delim);
 
+/* convert jpeg image to RTF string */
+static char *
+rtf_from_jpg_image(void *data, size_t len);
+
 /* IMPLIMATION */
-#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -59,11 +59,7 @@ rtf_from_utf8(const char *s)
 	if (!s)
 		return NULL;
 	
-	fprintf(stderr, "IN: %s\n", s);
-	
 	size_t len = strlen(s);
-	fprintf(stderr, "LEN: %d\n", len);
-
 	char *out = (char *)malloc(len * 6 + 1);
 	if (!out)
 		return NULL;
@@ -81,7 +77,7 @@ rtf_from_utf8(const char *s)
 			c32 |= (*ptr++ & 0x3F) << 12;  // 0b00111111
 			c32 |= (*ptr++ & 0x3F) << 6;   // 0b00111111
 			c32 |=  *ptr++ & 0x3F;         // 0b00111111
-			sprintf(buf, "\\u%d ", c32);
+			sprintf(buf, "\\u%u ", c32);
 			strcat(out, buf);
 		}	
 		else if (c >= 248){/* 5-bytes */
@@ -90,7 +86,7 @@ rtf_from_utf8(const char *s)
 			c32 |= (*ptr++ & 0x3F) << 12;  // 0b00111111
 			c32 |= (*ptr++ & 0x3F) << 6;   // 0b00111111
 			c32 |=  *ptr++ & 0x3F;         // 0b00111111
-			sprintf(buf, "\\u%d ", c32);
+			sprintf(buf, "\\u%u ", c32);
 			strcat(out, buf);
 		}
 		else if (c >= 240){/* 4-bytes */
@@ -98,20 +94,20 @@ rtf_from_utf8(const char *s)
 			c32 |= (*ptr++ & 0x3F) << 12;  // 0b00111111
 			c32 |= (*ptr++ & 0x3F) << 6;   // 0b00111111
 			c32 |=  *ptr++ & 0x3F ;        // 0b00111111
-			sprintf(buf, "\\u%d ", c32);
+			sprintf(buf, "\\u%u ", c32);
 			strcat(out, buf);
 		}
 		else if (c >= 224){/* 3-bytes */
 			c32  = (*ptr++ & 0xF)  << 12;  // 0b00001111
 			c32 |= (*ptr++ & 0x3F) << 6;   // 0b00111111
 			c32 |=  *ptr++ & 0x3F;         // 0b00111111
-			sprintf(buf, "\\u%d ", c32);
+			sprintf(buf, "\\u%u ", c32);
 			strcat(out, buf);
 		}
 		else if (c >= 192){/* 2-bytes */
 			c32  = (*ptr++ & 0x1F) << 6;   // 0b00011111
 			c32 |=  *ptr++ & 0x3F;         // 0b00111111
-			sprintf(buf, "\\u%d ", c32);
+			sprintf(buf, "\\u%u ", c32);
 			strcat(out, buf);
 		}
 		else{/* 1-byte */
@@ -119,7 +115,6 @@ rtf_from_utf8(const char *s)
 			strcat(out, buf);
 		}
 	}
-	strcat(out, " ");
 	return out;
 }
 
@@ -242,6 +237,63 @@ rtf_table_row_from_string(
 				"\\row\n");
 	
 	free(str);
+	return s.str;
+}
+
+static unsigned char * _rtf_image_bin_to_strhex(
+		const unsigned char *bin,
+		unsigned int binsz,
+		unsigned char **result)
+{
+	unsigned char hex_str[] = "0123456789abcdef";
+	unsigned int  i;
+
+	if (!binsz)
+		return NULL;
+	
+	if (!(*result = 
+				(unsigned char *)malloc(binsz * 2 + 1)))
+		return NULL;
+
+	(*result)[binsz * 2] = 0;
+
+	for (i = 0; i < binsz; ++i)
+	{
+		(*result)[i * 2 + 0] = hex_str[(bin[i] >> 4) & 0x0F];
+		(*result)[i * 2 + 1] = hex_str[(bin[i]     ) & 0x0F];
+	}
+
+	return (*result);
+}
+
+/* convert image to RTF string */
+static char *rtf_from_jpg_image(
+		void *data, size_t len)
+{
+	if (!data || !len)
+		return NULL;
+	
+	int i;
+	struct _rtf_str s;
+	if (_rtf_str_init(&s))
+		return NULL;
+
+	// append image header to rtf
+	_rtf_str_appendf(&s, 
+			"{\\pict\\picw0\\pich0\\picwgoal10254"
+			"\\pichgoal6000\\jpegblip\n");
+	
+	// append image data to rtf
+	unsigned char *str;
+	_rtf_image_bin_to_strhex(
+			(unsigned char *)data,
+		len, &str);
+	_rtf_str_append(&s, (char*)str);
+	free(str);
+	
+	// append image close to rtf
+	_rtf_str_appendf(&s, "}\n");
+
 	return s.str;
 }
 
