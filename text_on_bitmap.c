@@ -100,6 +100,7 @@ int text_on_bitmap(
 			// get letter pixel
 			if (canvas[j][i] > 1){
 				*(int*)&(bitmap[j*width*channels + i*channels]) = color;
+				bitmap[j*width*channels + i*channels + 3] = canvas[j][i];
 			}
 		}
 	}
