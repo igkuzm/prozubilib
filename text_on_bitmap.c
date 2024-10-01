@@ -6,8 +6,6 @@
 #include "stb_image_write.h"
 #include "utf.h"
 
-unsigned char buffer[24<<20];
-
 int text_on_bitmap(
 		unsigned char *bitmap,
 		int width, int height, int channels,
@@ -22,14 +20,20 @@ int text_on_bitmap(
 	FILE *fp = fopen(font, "rb");
 	if (!fp)
 		return 1;
+	
+	// get size
 	fseek(fp, 0, SEEK_END);
 	int size = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
+	
+	// read font
+	unsigned char buffer[size];
 	fread(buffer, size, 1, fp);
   if (stbtt_InitFont(
 			&fnt, buffer, 0) == 0)
 		return 1;
 
+	// create bitmap for text
 	unsigned char canvas[height][width];
 	memset(canvas, 0, width * height);
 
@@ -43,6 +47,7 @@ int text_on_bitmap(
 	unsigned int str[strlen(text)+1];
 	mbtoc32(str, text);
 
+	// print for each char
 	while (str[ch]) {
       int advance,lsb,x0,y0,x1,y1;
       float x_shift = xpos - (float) floor(xpos);
@@ -84,7 +89,8 @@ int text_on_bitmap(
 			// get letter pixel
 			if (canvas[j][i] > 1){
 				*(int*)&(bitmap[j*width*channels + i*channels]) = color;
-				bitmap[j*width*channels + i*channels + 3] = canvas[j][i];
+				bitmap[j*width*channels + i*channels + channels - 1] 
+					= canvas[j][i];
 			}
 		}
 	}
