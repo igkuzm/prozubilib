@@ -413,7 +413,6 @@ static char *pl_replace(
 	if (index == num){\
 		if (type == PL_TEXT){\
 			char *ccc = rtf_from_utf8((char *)rep);\
-			fprintf(stderr, "CCREP: %s\nCCC: %s\n", rep, ccc);\
 			return ccc;\
 		}\
 		else if (type == PL_NONE){\
@@ -518,8 +517,6 @@ documents_get_plan_lecheniya(
 			// terminate buffer
 			buf[i] = 0;
 
-			fprintf(stderr, "BUF: %s\n", buf);
-
 			// convert buf to replace
 			i = 0;
 			char **needles = (char **)pl_needle_array;
@@ -532,7 +529,6 @@ documents_get_plan_lecheniya(
 							table, summa, sroki, 
 							zformula, img.str.str);
 					// put replace to out stream
-					fprintf(stderr, "REPLACE: %s\n", replace);
 					if (replace){
 						fputs(replace, out);
 						free(replace);
@@ -618,8 +614,6 @@ documents_get_case(
 			// terminate buffer
 			buf[i] = 0;
 
-			fprintf(stderr, "BUF: %s\n", buf);
-
 			// convert buf to replace
 			i = 0;
 			char **needles = (char **)pl_needle_array;
@@ -632,7 +626,6 @@ documents_get_case(
 							NULL, NULL, NULL, 
 							NULL, NULL);
 					// put replace to out stream
-					fprintf(stderr, "REPLACE: %s\n", replace);
 					if (replace){
 						fputs(replace, out);
 						free(replace);
@@ -717,8 +710,6 @@ documents_get_akt(
 			// terminate buffer
 			buf[i] = 0;
 
-			fprintf(stderr, "BUF: %s\n", buf);
-
 			// convert buf to replace
 			i = 0;
 			char **needles = (char **)pl_needle_array;
@@ -731,7 +722,6 @@ documents_get_akt(
 							bill, NULL, NULL, 
 							NULL, NULL);
 					// put replace to out stream
-					fprintf(stderr, "REPLACE: %s\n", replace);
 					if (replace){
 						fputs(replace, out);
 						free(replace);
@@ -817,8 +807,6 @@ documents_get_dogovor(
 			// terminate buffer
 			buf[i] = 0;
 
-			fprintf(stderr, "BUF: %s\n", buf);
-
 			// convert buf to replace
 			i = 0;
 			char **needles = (char **)pl_needle_array;
@@ -831,7 +819,6 @@ documents_get_dogovor(
 							NULL, NULL, NULL, 
 							NULL, NULL);
 					// put replace to out stream
-					fprintf(stderr, "REPLACE: %s\n", replace);
 					if (replace){
 						fputs(replace, out);
 						free(replace);
