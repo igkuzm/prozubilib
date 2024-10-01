@@ -8,18 +8,6 @@
 
 unsigned char buffer[24<<20];
 
-struct ustring {
-	int *data;
-	int len;
-};
-
-static int callback(void *d, uint32_t c){
-	struct ustring *u = d;
-	u->data[u->len++] = c;
-	u->data[u->len] = 0;
-	return 0;
-}	
-
 int text_on_bitmap(
 		unsigned char *bitmap,
 		int width, int height, int channels,
@@ -52,12 +40,8 @@ int text_on_bitmap(
 	baseline = (int) (ascent*scale);
 
 	// get unicode
-	int str[strlen(text)+1];
-	struct ustring u = {
-		.data = str,
-		.len = 0,
-	};
-	utf8_to_utf32(text, &u, callback);	
+	unsigned int str[strlen(text)+1];
+	mbtoc32(str, text);
 
 	while (str[ch]) {
       int advance,lsb,x0,y0,x1,y1;

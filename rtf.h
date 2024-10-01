@@ -44,13 +44,11 @@ static char *
 rtf_table_row_from_string(
 		const char *colv, const char *delim);
 
-/* convert jpeg image to RTF string */
+/* convert image to RTF string 
+ * valid formats:
+ * emf, png, jpeg */
 static char *
-rtf_from_jpg_image(void *data, size_t len);
-
-/* convert png image to RTF string */
-static char *
-rtf_from_png_image(void *data, size_t len);
+rtf_from_image(const char *format, void *data, size_t len);
 
 /* IMPLIMATION */
 #include <string.h>
@@ -271,10 +269,16 @@ static unsigned char * _rtf_image_bin_to_strhex(
 }
 
 /* convert image to RTF string */
-static char *rtf_from_jpg_image(
-		void *data, size_t len)
+static char *rtf_from_image(
+		const char *format, void *data, size_t len)
 {
-	if (!data || !len)
+	if (!format || !data || !len)
+		return NULL;
+	
+	/* emf, png, jpeg */
+	if (strcmp(format, "png") &&
+			strcmp(format, "jpeg") &&
+			strcmp(format, "emf"))
 		return NULL;
 	
 	int i;
@@ -285,38 +289,7 @@ static char *rtf_from_jpg_image(
 	// append image header to rtf
 	_rtf_str_appendf(&s, 
 			"{\\pict\\picw0\\pich0\\picwgoal10254"
-			"\\pichgoal6000\\jpegblip\n");
-	
-	// append image data to rtf
-	unsigned char *str;
-	_rtf_image_bin_to_strhex(
-			(unsigned char *)data,
-		len, &str);
-	_rtf_str_append(&s, (char*)str);
-	free(str);
-	
-	// append image close to rtf
-	_rtf_str_appendf(&s, "}\n");
-
-	return s.str;
-}
-
-/* convert image to RTF string */
-static char *rtf_from_png_image(
-		void *data, size_t len)
-{
-	if (!data || !len)
-		return NULL;
-	
-	int i;
-	struct _rtf_str s;
-	if (_rtf_str_init(&s))
-		return NULL;
-
-	// append image header to rtf
-	_rtf_str_appendf(&s, 
-			"{\\pict\\picw0\\pich0\\picwgoal10254"
-			"\\pichgoal6000\\pngblip\n");
+			"\\pichgoal6000\\%sblip\n", format);
 	
 	// append image data to rtf
 	unsigned char *str;
