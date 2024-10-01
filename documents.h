@@ -481,7 +481,8 @@ documents_get_plan_lecheniya(
 		pl_zformula(p, c, &zformula);
 	} else {
 		zformula = 
-			rtf_from_image("png", zdata, zlen);
+			rtf_from_image("png", zdata, zlen,
+				 	10250, 6000);
 	}
 
 	// load images

@@ -45,10 +45,13 @@ rtf_table_row_from_string(
 		const char *colv, const char *delim);
 
 /* convert image to RTF string 
- * valid formats:
- * emf, png, jpeg */
+ * valid formats: emf, png, jpeg
+ * with and height are in twips (inxhes * 20) - 
+ * for A4 13011x16838 */
 static char *
-rtf_from_image(const char *format, void *data, size_t len);
+rtf_from_image(
+		const char *format, void *data, size_t len,
+		int width, int height);
 
 /* IMPLIMATION */
 #include <string.h>
@@ -270,7 +273,8 @@ static unsigned char * _rtf_image_bin_to_strhex(
 
 /* convert image to RTF string */
 static char *rtf_from_image(
-		const char *format, void *data, size_t len)
+		const char *format, void *data, size_t len,
+		int width, int height)
 {
 	if (!format || !data || !len)
 		return NULL;
@@ -288,8 +292,8 @@ static char *rtf_from_image(
 
 	// append image header to rtf
 	_rtf_str_appendf(&s, 
-			"{\\pict\\picw0\\pich0\\picwgoal10254"
-			"\\pichgoal6000\\%sblip\n", format);
+			"{\\pict\\picw0\\pich0\\picwgoal%d"
+			"\\pichgoal%d\\%sblip\n", width, height, format);
 	
 	// append image data to rtf
 	unsigned char *str;
