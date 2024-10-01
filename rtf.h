@@ -2,7 +2,7 @@
  * File              : rtf.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 04.12.2023
- * Last Modified Date: 28.09.2024
+ * Last Modified Date: 01.10.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -47,6 +47,10 @@ rtf_table_row_from_string(
 /* convert jpeg image to RTF string */
 static char *
 rtf_from_jpg_image(void *data, size_t len);
+
+/* convert png image to RTF string */
+static char *
+rtf_from_png_image(void *data, size_t len);
 
 /* IMPLIMATION */
 #include <string.h>
@@ -282,6 +286,37 @@ static char *rtf_from_jpg_image(
 	_rtf_str_appendf(&s, 
 			"{\\pict\\picw0\\pich0\\picwgoal10254"
 			"\\pichgoal6000\\jpegblip\n");
+	
+	// append image data to rtf
+	unsigned char *str;
+	_rtf_image_bin_to_strhex(
+			(unsigned char *)data,
+		len, &str);
+	_rtf_str_append(&s, (char*)str);
+	free(str);
+	
+	// append image close to rtf
+	_rtf_str_appendf(&s, "}\n");
+
+	return s.str;
+}
+
+/* convert image to RTF string */
+static char *rtf_from_png_image(
+		void *data, size_t len)
+{
+	if (!data || !len)
+		return NULL;
+	
+	int i;
+	struct _rtf_str s;
+	if (_rtf_str_init(&s))
+		return NULL;
+
+	// append image header to rtf
+	_rtf_str_appendf(&s, 
+			"{\\pict\\picw0\\pich0\\picwgoal10254"
+			"\\pichgoal6000\\pngblip\n");
 	
 	// append image data to rtf
 	unsigned char *str;

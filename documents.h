@@ -480,7 +480,7 @@ documents_get_plan_lecheniya(
 	{
 		pl_zformula(p, c, &zformula);
 	} else {
-		zformula = rtf_from_jpg_image(zdata, zlen);
+		zformula = rtf_from_png_image(zdata, zlen);
 	}
 
 	// load images

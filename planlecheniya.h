@@ -718,17 +718,17 @@ _prozubi_zformula_image(
 	s.len = 0;
 	s.p = p;
 
-	if (stbi_write_jpg_to_func(
+	if (stbi_write_png_to_func(
 			_prozubi_image_jpg_write_func,
 			&s, 
 			w, h, 4, 
-			img, 80) == 0)
+			img, 0) == 0)
 		_planlecheniya_on_error(p, 
 				stbi_image_free(img);
 				if (s.data)
 					free(s.data);
 				return 1,
-				"can't convert bitmap to jpeg");
+				"can't convert bitmap to png");
 	
 	// free bitmap	
 	stbi_image_free(img);	
