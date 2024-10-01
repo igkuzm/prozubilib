@@ -2,7 +2,7 @@
  * File              : cases.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 06.05.2023
- * Last Modified Date: 18.09.2024
+ * Last Modified Date: 01.10.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef CASES_H
@@ -136,9 +136,9 @@ _prozubi_cases_list_string =
 	ZUBFORMULA_TYPE_DEF(ZUBFORMULA_TYPE_P,  "пульпит",     "P")\
 	ZUBFORMULA_TYPE_DEF(ZUBFORMULA_TYPE_Pt, "периодонтит", "Pt")\
 	ZUBFORMULA_TYPE_DEF(ZUBFORMULA_TYPE_0,  "отсутствует", "0")\
-	ZUBFORMULA_TYPE_DEF(ZUBFORMULA_TYPE_Pl, "пломба",      "П")\
-	ZUBFORMULA_TYPE_DEF(ZUBFORMULA_TYPE_K,  "коронка",     "К")\
-	ZUBFORMULA_TYPE_DEF(ZUBFORMULA_TYPE_I,  "искусств",    "И")\
+	ZUBFORMULA_TYPE_DEF(ZUBFORMULA_TYPE_Pl, "пломба",      "n")\
+	ZUBFORMULA_TYPE_DEF(ZUBFORMULA_TYPE_K,  "коронка",     "K")\
+	ZUBFORMULA_TYPE_DEF(ZUBFORMULA_TYPE_I,  "искусств",    "I")\
 	ZUBFORMULA_TYPE_DEF(ZUBFORMULA_TYPE_R,  "корень",      "R")
 
 BEGIN_ENUM(ZUBFORMULA_TYPE) 
