@@ -45,7 +45,7 @@ int text_on_bitmap(
 
 	// get unicode
 	unsigned int str[strlen(text)+1];
-	mbtoc32(str, text);
+	mbtoc32(str, text, -1);
 
 	// print for each char
 	while (str[ch]) {
