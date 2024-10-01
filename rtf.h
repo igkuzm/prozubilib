@@ -46,7 +46,7 @@ rtf_table_row_from_string(
 
 /* convert image to RTF string 
  * valid formats: emf, png, jpeg
- * with and height are in twips (inches / 20) - 
+ * with and height are in twips (inches * 20) - 
  * for A4 13011x16838 */
 static char *
 rtf_from_image(

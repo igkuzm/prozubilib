@@ -712,8 +712,8 @@ _prozubi_zformula_image(
 	struct prozubi_image_jpg_write_s s;
 	s.data = malloc(1);
 	if (!s.data){
-		perror("allocate");
-		exit(EXIT_FAILURE);
+		_planlecheniya_on_error(p,
+				return 1, "can't allocate memory");
 	}
 	s.len = 0;
 	s.p = p;
