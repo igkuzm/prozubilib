@@ -36,7 +36,8 @@ int text_on_bitmap(
 		return 1;
 	fseek(fp, 0, SEEK_END);
 	int size = ftell(fp);
-	fread(buffer, 1, size, fp);
+	fseek(fp, 0, SEEK_SET);
+	fread(buffer, 1, 1000000, fp);
   if (stbtt_InitFont(
 			&fnt, buffer, 0) == 0)
 		return 1;
@@ -51,7 +52,7 @@ int text_on_bitmap(
 	baseline = (int) (ascent*scale);
 
 	// get unicode
-	int str[strlen(text)];
+	int str[strlen(text)+1];
 	struct ustring u = {
 		.data = str,
 		.len = 0,
