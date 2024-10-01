@@ -4,8 +4,21 @@
 #include "stb_truetype.h"
 #include "stb_image.h"
 #include "stb_image_write.h"
+#include "utf.h"
 
 unsigned char buffer[24<<20];
+
+struct ustring {
+	int *data;
+	int len;
+};
+
+static int callback(void *d, uint32_t c){
+	struct ustring *u = d;
+	u->data[u->len++] = c;
+	u->data[u->len] = 0;
+	return 0;
+}	
 
 int text_on_bitmap(
 		unsigned char *bitmap,
@@ -21,7 +34,9 @@ int text_on_bitmap(
 	FILE *fp = fopen(font, "rb");
 	if (!fp)
 		return 1;
-	fread(buffer, 1, 10000000, fp);
+	fseek(fp, 0, SEEK_END);
+	int size = ftell(fp);
+	fread(buffer, 1, size, fp);
   if (stbtt_InitFont(
 			&fnt, buffer, 0) == 0)
 		return 1;
@@ -35,17 +50,25 @@ int text_on_bitmap(
 			0,0);
 	baseline = (int) (ascent*scale);
 
-	while (text[ch]) {
+	// get unicode
+	int str[strlen(text)];
+	struct ustring u = {
+		.data = str,
+		.len = 0,
+	};
+	utf8_to_utf32(text, &u, callback);	
+
+	while (str[ch]) {
       int advance,lsb,x0,y0,x1,y1;
       float x_shift = xpos - (float) floor(xpos);
       stbtt_GetCodepointHMetrics(
 					&fnt, 
-					text[ch], 
+					str[ch], 
 					&advance, 
 					&lsb);
       stbtt_GetCodepointBitmapBoxSubpixel(
 					&fnt, 
-					text[ch], 
+					str[ch], 
 					scale,
 					scale,
 					x_shift,
@@ -57,18 +80,18 @@ int text_on_bitmap(
 					&canvas[baseline + y0][(int) xpos + x0], 
 					x1-x0, y1-y0, width, 
 					scale, scale,
-					x_shift, y, text[ch]);
+					x_shift, y, str[ch]);
       // note that this stomps the old data, so where character boxes overlap (e.g. 'lj') it's wrong
       // because this API is really for baking character bitmaps into textures. if you want to render
       // a sequence of characters, you really need to render each bitmap to a temp buffer, then
       // "alpha blend" that into the working buffer
       xpos += (advance * scale);
-      if (text[ch+1])
+      if (str[ch+1])
          xpos += 
 					 scale*stbtt_GetCodepointKernAdvance(
 							 &fnt, 
-							 text[ch],
-							 text[ch+1]);
+							 str[ch],
+							 str[ch+1]);
       ++ch;
 	}
 	for (j = 0; j < height; ++j) {
