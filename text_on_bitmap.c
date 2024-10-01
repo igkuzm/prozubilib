@@ -25,7 +25,7 @@ int text_on_bitmap(
 	fseek(fp, 0, SEEK_END);
 	int size = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
-	fread(buffer, 1, 1000000, fp);
+	fread(buffer, size, 1, fp);
   if (stbtt_InitFont(
 			&fnt, buffer, 0) == 0)
 		return 1;
