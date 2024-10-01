@@ -21,6 +21,7 @@ endif
 
 libprozubilib_la_SOURCES = \
 	prozubilib.c \
+	text_on_bitmap.c text_on_bitmap.h \
 	stb_image.c
 
 libprozubilib_la_LIBADD =  $(SQLITE3_LINK) -lcurl $(CURL_LIBDIR) $(ADD_OBJECTS) -ltiff -lm

@@ -2,7 +2,7 @@
  * File              : planlecheniya.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.04.2023
- * Last Modified Date: 27.09.2024
+ * Last Modified Date: 01.10.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -18,6 +18,9 @@
 #include "kdata2/cYandexDisk/cJSON.h"
 #include "rtf.h"
 #include "str.h"
+#include "images.h"
+#include "cases.h"
+#include "text_on_bitmap.h"
 
 typedef enum PLANLECHENIYA_TYPE {
 	PLANLECHENIYA_TYPE_STAGE,
@@ -638,6 +641,103 @@ prozubi_planlecheniya_set_stage_duration(
 		return cJSON_False;
 	
 	return cJSON_True;
+}
+
+#define ZFORMULA_COORDS \
+	ZFORMULA_COORD(z18, 17,  102)\
+	ZFORMULA_COORD(z17, 58,  102)\
+	ZFORMULA_COORD(z16, 98,  102)\
+	ZFORMULA_COORD(z15, 134, 102)\
+	ZFORMULA_COORD(z14, 168, 102)\
+	ZFORMULA_COORD(z13, 203, 102)\
+	ZFORMULA_COORD(z12, 236, 102)\
+	ZFORMULA_COORD(z11, 269, 102)\
+	ZFORMULA_COORD(z21, 314, 102)\
+	ZFORMULA_COORD(z22, 348, 102)\
+	ZFORMULA_COORD(z23, 379, 102)\
+	ZFORMULA_COORD(z24, 416, 102)\
+	ZFORMULA_COORD(z25, 447, 102)\
+	ZFORMULA_COORD(z26, 485, 102)\
+	ZFORMULA_COORD(z27, 522, 102)\
+	ZFORMULA_COORD(z28, 566, 102)\
+	ZFORMULA_COORD(z48, 25,  165)\
+	ZFORMULA_COORD(z47, 69,  165)\
+	ZFORMULA_COORD(z46, 112, 165)\
+	ZFORMULA_COORD(z45, 151, 165)\
+	ZFORMULA_COORD(z44, 185, 165)\
+	ZFORMULA_COORD(z43, 216, 165)\
+	ZFORMULA_COORD(z42, 249, 165)\
+	ZFORMULA_COORD(z41, 278, 165)\
+	ZFORMULA_COORD(z31, 308, 165)\
+	ZFORMULA_COORD(z32, 336, 165)\
+	ZFORMULA_COORD(z33, 367, 165)\
+	ZFORMULA_COORD(z34, 399, 165)\
+	ZFORMULA_COORD(z35, 432, 165)\
+	ZFORMULA_COORD(z36, 469, 165)\
+	ZFORMULA_COORD(z37, 511, 165)\
+	ZFORMULA_COORD(z38, 555, 165)
+
+
+static int
+_prozubi_zformula_image(
+		prozubi_t *p, struct case_t *c, 
+		const char *imagepath, 
+		void **data, size_t *len)
+{
+	// open image
+	int i, w, h;
+	stbi_uc *img = 
+		stbi_load(imagepath, &w, &h, 
+				NULL, 4);
+	if (!img)
+		_planlecheniya_on_error(p, return 1, 
+				"can't load image with path: %s\n", imagepath);
+
+	// write zubformula in image
+#define ZFORMULA_COORD(num, x, y) \
+	if (c->num && c->num[0]){\
+		if (text_on_bitmap(\
+				img, w, h, 4, \
+				c->num, 0xFF, "FreeSans.ttf", 15, x, y))\
+		_planlecheniya_on_error(p,\
+				stbi_image_free(img);\
+				return 1, \
+				"can't print text on image"); \
+		;\
+	}
+	ZFORMULA_COORDS
+#undef ZFORMULA_COORD
+
+	// convert bitmap to jpeg
+	struct prozubi_image_jpg_write_s s;
+	s.data = malloc(1);
+	if (!s.data){
+		perror("allocate");
+		exit(EXIT_FAILURE);
+	}
+	s.len = 0;
+	s.p = p;
+
+	if (stbi_write_jpg_to_func(
+			_prozubi_image_jpg_write_func,
+			&s, 
+			w, h, 4, 
+			img, 80) == 0)
+		_planlecheniya_on_error(p, 
+				stbi_image_free(img);
+				if (s.data)
+					free(s.data);
+				return 1,
+				"can't convert bitmap to jpeg");
+	
+	// free bitmap	
+	stbi_image_free(img);	
+	
+	// return data
+	*data = s.data;
+	*len = s.len;
+
+	return 0;
 }
 
 static void * _prozubi_planlecheniya_to_rtf_cb(

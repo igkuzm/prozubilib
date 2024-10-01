@@ -2,7 +2,7 @@
  * File              : documents.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 25.07.2023
- * Last Modified Date: 28.09.2024
+ * Last Modified Date: 01.10.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef DOCUMENTS_H
@@ -468,11 +468,20 @@ documents_get_plan_lecheniya(
 
 	// get table
 	char *table, *summa, *sroki;
-	pl_table(p, c->planlecheniya, &table, &summa, &sroki);
+	pl_table(p, c->planlecheniya, &table,
+		 	&summa, &sroki);
 	
 	// get zformula
 	char *zformula;
-	pl_zformula(p, c, &zformula);
+	void *zdata; size_t zlen;
+	if (_prozubi_zformula_image(p, c,
+			 	"zubFormula.png",
+			 	&zdata, &zlen))
+	{
+		pl_zformula(p, c, &zformula);
+	} else {
+		zformula = rtf_from_jpg_image(zdata, zlen);
+	}
 
 	// load images
 	struct pl_images img;
