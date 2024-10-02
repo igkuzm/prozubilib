@@ -37,57 +37,56 @@ extern "C"{
 #include <stdint.h>
 
 /* convert UTF-32 %c32 character to UTF-8 null-terminated 
- * multybite array, set %s pointer to last character in it 
- * and return number of bytes. */ 
-static int c32tomb(char **s, uint32_t c32)
+ * multybite array, and return pointer to last 
+ * character in it */ 
+static char *c32tomb(char *s, uint32_t c32)
 {
-	int l=0;
+	char *p = s;
 	if (c32 <= 0x7F) {
 		// Plain single-byte ASCII.
-		s[0][l++] = (char) c32;
+		*p++ = (char) c32;
 	}
 	else if (c32 <= 0x7FF) {
 		// Two bytes.
-		s[0][l++] = 0xC0 |  (c32 >> 6);
-		s[0][l++] = 0x80 | ((c32 >> 0) & 0x3F);
+		*p++ = 0xC0 |  (c32 >> 6);
+		*p++ = 0x80 | ((c32 >> 0) & 0x3F);
 	}
 	else if (c32 <= 0xFFFF) {
 		// Three bytes.
-		s[0][l++] = 0xE0 |  (c32 >> 12);
-		s[0][l++] = 0x80 | ((c32 >> 6) & 0x3F);
-		s[0][l++] = 0x80 | ((c32 >> 0) & 0x3F);
+		*p++ = 0xE0 |  (c32 >> 12);
+		*p++ = 0x80 | ((c32 >> 6) & 0x3F);
+		*p++ = 0x80 | ((c32 >> 0) & 0x3F);
 	}
 	else if (c32 <= 0x1FFFFF) {
 		// Four bytes.
-		s[0][l++] = 0xF0 |  (c32 >> 18);
-		s[0][l++] = 0x80 | ((c32 >> 12) & 0x3F);
-		s[0][l++] = 0x80 | ((c32 >> 6)  & 0x3F);
-		s[0][l++] = 0x80 | ((c32 >> 0)  & 0x3F);
+		*p++ = 0xF0 |  (c32 >> 18);
+		*p++ = 0x80 | ((c32 >> 12) & 0x3F);
+		*p++ = 0x80 | ((c32 >> 6)  & 0x3F);
+		*p++ = 0x80 | ((c32 >> 0)  & 0x3F);
 	}
 	else if (c32 <= 0x3FFFFFF) {
 		// Five bytes.
-		s[0][l++] = 0xF8 |  (c32 >> 24);
-		s[0][l++] = 0x80 | ((c32 >> 18) & 0x3F);
-		s[0][l++] = 0x80 | ((c32 >> 12) & 0x3F);
-		s[0][l++] = 0x80 | ((c32 >> 6)  & 0x3F);
-		s[0][l++] = 0x80 | ((c32 >> 0)  & 0x3F);
+		*p++ = 0xF8 |  (c32 >> 24);
+		*p++ = 0x80 | ((c32 >> 18) & 0x3F);
+		*p++ = 0x80 | ((c32 >> 12) & 0x3F);
+		*p++ = 0x80 | ((c32 >> 6)  & 0x3F);
+		*p++ = 0x80 | ((c32 >> 0)  & 0x3F);
 	}
 	else if (c32 <= 0x7FFFFFFF) {
 		// Six bytes.
-		s[0][l++] = 0xFC |  (c32 >> 30);
-		s[0][l++] = 0x80 | ((c32 >> 24) & 0x3F);
-		s[0][l++] = 0x80 | ((c32 >> 18) & 0x3F);
-		s[0][l++] = 0x80 | ((c32 >> 12) & 0x3F);
-		s[0][l++] = 0x80 | ((c32 >> 6)  & 0x3F);
-		s[0][l++] = 0x80 | ((c32 >> 0)  & 0x3F);
+		*p++ = 0xFC |  (c32 >> 30);
+		*p++ = 0x80 | ((c32 >> 24) & 0x3F);
+		*p++ = 0x80 | ((c32 >> 18) & 0x3F);
+		*p++ = 0x80 | ((c32 >> 12) & 0x3F);
+		*p++ = 0x80 | ((c32 >> 6)  & 0x3F);
+		*p++ = 0x80 | ((c32 >> 0)  & 0x3F);
 	}
 	else{
 		// Invalid char; don't encode anything.
 	}	
 
-	s[0][l] = 0;
-	*s = &s[0][l];
-	return l;
+	*p = 0;
+	return p;
 }
 
 /* convert UTF-8 multybite character %s to UTF-32 %s32 
