@@ -36,115 +36,100 @@ extern "C"{
 #include <stdio.h>
 #include <stdint.h>
 
-/* convert %len items of UTF-32 %c32 array to UTF-8 multybite 
- * null-terminated string and return number of bytes. 
- * set len to -1 to handle c32 as null-terminated string*/ 
-static int c32tomb(char *s, const uint32_t *c32, int len)
+/* convert UTF-32 %c32 character to UTF-8 null-terminated 
+ * multybite array, set %s pointer to last character in it 
+ * and return number of bytes. */ 
+static int c32tomb(char **s, uint32_t c32)
 {
-	int i, l=0;
-	for(i = 0; i < len || (len == -1 && c32[i]); ++i) 
-	{
-		if (c32[i] <= 0x7F) {
-			// Plain single-byte ASCII.
-			s[l++] = (char) c32[i];
-		}
-		else if (c32[i] <= 0x7FF) {
-			// Two bytes.
-			s[l++] = 0xC0 |  (c32[i] >> 6);
-			s[l++] = 0x80 | ((c32[i] >> 0) & 0x3F);
-		}
-		else if (c32[i] <= 0xFFFF) {
-			// Three bytes.
-			s[l++] = 0xE0 |  (c32[i] >> 12);
-			s[l++] = 0x80 | ((c32[i] >> 6) & 0x3F);
-			s[l++] = 0x80 | ((c32[i] >> 0) & 0x3F);
-		}
-		else if (c32[i] <= 0x1FFFFF) {
-			// Four bytes.
-			s[l++] = 0xF0 |  (c32[i] >> 18);
-			s[l++] = 0x80 | ((c32[i] >> 12) & 0x3F);
-			s[l++] = 0x80 | ((c32[i] >> 6)  & 0x3F);
-			s[l++] = 0x80 | ((c32[i] >> 0)  & 0x3F);
-		}
-		else if (c32[i] <= 0x3FFFFFF) {
-			// Five bytes.
-			s[l++] = 0xF8 |  (c32[i] >> 24);
-			s[l++] = 0x80 | ((c32[i] >> 18) & 0x3F);
-			s[l++] = 0x80 | ((c32[i] >> 12) & 0x3F);
-			s[l++] = 0x80 | ((c32[i] >> 6)  & 0x3F);
-			s[l++] = 0x80 | ((c32[i] >> 0)  & 0x3F);
-		}
-		else if (c32[i] <= 0x7FFFFFFF) {
-			// Six bytes.
-			s[l++] = 0xFC |  (c32[i] >> 30);
-			s[l++] = 0x80 | ((c32[i] >> 24) & 0x3F);
-			s[l++] = 0x80 | ((c32[i] >> 18) & 0x3F);
-			s[l++] = 0x80 | ((c32[i] >> 12) & 0x3F);
-			s[l++] = 0x80 | ((c32[i] >> 6)  & 0x3F);
-			s[l++] = 0x80 | ((c32[i] >> 0)  & 0x3F);
-		}
-		else{
-			// Invalid char; don't encode anything.
-		}	
+	int l=0;
+	if (c32 <= 0x7F) {
+		// Plain single-byte ASCII.
+		s[0][l++] = (char) c32;
 	}
+	else if (c32 <= 0x7FF) {
+		// Two bytes.
+		s[0][l++] = 0xC0 |  (c32 >> 6);
+		s[0][l++] = 0x80 | ((c32 >> 0) & 0x3F);
+	}
+	else if (c32 <= 0xFFFF) {
+		// Three bytes.
+		s[0][l++] = 0xE0 |  (c32 >> 12);
+		s[0][l++] = 0x80 | ((c32 >> 6) & 0x3F);
+		s[0][l++] = 0x80 | ((c32 >> 0) & 0x3F);
+	}
+	else if (c32 <= 0x1FFFFF) {
+		// Four bytes.
+		s[0][l++] = 0xF0 |  (c32 >> 18);
+		s[0][l++] = 0x80 | ((c32 >> 12) & 0x3F);
+		s[0][l++] = 0x80 | ((c32 >> 6)  & 0x3F);
+		s[0][l++] = 0x80 | ((c32 >> 0)  & 0x3F);
+	}
+	else if (c32 <= 0x3FFFFFF) {
+		// Five bytes.
+		s[0][l++] = 0xF8 |  (c32 >> 24);
+		s[0][l++] = 0x80 | ((c32 >> 18) & 0x3F);
+		s[0][l++] = 0x80 | ((c32 >> 12) & 0x3F);
+		s[0][l++] = 0x80 | ((c32 >> 6)  & 0x3F);
+		s[0][l++] = 0x80 | ((c32 >> 0)  & 0x3F);
+	}
+	else if (c32 <= 0x7FFFFFFF) {
+		// Six bytes.
+		s[0][l++] = 0xFC |  (c32 >> 30);
+		s[0][l++] = 0x80 | ((c32 >> 24) & 0x3F);
+		s[0][l++] = 0x80 | ((c32 >> 18) & 0x3F);
+		s[0][l++] = 0x80 | ((c32 >> 12) & 0x3F);
+		s[0][l++] = 0x80 | ((c32 >> 6)  & 0x3F);
+		s[0][l++] = 0x80 | ((c32 >> 0)  & 0x3F);
+	}
+	else{
+		// Invalid char; don't encode anything.
+	}	
 
-	// null-terminate
-	s[l] = 0;
-
+	s[0][l] = 0;
+	*s = &s[0][l];
 	return l;
 }
 
-/* convert %len UTF-8 %s multybite array to UTF-32 %s32 
- * null-terminated string and return it's len 
- * set len to -1 to handle %s as null-terminated string */ 
-static size_t mbtoc32(uint32_t *s32, const char *s, int len)
+/* convert UTF-8 multybite character %s to UTF-32 %s32 
+ * character and return pointer to next %s character */ 
+static char *mbtoc32(uint32_t *s32, const char *s)
 {
-	int i, l=0;
-	for (i = 0; i < len || (len == -1 && s[i]);)
-	{
-		if (s[i] >= 252){/* 6-bytes */
-			s32[l]  = (s[i++] & 0x1)  << 30;  // 0b00000001
-			s32[l] |= (s[i++] & 0x3F) << 24;  // 0b00111111	
-			s32[l] |= (s[i++] & 0x3F) << 18;  // 0b00111111
-			s32[l] |= (s[i++] & 0x3F) << 12;  // 0b00111111
-			s32[l] |= (s[i++] & 0x3F) << 6;   // 0b00111111
-			s32[l] |=  s[i++] & 0x3F;         // 0b00111111
-			l++;
-		} 
-		else if (s[i] >= 248){/* 5-bytes */
-			s32[l]  = (s[i++] & 0x3)  << 24;  // 0b00000011
-			s32[l] |= (s[i++] & 0x3F) << 18;  // 0b00111111
-			s32[l] |= (s[i++] & 0x3F) << 12;  // 0b00111111
-			s32[l] |= (s[i++] & 0x3F) << 6;   // 0b00111111
-			s32[l] |=  s[i++] & 0x3F;         // 0b00111111
-			l++;
-		}
-		else if (s[i] >= 240){/* 4-bytes */
-			s32[l]  = (s[i++] & 0x7)  << 18;  // 0b00000111
-			s32[l] |= (s[i++] & 0x3F) << 12;  // 0b00111111
-			s32[l] |= (s[i++] & 0x3F) << 6;   // 0b00111111
-			s32[l] |=  s[i++] & 0x3F;         // 0b00111111
-			l++;
-		} 
-		else if (s[i] >= 224){/* 3-bytes */
-			s32[l]  = (s[i++] & 0xF)  << 12;  // 0b00001111
-			s32[l] |= (s[i++] & 0x3F) << 6;   // 0b00111111
-			s32[l] |=  s[i++] & 0x3F;         // 0b00111111
-			l++;                
-		}
-		else if (s[i] >= 192){/* 2-bytes */
-			s32[l]  = (s[i++] & 0x1F) << 6;   // 0b00011111
-			s32[l] |=  s[i++] & 0x3F;         // 0b00111111 
-			l++; 
-		} 
-		else{/* 1-byte */
-			s32[l++] = s[i++];
-		} 
+	int i=0;
+	if (s[i] >= 252){/* 6-bytes */
+		*s32  = (s[i++] & 0x1)  << 30;  // 0b00000001
+		*s32 |= (s[i++] & 0x3F) << 24;  // 0b00111111	
+		*s32 |= (s[i++] & 0x3F) << 18;  // 0b00111111
+		*s32 |= (s[i++] & 0x3F) << 12;  // 0b00111111
+		*s32 |= (s[i++] & 0x3F) << 6;   // 0b00111111
+		*s32 |=  s[i++] & 0x3F;         // 0b00111111
+	} 
+	else if (s[i] >= 248){/* 5-bytes */
+		*s32  = (s[i++] & 0x3)  << 24;  // 0b00000011
+		*s32 |= (s[i++] & 0x3F) << 18;  // 0b00111111
+		*s32 |= (s[i++] & 0x3F) << 12;  // 0b00111111
+		*s32 |= (s[i++] & 0x3F) << 6;   // 0b00111111
+		*s32 |=  s[i++] & 0x3F;         // 0b00111111
 	}
+	else if (s[i] >= 240){/* 4-bytes */
+		*s32  = (s[i++] & 0x7)  << 18;  // 0b00000111
+		*s32 |= (s[i++] & 0x3F) << 12;  // 0b00111111
+		*s32 |= (s[i++] & 0x3F) << 6;   // 0b00111111
+		*s32 |=  s[i++] & 0x3F;         // 0b00111111
+	} 
+	else if (s[i] >= 224){/* 3-bytes */
+		*s32  = (s[i++] & 0xF)  << 12;  // 0b00001111
+		*s32 |= (s[i++] & 0x3F) << 6;   // 0b00111111
+		*s32 |=  s[i++] & 0x3F;         // 0b00111111
+	}
+	else if (s[i] >= 192){/* 2-bytes */
+		*s32  = (s[i++] & 0x1F) << 6;   // 0b00011111
+		*s32 |=  s[i++] & 0x3F;         // 0b00111111 
+	} 
+	else{/* 1-byte */
+		*s32 = s[i++];
+	} 
 
-	// null-terminate string
-	s32[l] = 0;
-	return l;
+	return &((char *)s)[i];
 }	
 
 #ifdef __cplusplus
