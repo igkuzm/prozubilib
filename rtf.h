@@ -68,7 +68,7 @@ rtf_from_utf8(const char *s)
 	char *out = (char *)malloc(len * 6 + 1);
 	if (!out)
 		return NULL;
-	strcpy(out, "");
+	strcpy(out, "\\uc0 ");
 
 	char *ptr = (char *)s, buf[8] = "";
 	uint32_t c32;
