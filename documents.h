@@ -640,6 +640,60 @@ documents_get_case(
 	return OUTFILE;
 }
 
+static void 
+bill_table_cb(void *d, struct bill_t *t){
+	struct pl_table_str *s = (struct pl_table_str *)d;
+	switch (t->type) {
+		case BILL_TYPE_ITEM:
+			{
+				str_appendf(&s->str, 
+						"\\trowd\n"
+						"\\intbl %d \\cell\n"
+						"\\intbl %s \\cell\n"
+						"\\intbl %s \\cell\n"
+						"\\intbl %s \\cell\n"
+						"\\intbl %s \\cell\n"
+						"\\row\n"
+						, t->itemIndex + 1
+						, t->title
+						, t->count
+						, t->price
+						, t->total);
+				break;
+			}
+		
+		case BILL_TYPE_TOTAL_PRICE:
+			{
+				s->summa = (char *)malloc(strlen(t->total) + 1);
+				if (!s->summa){
+					perror("realloc");
+					exit(EXIT_FAILURE);	
+				}
+				strcpy(s->summa, t->total);
+				break;
+			}
+		default:
+			break;
+	}
+}
+
+static void bill_table(
+		prozubi_t *p, cJSON *bill, char **table)
+{
+	struct pl_table_str s;
+	if (str_init(&s.str))
+	{
+		perror("malloc");
+		exit(EXIT_FAILURE);
+	} 
+
+	// create RTF table
+	prozubi_bill_foreach(p, bill, &s, bill_table_cb);
+
+	if (table)
+		*table = s.str.str;
+}
+
 
 static const char * 
 documents_get_akt(
@@ -675,7 +729,8 @@ documents_get_akt(
 
 	// get table
 	char *bill = NULL;
-	prozubi_bill_to_rtf(p, c->bill, &bill);
+	bill_table(p, c->bill, &bill);
+	//prozubi_bill_to_rtf(p, c->bill, &bill);
 	
 	// parse RTF
 	int ch;
