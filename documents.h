@@ -686,6 +686,24 @@ static void bill_table(
 		perror("malloc");
 		exit(EXIT_FAILURE);
 	} 
+		str_appendf(&s.str, 
+			"\\pard\\par\\trowd\n"
+			"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb\\brdrs\\clbrdrr\\brdrs\n"
+			"\\cellx400\n"
+			"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb\\brdrs\\clbrdrr\\brdrs\n"
+			"\\cellx7254\n"
+			"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb\\brdrs\\clbrdrr\\brdrs\n"
+			"\\cellx8254\n"
+			"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb\\brdrs\\clbrdrr\\brdrs\n"
+			"\\cellx9254\n"
+			"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb\\brdrs\\clbrdrr\\brdrs\n"
+			"\\cellx10254\n"
+			"\\intbl \\b № \\b0 \\cell\n"
+			"\\intbl \\b Наименование работы (услуги) \\b0 \\cell\n"
+			"\\intbl \\b Количество \\b0 \\cell\n"
+			"\\intbl \\b Цена \\b0 \\cell\n"
+			"\\intbl \\b Сумма \\b0 \\cell\n"
+			"\\row\n");
 
 	// create RTF table
 	prozubi_bill_foreach(p, bill, &s, bill_table_cb);
