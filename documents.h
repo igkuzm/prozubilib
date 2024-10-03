@@ -2,7 +2,7 @@
  * File              : documents.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 25.07.2023
- * Last Modified Date: 01.10.2024
+ * Last Modified Date: 03.10.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef DOCUMENTS_H
@@ -511,8 +511,6 @@ documents_get_plan_lecheniya(
 				buf[i++] = ch;
 				ch = fgetc(in);
 			}
-			// return last symbol to out
-			fputc(ch, out);
 			
 			// terminate buffer
 			buf[i] = 0;
@@ -538,8 +536,6 @@ documents_get_plan_lecheniya(
 				i++;
 			}
 			
-			// return last symbol to out
-			fputc(ch, out);
 		
 		} else
 			fputc(ch, out);
@@ -608,8 +604,6 @@ documents_get_case(
 				buf[i++] = ch;
 				ch = fgetc(in);
 			}
-			// return last symbol to out
-			fputc(ch, out);
 			
 			// terminate buffer
 			buf[i] = 0;
@@ -635,8 +629,6 @@ documents_get_case(
 				i++;
 			}
 			
-			// return last symbol to out
-			fputc(ch, out);
 		
 		} else
 			fputc(ch, out);
@@ -704,8 +696,6 @@ documents_get_akt(
 				buf[i++] = ch;
 				ch = fgetc(in);
 			}
-			// return last symbol to out
-			fputc(ch, out);
 			
 			// terminate buffer
 			buf[i] = 0;
@@ -731,8 +721,6 @@ documents_get_akt(
 				i++;
 			}
 			
-			// return last symbol to out
-			fputc(ch, out);
 		
 		} else
 			fputc(ch, out);
@@ -801,8 +789,6 @@ documents_get_dogovor(
 				buf[i++] = ch;
 				ch = fgetc(in);
 			}
-			// return last symbol to out
-			fputc(ch, out);
 			
 			// terminate buffer
 			buf[i] = 0;
@@ -828,8 +814,6 @@ documents_get_dogovor(
 				i++;
 			}
 			
-			// return last symbol to out
-			fputc(ch, out);
 		
 		} else
 			fputc(ch, out);
