@@ -2,7 +2,7 @@
  * File              : rtf.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 04.12.2023
- * Last Modified Date: 01.10.2024
+ * Last Modified Date: 03.10.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -120,6 +120,8 @@ rtf_from_utf8(const char *s)
 			strcat(out, buf);
 		}
 	}
+	// add space after end of string
+	strcat(out, " ");
 	return out;
 }
 
