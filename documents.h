@@ -2,7 +2,7 @@
  * File              : documents.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 25.07.2023
- * Last Modified Date: 03.10.2024
+ * Last Modified Date: 05.10.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef DOCUMENTS_H
@@ -368,6 +368,7 @@ pl_images_get(
 	PL_REP("$doctor", "Семенцов И.В.", PL_TEXT)\
 	PL_REP("$patientID", patient->id, PL_TEXT)\
 	PL_REP("$document", patient->document, PL_TEXT)\
+	PL_REP("$address", patient->address, PL_TEXT)\
 	PL_REP("$tel", patient->tel, PL_TEXT)\
 	PL_REP("$email", patient->email, PL_TEXT)\
 	PL_REP("$zhalobi", c->zhalobi, PL_TEXT)\
