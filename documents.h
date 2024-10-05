@@ -382,6 +382,38 @@ pl_images_get(
 	PL_REP("$diagnozis", c->diagnozis, PL_TEXT)\
 	PL_REP("$lecheniye", c->lecheniye, PL_TEXT)\
 	PL_REP("$recomendacii", c->recomendacii, PL_TEXT)\
+	PL_REP("$z11", c->z11, PL_TEXT)\
+	PL_REP("$z12", c->z12, PL_TEXT)\
+	PL_REP("$z13", c->z13, PL_TEXT)\
+	PL_REP("$z14", c->z14, PL_TEXT)\
+	PL_REP("$z15", c->z15, PL_TEXT)\
+	PL_REP("$z16", c->z16, PL_TEXT)\
+	PL_REP("$z17", c->z17, PL_TEXT)\
+	PL_REP("$z18", c->z18, PL_TEXT)\
+	PL_REP("$z21", c->z21, PL_TEXT)\
+	PL_REP("$z22", c->z22, PL_TEXT)\
+	PL_REP("$z23", c->z23, PL_TEXT)\
+	PL_REP("$z24", c->z24, PL_TEXT)\
+	PL_REP("$z25", c->z25, PL_TEXT)\
+	PL_REP("$z26", c->z26, PL_TEXT)\
+	PL_REP("$z27", c->z27, PL_TEXT)\
+	PL_REP("$z28", c->z28, PL_TEXT)\
+	PL_REP("$z31", c->z31, PL_TEXT)\
+	PL_REP("$z32", c->z32, PL_TEXT)\
+	PL_REP("$z33", c->z33, PL_TEXT)\
+	PL_REP("$z34", c->z34, PL_TEXT)\
+	PL_REP("$z35", c->z35, PL_TEXT)\
+	PL_REP("$z36", c->z36, PL_TEXT)\
+	PL_REP("$z37", c->z37, PL_TEXT)\
+	PL_REP("$z38", c->z38, PL_TEXT)\
+	PL_REP("$z41", c->z41, PL_TEXT)\
+	PL_REP("$z42", c->z42, PL_TEXT)\
+	PL_REP("$z43", c->z43, PL_TEXT)\
+	PL_REP("$z44", c->z44, PL_TEXT)\
+	PL_REP("$z45", c->z45, PL_TEXT)\
+	PL_REP("$z46", c->z46, PL_TEXT)\
+	PL_REP("$z47", c->z47, PL_TEXT)\
+	PL_REP("$z48", c->z48, PL_TEXT)\
 
 enum {
 	PL_NONE,
