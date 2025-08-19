@@ -6,6 +6,10 @@
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
+#ifndef PROZUBILIB_CONF_H
+#define PROZUBILIB_CONF_H
+
+
 #ifndef UUIDCOLUMN
 #define UUIDCOLUMN "ZRECORDNAME"
 #endif /* ifndef UUIDCOLUMN */
@@ -35,3 +39,5 @@ typedef char uuid4_str[37];
 #ifndef NSTimeIntervalSince1970
 #define NSTimeIntervalSince1970  978307200.0
 #endif /* ifndef NSTimeIntervalSince1970 */
+
+#endif /* ifndef PROZUBILIB_CONF_H */
