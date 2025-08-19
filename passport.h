@@ -215,15 +215,8 @@ prozubi_passport_new(
 
 	if (!id){
 		/* create new uuid */
-		UUID4_STATE_T state; UUID4_T identifier;
-		uuid4_seed(&state);
-		uuid4_gen(&state, &identifier);
-		if (!uuid4_to_s(identifier, p->id, 37)){
-			if (kdata->on_error)
-				kdata->on_error(kdata->on_error_data,			
-			STR_ERR("%s", "can't generate uuid"));
-			return NULL;
-		}
+		uuid4_init();
+		uuid4_generate(p->id);
 	} else
 		strcpy(p->id, id);
 

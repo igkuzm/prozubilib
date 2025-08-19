@@ -479,16 +479,9 @@ prozubi_case_new_for_patient(prozubi_t *p, char patientid[37]){
 	struct case_t *c = _prozubi_case_new();
 	
 	/* create new uuid */
-		UUID4_STATE_T state; UUID4_T identifier;
-		uuid4_seed(&state);
-		uuid4_gen(&state, &identifier);
-		if (!uuid4_to_s(identifier, c->id, 37)){
-			if (p->on_error)
-				p->on_error(p->on_error_data,
-			STR_ERR("%s", "can't generate uuid"));
-			return NULL;
-		}
-
+	uuid4_init();
+	uuid4_generate(c->id);
+	
 	/* get last case pro patient - to copy data from it */
 	char SQL[BUFSIZ] = "";
 	strcat(SQL, "SELECT ");
