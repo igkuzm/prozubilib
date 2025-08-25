@@ -187,7 +187,7 @@ prozubi_doctor_foreach(
 					size_t len = sqlite3_column_bytes(stmt, i);\
 					const unsigned char *value = sqlite3_column_text(stmt, i);\
 					if (value){\
-						d->member = strndup((char*)value, len);\
+						d->member = strdup((char*)value);\
 						d->len_##member = len;\
 					} else {\
 						d->member = NULL;\

@@ -138,9 +138,13 @@ PASSPORT_COLUMNS
 		/* iterate columns */
 		int i;
 		for (i = 0; i < PASSPORT_COLS_NUM; ++i) {
+
+			fprintf(stderr, "data: %s\n", sqlite3_column_text(stmt, i));
+			
+
 			/* cast string */
 			switch (i) {
-
+					
 #define PASSPORT_COLUMN_DATE(member, number, title) \
 				case number:\
 				{\
@@ -160,7 +164,7 @@ PASSPORT_COLUMNS
 					size_t len = sqlite3_column_bytes(stmt, i);\
 					const unsigned char *value = sqlite3_column_text(stmt, i);\
 					if (value){\
-						p->member = strndup((char*)value, len);\
+						p->member = strdup((char*)value);\
 						p->len_##member = len;\
 					} else {\
 						p->member = NULL;\

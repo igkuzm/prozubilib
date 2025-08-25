@@ -540,7 +540,7 @@ prozubi_case_new_for_patient(prozubi_t *p, char patientid[37]){
 					const unsigned char *value =\
 						sqlite3_column_text(stmt, i);\
 					if (value){\
-						c->member = strndup((char*)value, len);\
+						c->member = strdup((char*)value);\
 						c->len_##member = len;\
 					} else {\
 						c->member = NULL;\
@@ -688,7 +688,7 @@ prozubi_cases_from_sql(
 				const unsigned char *value =\
 					sqlite3_column_text(stmt, i);\
 				if (value){\
-					c->member = strndup((char*)value, len);\
+					c->member = strdup((char*)value);\
 					c->len_##member = len;\
 				} else {\
 					c->member = NULL;\

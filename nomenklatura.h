@@ -151,7 +151,7 @@ prozubi_nomenklatura_foreach(
 						{\
 							size_t len = sqlite3_column_bytes(stmt_p, i);\
 							const unsigned char *value = sqlite3_column_text(stmt_p, i);\
-							c->title = strndup((const char *)value, len);\
+							c->title = strdup((const char *)value);\
 							break;\
 						};				
 #define NOMENKLATURA_COLUMN_INT(title) \
@@ -178,7 +178,7 @@ prozubi_nomenklatura_foreach(
 			/* handle values */
 			size_t len = sqlite3_column_bytes(stmt_p, 0);
 			const unsigned char *value = sqlite3_column_text(stmt_p, 0);
-			c->name = strndup((const char *)value, len);
+			c->name = strdup((const char *)value);
 			c->kod  = strdup("");
 			c->headName  = strdup("");
 
@@ -231,7 +231,7 @@ prozubi_nomenklatura_foreach(
 						{\
 							size_t len = sqlite3_column_bytes(stmt_c, i);\
 							const unsigned char *value = sqlite3_column_text(stmt_c, i);\
-							c->title = strndup((char*)value, len);\
+							c->title = strdup((char*)value);\
 							c->title[len] = 0;\
 							break;\
 						};				

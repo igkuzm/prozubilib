@@ -165,7 +165,7 @@ prozubi_template_foreach(
 					size_t len = sqlite3_column_bytes(stmt, i);\
 					const unsigned char *value = sqlite3_column_text(stmt, i);\
 					if (value){\
-						t->member = strndup((char*)value, len);\
+						t->member = strdup((char*)value);\
 						t->len_##member = len;\
 					} else {\
 						t->member = NULL;\
