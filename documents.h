@@ -28,8 +28,25 @@
 #include "str.h"
 #include "rtf.h"
 #include "docx.h"
+#include "fm.h"
 
-#define OUTFILE "out.rtf"
+#define OUTDIR "out.rtfd"
+#define OUTFILE OUTDIR "/TXT.rtf"
+#define ZFORMULAIMG "zubFormula.png"
+
+static void free_out_dir(){
+	// remove temp file
+	remove(OUTFILE);
+	
+	// remove outdir
+	dir_foreach(OUTDIR, file){
+		char path[BUFSIZ];
+		sprintf(path, "%s/%s", OUTDIR, file->d_name);
+		remove(path);
+	}
+	rmdir(OUTDIR);
+	newdir(OUTDIR, 0755);
+}
 
 struct pl_table_str{
 	struct str str;
@@ -434,7 +451,16 @@ pl_images_cb(void *d, struct image_t *image){
 					STR("can't load image: %s", image->id));
 		return 0;
 	}
-
+	
+	// add image to rtfd for macos support
+	char path[BUFSIZ];
+	sprintf(path, OUTDIR "/%s.jpeg", image->id);
+	FILE *fp = fopen(path, "w");
+	if (fp){
+		fwrite(image->data, image->len_data, 1, fp);
+		fclose(fp);
+	}
+	
 	int i;
 	str_appendf(&img->str,
 		"{\\pict\\picw0\\pich0\\picwgoal10254\\pichgoal6000\\jpegblip\n");
@@ -444,6 +470,9 @@ pl_images_cb(void *d, struct image_t *image){
 		str_appendf(&img->str, "%02x", bit);
 	}
 	str_appendf(&img->str, "}\n");
+	
+	// add macos support
+	str_appendf(&img->str, "\\f0\\fs24 \\cf0 {{\\*\\NeXTGraphic %s.jpeg \\width10250 \\height6000}}\n", image->id);
 
 	return 0;
 }
@@ -589,7 +618,8 @@ documents_get_plan_lecheniya(
 	}
 
 	// remove temp file
-	remove(OUTFILE);
+	free_out_dir();
+	
 	// open out file
 	FILE *out = fopen(OUTFILE, "w+");
 	if (!in){
@@ -609,14 +639,27 @@ documents_get_plan_lecheniya(
 	char *zformula;
 	void *zdata; size_t zlen;
 	if (_prozubi_zformula_image(p, c,
-			 	"zubFormula.png",
+			 	ZFORMULAIMG,
 			 	&zdata, &zlen))
 	{
 		pl_zformula(p, c, &zformula);
 	} else {
-		zformula = 
-			rtf_from_image("png", zdata, zlen,
-				 	10250, 6000);
+		// add image to rtfd
+		char path[BUFSIZ];
+		sprintf(path, OUTDIR "/" ZFORMULAIMG);
+		fcopy(ZFORMULAIMG, path);
+		
+		// add image to rtf
+		struct str s;
+		str_init(&s);
+		char *img = rtf_from_image("png", zdata, zlen,
+								   10250, 6000);
+		
+		str_append(&s, img, strlen(img));
+		
+		str_appendf(&s, "\\f0\\fs24 \\cf0 {{\\*\\NeXTGraphic "ZFORMULAIMG" \\width10250 \\height6000}}\n");
+		
+		zformula = s.str;
 	}
 
 	// load images
@@ -685,7 +728,11 @@ documents_get_plan_lecheniya(
 	fclose(in);
 	fclose(out);
 
+#ifdef	__APPLE__
+	return OUTDIR;
+#else
 	return OUTFILE;
+#endif
 }
 
 static const char * 
@@ -709,7 +756,7 @@ documents_get_case(
 	}
 
 	// remove temp file
-	remove(OUTFILE);
+	free_out_dir();
 	// open out file
 	FILE *out = fopen(OUTFILE, "w+");
 	if (!in){
@@ -772,7 +819,11 @@ documents_get_case(
 	fclose(in);
 	fclose(out);
 
+#ifdef	__APPLE__
+	return OUTDIR;
+#else
 	return OUTFILE;
+#endif
 }
 
 static void 
@@ -869,7 +920,7 @@ documents_get_akt(
 	}
 
 	// remove temp file
-	remove(OUTFILE);
+	free_out_dir();
 	// open out file
 	FILE *out = fopen(OUTFILE, "w+");
 	if (!in){
@@ -940,7 +991,11 @@ documents_get_akt(
 	fclose(in);
 	fclose(out);
 
+#ifdef	__APPLE__
+	return OUTDIR;
+#else
 	return OUTFILE;
+#endif
 }
 
 
@@ -964,7 +1019,8 @@ documents_get_dogovor(
 	}
 
 	// remove temp file
-	remove(OUTFILE);
+	free_out_dir();
+		
 	// open out file
 	FILE *out = fopen(OUTFILE, "w+");
 	if (!in){
@@ -1030,7 +1086,11 @@ documents_get_dogovor(
 	fclose(in);
 	fclose(out);
 
+#ifdef	__APPLE__
+	return OUTDIR;
+#else
 	return OUTFILE;
+#endif
 }
 
 
