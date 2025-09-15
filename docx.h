@@ -11,7 +11,6 @@
 #ifndef DOCX_H_
 #define DOCX_H_
 
-#include <cstdlib>
 #include <stdio.h>
 #include <zip.h>
 
@@ -295,9 +294,9 @@ docx_table_start_xml(int ncols, int *sizes)
 	"<w:tbl>"
 	"<w:tblPr>"
 	"</w:tblPr>"
-	"<w:tblGrid>";
+	"<w:tblGrid>");
 	int i;
-	for (i=0; i<ncels; ++i) {
+	for (i=0; i<ncols; ++i) {
 		sprintf(str, "%s%s", str, "<w:gridCol w:w=\"%s\"/>");
 	}
 	strcat(str, "</w:tblGrid>");

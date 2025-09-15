@@ -27,6 +27,7 @@
 #include "images.h"
 #include "str.h"
 #include "rtf.h"
+#include "docx.h"
 
 #define OUTFILE "out.rtf"
 
@@ -35,6 +36,107 @@ struct pl_table_str{
 	char *summa;
 	char *sroki;
 };
+
+static void *
+pl_table_cb_docx(void *d, void *p, struct planlecheniya_t *t){
+	struct pl_table_str *s = (struct pl_table_str *)d;
+	switch (t->type) {
+		case PLANLECHENIYA_TYPE_STAGE:
+		{
+			str_appendf(&s->str, 
+						"\\pard\\ql \\b %s \\b0 \\ \\par\n", t->title);
+			str_appendf(&s->str, 
+						"\\pard\\par\\trowd\n"
+						"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb\\brdrs\\clbrdrr\\brdrs\n"
+						"\\cellx400\n"
+						"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb\\brdrs\\clbrdrr\\brdrs\n"
+						"\\cellx7254\n"
+						"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb\\brdrs\\clbrdrr\\brdrs\n"
+						"\\cellx8254\n"
+						"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb\\brdrs\\clbrdrr\\brdrs\n"
+						"\\cellx9254\n"
+						"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb\\brdrs\\clbrdrr\\brdrs\n"
+						"\\cellx10254\n"
+						"\\intbl \\b № \\b0 \\cell\n"
+						"\\intbl \\b Наименование работы (услуги) \\b0 \\cell\n"
+						"\\intbl \\b Количество \\b0 \\cell\n"
+						"\\intbl \\b Цена \\b0 \\cell\n"
+						"\\intbl \\b Сумма \\b0 \\cell\n"
+						"\\row\n");
+			break;
+		}
+		case PLANLECHENIYA_TYPE_ITEM:
+		{
+			str_appendf(&s->str, 
+						"\\trowd\n"
+						"\\intbl %d \\cell\n"
+						"\\intbl %s \\cell\n"
+						"\\intbl %s \\cell\n"
+						"\\intbl %s \\cell\n"
+						"\\intbl %s \\cell\n"
+						"\\row\n"
+						, t->itemIndex + 1
+						, t->title
+						, t->count
+						, t->price
+						, t->total);
+			break;
+		}
+		case PLANLECHENIYA_TYPE_STAGE_PRICE:
+		{
+			str_appendf(&s->str, 
+						"\\trowd\n"
+						"\\intbl  \\cell\n"
+						"\\intbl \\b %s \\b0 \\cell\n"
+						"\\intbl \\cell\n"
+						"\\intbl \\cell\n"
+						"\\intbl \\b %s руб. \\b0 \\cell\n"
+						"\\row\n"
+						, t->title
+						, t->total
+						);
+			break;
+		}
+		case PLANLECHENIYA_TYPE_STAGE_DURATION:
+		{
+			str_appendf(&s->str, 
+						"\\trowd\n"
+						"\\intbl  \\cell\n"
+						"\\intbl \\b %s \\b0 \\cell\n"
+						"\\intbl \\cell\n"
+						"\\intbl \\cell\n"
+						"\\intbl \\b %s мес. \\b0 \\cell\n"
+						"\\row\\lastrow\\par\n"
+						, t->title
+						, t->count
+						);
+			break;
+		}
+		case PLANLECHENIYA_TYPE_TOTAL_PRICE:
+		{
+			s->summa = (char *)malloc(strlen(t->total) + 1);
+			if (!s->summa){
+				perror("realloc");
+				exit(EXIT_FAILURE);	
+			}
+			strcpy(s->summa, t->total);
+			break;
+		}
+		case PLANLECHENIYA_TYPE_TOTAL_DURATION:
+		{
+			s->sroki = (char *)malloc(strlen(t->count) + strlen(t->title) + 1);
+			if (!s->sroki){
+				perror("realloc");
+				exit(EXIT_FAILURE);	
+			}
+			sprintf(s->sroki, "%s  %s", t->title, t->count);		
+			break;
+		}
+		default:
+			break;
+	}
+}
+
 
 static void *
 pl_table_cb(void *d, void *p, struct planlecheniya_t *t){
