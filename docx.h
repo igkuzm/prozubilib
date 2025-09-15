@@ -39,6 +39,26 @@ docx_add_image_and_get_xml(
 		size_t len,
 		int width, int height);
 
+/* get table start docx xml with columns width in twips (inches * 20) */
+static char *
+docx_table_start_xml(int ncols, int *sizes);
+
+/* get table end docx xml */
+static const char *
+docx_table_end_xml();
+
+/* get table row start docx xml */
+static const char *
+docx_table_row_start_xml();
+
+/* get table row end docx xml */
+static const char *
+docx_table_row_end_xml();
+
+/* get table end docx xml */
+static char *
+docx_table_cell_xml(const char *data);
+
 /* IMPLIMATION */
 #include <string.h>
 #include <stdint.h>
@@ -263,5 +283,71 @@ docx_add_image_and_get_xml(
 
 	return xml;
 }
+
+char *
+docx_table_start_xml(int ncols, int *sizes)
+{
+	char *str = malloc(BUFSIZ);
+	if (!str)
+		return NULL;
+	*str = 0;
+	strcat(str,
+	"<w:tbl>"
+	"<w:tblPr>"
+	"</w:tblPr>"
+	"<w:tblGrid>";
+	int i;
+	for (i=0; i<ncels; ++i) {
+		sprintf(str, "%s%s", str, "<w:gridCol w:w=\"%s\"/>");
+	}
+	strcat(str, "</w:tblGrid>");
+	return str;
+}
+
+const char *
+docx_table_end_xml()
+{
+	return "</w:tbl>";
+}
+	
+const char *
+docx_table_row_start_xml(){
+	return "<w:tr>";
+}
+	
+const char *
+docx_table_row_end_xml()
+{
+	return "</w:tr>";		
+}
+	
+
+char *
+docx_table_cell_xml(const char *data)
+{
+	const char *cell_start = 
+	"<w:tc><w:tcPr><w:tcBorders>"
+	"<w:top w:val=\"single\" w:sz=\"4\" w:space=\"0\" w:color=\"000000\"/>"
+	"<w:bottom w:val=\"single\" w:sz=\"4\" w:space=\"0\" w:color=\"000000\"/>"
+	"<w:left w:val=\"single\" w:sz=\"4\" w:space=\"0\" w:color=\"000000\"/>"
+	"<w:right w:val=\"single\" w:sz=\"4\" w:space=\"0\" w:color=\"000000\"/>"
+	"</w:tcBorders></w:tcPr>"
+	"<w:p><w:r><w:t>";
+	
+	const char *cell_end = "<w:tc><w:p><w:r><w:t>";
+	
+	int size = BUFSIZ + sizeof(cell_start) + sizeof(cell_end);
+	char *str = malloc(size + 1);
+	if (!str)
+		return NULL;
+	*str = 0;
+	
+	strcat(str, cell_start);
+	strncat(str, data, BUFSIZ);
+	strcat(str, cell_end);
+	
+	return str;
+}
+
 
 #endif /* ifndef DOCX_H_ */
