@@ -425,6 +425,8 @@ static void _prozubi_bill_to_rtf_cb(
 		
 		str_append(
 				   s, tbl, strlen(tbl));
+		
+		str_appendf(&s, "\\lastrow\n");
 	}
 }
 
@@ -462,12 +464,15 @@ static size_t prozubi_bill_to_rtf(
 	prozubi_bill_foreach(
 			p, bill, &s, 
 			_prozubi_bill_to_rtf_cb);
+	
+	// bottom
+	str_appendf(&s, "\n\\par");
 
 	if (rtf)
 		*rtf = s.str;
 	else
 		free(s.str);
-	
+		
 	return s.len;
 }
 

@@ -253,7 +253,7 @@ prozubi_planlecheniya_foreach(
 				PLANLECHENIYA_TYPE_STAGE_DURATION,
 				stage_i, -1, 
 				strdup(
-					"Продолжительность этапа (мес.):"), 
+					"Продолжительность этапа:"), 
 				NULL, NULL, 	stage_duration_str,
 				(char*)""));
 		
@@ -796,15 +796,15 @@ static void * _prozubi_planlecheniya_to_rtf_cb(
 			{
 				char title[BUFSIZ];
 				snprintf(title,BUFSIZ,"\\b %s \\b0", t->title);
-				char price[BUFSIZ];
-				snprintf(price,BUFSIZ,"\\b %s руб. \\b0", t->total);
+				char total[BUFSIZ];
+				snprintf(total,BUFSIZ,"\\b %s руб. \\b0", t->total);
 				
 				char *row[] = {
 					"",
 					title,
 					"",
-					price,
-					""
+					"",
+					total
 				};
 				
 				int width[] = 
@@ -845,32 +845,34 @@ static void * _prozubi_planlecheniya_to_rtf_cb(
 			}
 		case PLANLECHENIYA_TYPE_TOTAL_PRICE:
 			{
-				char str[256];
-				sprintf(str, 
-						"\\lastrow\n\n%s %s руб.\n"
-						, t->title
-						, t->total
-				);
-				char *rtf_string = 
-					rtf_from_utf8(str);
-				str_append(
-						s, rtf_string, strlen(rtf_string));
-				free(rtf_string);
+//				char str[256];
+//				sprintf(str, 
+//						"\\lastrow\n\n%s %s руб.\n"
+//						, t->title
+//						, t->total
+//				);
+//				char *rtf_string = 
+//					rtf_from_utf8(str);
+//				str_append(
+//						s, rtf_string, strlen(rtf_string));
+//				free(rtf_string);
+				str_appendf(s, "\\lastrow\n");
 				break;
 			}
 		case PLANLECHENIYA_TYPE_TOTAL_DURATION:
 			{
-				char str[256];
-				sprintf(str, 
-						"%s %s\n"
-						, t->title
-						, t->count
-				);
-				char *rtf_string = 
-					rtf_from_utf8(str);
-				str_append(
-						s, rtf_string, strlen(rtf_string));
-				free(rtf_string);
+//				char str[256];
+//				sprintf(str, 
+//						"%s %s\n\\par\\par"
+//						, t->title
+//						, t->count
+//				);
+//				char *rtf_string = 
+//					rtf_from_utf8(str);
+//				str_append(
+//						s, rtf_string, strlen(rtf_string));
+//				free(rtf_string);
+				str_appendf(s, "\n\\par");
 				break;
 			}
 
