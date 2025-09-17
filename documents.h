@@ -631,10 +631,17 @@ documents_get_plan_lecheniya(
 	}
 
 	// get table
-	char *table, *summa, *sroki;
-	pl_table(p, c->planlecheniya, &table,
-		 	&summa, &sroki);
-	
+	char *table;
+//	pl_table(p, c->planlecheniya, &table,
+//		 	&summa, &sroki);
+	prozubi_planlecheniya_to_rtf(p, c->planlecheniya, &table);
+	int duration = prozubi_planlecheniya_get_duration_total(p, c->planlecheniya);
+	char sroki[128];
+	sprintf(sroki,"Общая продолжительность лечения (мес.): %d", duration);
+	int total = prozubi_planlecheniya_get_price_total(p, c->planlecheniya);
+	char summa[128];
+	sprintf(summa,"%d ", total);
+
 	// get zformula
 	char *zformula;
 	void *zdata; size_t zlen;

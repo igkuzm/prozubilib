@@ -748,21 +748,21 @@ static void * _prozubi_planlecheniya_to_rtf_cb(
 		case PLANLECHENIYA_TYPE_STAGE:
 			{
 				str_appendf(s,
-					"\\pard\\par\\ql \\b %s \\b0 \\ \n", 
+					"\n\n\\par\\pard\\ql \\b %s \\b0 \\ \\par\n", 
 					t->title);
 
 				const char *titles[] =
 				{
 					"\\b № \\b0",
-					"\\b Наименование работы (услуги) \\b0"
-					"\\b Количество \\b0"
-					"\\b Цена \\b0"
+					"\\b Наименование работы (услуги) \\b0",
+					"\\b Количество \\b0",
+					"\\b Цена \\b0",
 					"\\b Сумма \\b0"
 				};
 				int width[] = 
 					{400, 6854, 1000, 1000, 1000};
 				char *tbl = 
-					rtf_table_header(5, titles, width);
+					rtf_table_row(5, titles, width);
 				
 				str_append(
 						s, tbl, strlen(tbl));
@@ -771,17 +771,22 @@ static void * _prozubi_planlecheniya_to_rtf_cb(
 			}
 		case PLANLECHENIYA_TYPE_ITEM:
 			{
-				char row[256];
-				sprintf(row, 
-						"%d=%s=%s=%s=%s"
-						, t->itemIndex + 1
-						, t->title
-						, t->count
-						, t->price
-						, t->total
-				);
+				char index[32];
+				sprintf(index, "%d", t->itemIndex + 1);
+				char *row[] = {
+					index,
+					t->title,
+					t->count,
+					t->price,
+					t->total
+				};
+				
+				int width[] = 
+					{400, 6854, 1000, 1000, 1000};
+				
 				char *tbl = 
-					rtf_table_row_from_string(row, "=");
+					rtf_table_row(5, row, width);
+				
 				str_append(
 						s, tbl, strlen(tbl));
 				free(tbl);
@@ -789,14 +794,24 @@ static void * _prozubi_planlecheniya_to_rtf_cb(
 			}
 		case PLANLECHENIYA_TYPE_STAGE_PRICE:
 			{
-				char row[256];
-				sprintf(row, 
-						"=\\b %s \\b0==\\b %s руб. \\b0="
-						, t->title
-						, t->total
-				);
+				char title[BUFSIZ];
+				snprintf(title,BUFSIZ,"\\b %s \\b0", t->title);
+				char price[BUFSIZ];
+				snprintf(price,BUFSIZ,"\\b %s руб. \\b0", t->total);
+				
+				char *row[] = {
+					"",
+					title,
+					"",
+					price,
+					""
+				};
+				
+				int width[] = 
+				{400, 6854, 1000, 1000, 1000};
+				
 				char *tbl = 
-					rtf_table_row_from_string(row, "=");
+					rtf_table_row(5, row, width);
 				str_append(
 						s, tbl, strlen(tbl));
 				free(tbl);
@@ -804,14 +819,25 @@ static void * _prozubi_planlecheniya_to_rtf_cb(
 			}
 		case PLANLECHENIYA_TYPE_STAGE_DURATION:
 			{
-				char row[256];
-				sprintf(row, 
-						"==\\b %s \\b0===\\b %s мес. \\b0"
-						, t->title
-						, t->count
-				);
+				char title[BUFSIZ];
+				snprintf(title,BUFSIZ,"\\b %s \\b0", t->title);
+				char count[BUFSIZ];
+				snprintf(count,BUFSIZ,"\\b %s мес. \\b0", t->count);
+				
+				char *row[] = {
+					"",
+					title,
+					"",
+					"",
+					count
+				};
+				
+				int width[] = 
+				{400, 6854, 1000, 1000, 1000};
+				
 				char *tbl = 
-					rtf_table_row_from_string(row, "=");
+					rtf_table_row(5, row, width);
+
 				str_append(
 						s, tbl, strlen(tbl));
 				free(tbl);
@@ -821,7 +847,7 @@ static void * _prozubi_planlecheniya_to_rtf_cb(
 			{
 				char str[256];
 				sprintf(str, 
-						"\\lastrow\n\n%s: %s руб.\n"
+						"\\lastrow\n\n%s %s руб.\n"
 						, t->title
 						, t->total
 				);
@@ -836,7 +862,7 @@ static void * _prozubi_planlecheniya_to_rtf_cb(
 			{
 				char str[256];
 				sprintf(str, 
-						"%s: %s\n"
+						"%s %s\n"
 						, t->title
 						, t->count
 				);

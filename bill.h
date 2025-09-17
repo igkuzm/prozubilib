@@ -384,34 +384,47 @@ static void _prozubi_bill_to_rtf_cb(
 	struct str *s = (struct str *)d;
 	if (t->type == BILL_TYPE_ITEM)
 	{
-		str_appendf(s, 
-				"\\trowd\n"
-				"\\intbl %d \\cell\n"
-				"\\intbl %s \\cell\n"
-				"\\intbl %s \\cell\n"
-				"\\intbl %s \\cell\n"
-				"\\intbl %s \\cell\n"
-				"\\row\n"
-				, t->itemIndex + 1
-				, t->title
-				, t->count
-				, t->price
-				, t->total
-		);
+		char index[32];
+		sprintf(index, "%d", t->itemIndex + 1);
+		char *row[] = {
+			index,
+			t->title,
+			t->count,
+			t->price,
+			t->total
+		};
+		
+		int width[] = 
+		{400, 6854, 1000, 1000, 1000};
+		
+		char *tbl = 
+			rtf_table_row(5, row, width);
+		
+		str_append(
+				   s, tbl, strlen(tbl));
 	}
 	else if (t->type == BILL_TYPE_TOTAL_PRICE)
 	{
-		str_appendf(s, 
-				"\\trowd\n"
-				"\\intbl  \\cell\n"
-				"\\intbl \\b %s \\b0 \\cell\n"
-				"\\intbl \\cell\n"
-				"\\intbl \\cell\n"
-				"\\intbl \\b %s руб. \\b0 \\cell\n"
-				"\\row\\lastrow\n"
-				, t->title
-				, t->total
-		);
+		char title[BUFSIZ];
+		snprintf(title,BUFSIZ,"\\b %s \\b0", t->title);
+		char total[BUFSIZ];
+		snprintf(total,BUFSIZ,"\\b %s руб. \\b0", t->total);
+		char *row[] = {
+			"",
+			title,
+			"",
+			"",
+			total
+		};
+		
+		int width[] = 
+		{400, 6854, 1000, 1000, 1000};
+		
+		char *tbl = 
+			rtf_table_row(5, row, width);	
+		
+		str_append(
+				   s, tbl, strlen(tbl));
 	}
 }
 
@@ -436,7 +449,7 @@ static size_t prozubi_bill_to_rtf(
 	int width[] = 
 		{400, 6854, 1000, 1000, 1000};
 	char *tbl = 
-		rtf_table_header(5, titles, width);
+		rtf_table_row(5, titles, width);
 	
 	fprintf(stderr, "OK: \n");
 	

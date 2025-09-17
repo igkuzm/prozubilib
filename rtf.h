@@ -18,31 +18,14 @@
 static char *
 rtf_from_utf8(const char *s);
 
-/* rtf_table_header
- * return string with rtf code of table header
- * or NULL on error
- * %coln   - number of columns
- * %titles - array of columns titles
- * %width  - array of columns width */
-static char *
-rtf_table_header(int coln, const char *titles[], int *width);
-
 /* rtf_table_row
  * return string with rtf code of table row
  * or NULL on error
- * %coln  - number of columns
- * %colv  - columns values */
+ * %colc   - number of columns
+ * %colv - columns values
+ * %width  - array of columns width in twips*/
 static char *
-rtf_table_row(int coln, char *colv[]);
-
-/* rtf_table_row_from_string
- * return string with rtf code of table row
- * or NULL on error
- * %colv  - string with columns values separeted by delim
- * %delim - string with delim chars */
-static char *
-rtf_table_row_from_string(
-		const char *colv, const char *delim);
+rtf_table_row(int colc, const char *colv[], int *width);
 
 /* convert image to RTF string 
  * valid formats: emf, png, jpeg
@@ -159,42 +142,31 @@ _rtf_str_append(struct _rtf_str *s, const char *str)
 	({char str[BUFSIZ];sprintf(str, __VA_ARGS__);\
 			_rtf_str_append(s, str);});
 
-char *
-rtf_table_header(
-		int coln, const char *titles[], int *width)
+static void _rtf_table_add_row_column(
+		struct _rtf_str *s,
+		int width_current,
+		int width_total,
+		const char *value)
 {
-	int i, w=0;
-	struct _rtf_str s;
-	_rtf_str_init(&s);
-	
-	_rtf_str_append(&s, 
-			  "\\pard\\par\\trowd\n");
-	for (i = 0; i < coln; ++i) {
-		w += width[i];
-		_rtf_str_appendf(&s, 
+		_rtf_str_appendf(s, 
 				"\\clbrdrt\\brdrs"
 				"\\clbrdrl\\brdrs"
 				"\\clbrdrb\\brdrs"
 				"\\clbrdrr\\brdrs\n"
+				"\\clwWidth%d\\clftsWidth3"
 				"\\cellx%d\n", 
-				w);
-	}
-	for (i = 0; i < coln; ++i) {
-		char *title = rtf_from_utf8(titles[i]);
-		_rtf_str_appendf(&s, 
-				"\\intbl %s \\cell\n", 
-				title);
-		free(title);
-	}
+				width_current, width_total);		
 
-	return s.str;
+		_rtf_str_appendf(s, 
+				"\\intbl %s \\cell\n",
+				rtf_from_utf8(value));	
 }
 
 char *
 rtf_table_row(
-		int coln, char *colv[])
+		int colc, const char *colv[], int *width)
 {
-	int i;
+	int i, w=0;
 	struct _rtf_str s;
 	if (_rtf_str_init(&s))
 		return NULL;
@@ -202,48 +174,16 @@ rtf_table_row(
 	_rtf_str_append(&s, 
 				"\\trowd\n");
 	
-	for (i = 0; i < coln; ++i)
-		_rtf_str_appendf(&s, 
-				"\\intbl %s \\cell\n",
-				rtf_from_utf8(colv[i]));
+	for (i = 0; i < colc; ++i)
+	{
+		w += width[i];
+		_rtf_table_add_row_column(
+				&s, width[i], w, colv[i]);
+	}
 	
-	_rtf_str_appendf(&s, 
+	 _rtf_str_appendf(&s, 
 				"\\row\n");
 	
-	return s.str;
-}
-
-char *
-rtf_table_row_from_string(
-		const char *colv, const char *delim)
-{
-	int i;
-	struct _rtf_str s;
-	if (_rtf_str_init(&s))
-		return NULL;
-
-	_rtf_str_append(&s, 
-				"\\trowd\n");
-	
-	// do safe strtok
-	char *str = strdup(colv);
-	if (str == NULL)
-		return NULL;
-
-	// loop through the string to extract 
-	// tokens
-	char *t;
-	for(t=strtok(str, delim), i=0; 
-			t; 
-			t=strtok(NULL, delim), ++i) 
-		_rtf_str_appendf(&s, 
-				"\\intbl %s \\cell\n",
-				rtf_from_utf8(t));
-	
-	_rtf_str_appendf(&s, 
-				"\\row\n");
-	
-	free(str);
 	return s.str;
 }
 
