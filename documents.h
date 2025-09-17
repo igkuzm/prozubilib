@@ -644,11 +644,6 @@ documents_get_plan_lecheniya(
 	{
 		pl_zformula(p, c, &zformula);
 	} else {
-		// add image to rtfd
-		char path[BUFSIZ];
-		sprintf(path, OUTDIR "/" ZFORMULAIMG);
-		fcopy(ZFORMULAIMG, path);
-		
 		// add image to rtf
 		struct str s;
 		str_init(&s);
@@ -657,7 +652,25 @@ documents_get_plan_lecheniya(
 		
 		str_append(&s, img, strlen(img));
 		
-		str_appendf(&s, "\\f0\\fs24 \\cf0 {{\\*\\NeXTGraphic "ZFORMULAIMG" \\width10250 \\height6000}}\n");
+		// MAC OS add image to rtfd
+		char path[BUFSIZ];
+		sprintf(path, OUTDIR "/" ZFORMULAIMG);
+		//fcopy(ZFORMULAIMG, path);
+		
+		int x, y, c,
+			to_x = 450, to_y = 225;
+		stbi_uc *image = stbi_load_from_memory((unsigned char *)zdata, zlen, &x, &y, &c, 0);
+		if (image){
+			stbi_uc *resized = malloc(to_x*to_y*c);
+			if (resized){
+				if (stbir_resize_uint8(image, x, y, 0, resized, to_x, to_y, 0, c)){
+					stbi_write_png(path, to_x, to_y, c, resized, 0);
+				}
+				str_appendf(&s, "\\f0\\fs24 \\cf0 {{\\*\\NeXTGraphic "ZFORMULAIMG" \\width%d \\height%d}}\n", to_x, to_y);
+				stbi_image_free(resized);
+			}
+			stbi_image_free(image);
+		}
 		
 		zformula = s.str;
 	}
