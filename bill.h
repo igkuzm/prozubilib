@@ -453,12 +453,8 @@ static size_t prozubi_bill_to_rtf(
 	char *tbl = 
 		rtf_table_row(5, titles, width);
 	
-	fprintf(stderr, "OK: \n");
-	
-	str_append(
-			&s, tbl, strlen(tbl));
+	str_append(&s, tbl, strlen(tbl));
 	free(tbl);
-	fprintf(stderr, "OK: \n");
 
 	// fill RTF table
 	prozubi_bill_foreach(
@@ -467,6 +463,8 @@ static size_t prozubi_bill_to_rtf(
 	
 	// bottom
 	str_appendf(&s, "\n\\par");
+	
+	//fprintf(stderr, "OK: \n");
 
 	if (rtf)
 		*rtf = s.str;

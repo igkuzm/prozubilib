@@ -387,6 +387,7 @@ documents_get_plan_lecheniya(
 			stbi_image_free(image);
 		}
 		
+		free(zdata);
 		zformula = s.str;
 	}
 
@@ -402,10 +403,7 @@ documents_get_plan_lecheniya(
 	_documents_parse_rtf(p, in, out, patient, c, table,
 						 summa, sroki, zformula, img.str.str);	
 
-	free(table);
-	free(summa);
-	free(sroki);
-	
+	free(table);	
 	free(zformula);
 
 	return _documents_finish(p, in, out);
@@ -448,13 +446,14 @@ documents_get_akt(
 	char *bill = NULL;
 	prozubi_bill_to_rtf(p, c->bill, &bill);
 	
-	// parse RTF
-	_documents_parse_rtf(p, in, out, patient, c, bill,
+	if (bill){
+		
+		// parse RTF
+		_documents_parse_rtf(p, in, out, patient, c, bill,
 						 NULL, NULL, NULL, NULL);		
-
-	if (bill)
 		free(bill);
-
+	}
+	
 	return _documents_finish(p, in, out);
 }
 
