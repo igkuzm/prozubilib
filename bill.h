@@ -426,7 +426,7 @@ static void _prozubi_bill_to_rtf_cb(
 		str_append(
 				   s, tbl, strlen(tbl));
 		
-		str_appendf(&s, "\\lastrow\n");
+		str_appendf(s, "\\lastrow\n");
 	}
 }
 
