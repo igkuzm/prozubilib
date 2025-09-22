@@ -10,7 +10,7 @@ AC_CONFIG_MACRO_DIRS([m4])
 AC_PROG_CC
 AC_PROG_CXX
 
-AC_CHECK_HEADER([tiffio.h],[],[AC_MSG_ERROR([Please install libtiff])],[])
+#AC_CHECK_HEADER([tiffio.h],[],[AC_MSG_ERROR([Please install libtiff])],[])
 
 AC_CANONICAL_HOST
 case "${host_os}" in
