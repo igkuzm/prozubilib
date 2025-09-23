@@ -4,19 +4,24 @@
 SUBDIRS = kdata2
 
 lib_LTLIBRARIES = libprozubilib.la
+libprozubilib_la_CFLAGS =
 
 if WIN64
-CURL_LIBDIR = -L`pwd`/kdata2/cYandexDisk/curl/windows/win64/lib
+CURL_LIBDIR = -Lkdata2/cYandexDisk/curl/windows/win64/lib
 endif
 
 if WIN32
-CURL_LIBDIR = -L`pwd`/kdata2/cYandexDisk/curl/windows/win32/lib
+CURL_LIBDIR = -Lkdata2/cYandexDisk/curl/windows/win32/lib
+libprozubilib_la_CFLAGS += \
+	-IcYandexDisk/curl/windows/win32/include -IcYandexDisk/pthreads-win32/include
 endif
 
 if WINDOWS
 #ADD_OBJECTS = kdata2/*.o kdata2/cYandexDisk/*.o
 else
 SQLITE3_LINK = -lsqlite3
+libprozubilib_la_CFLAGS += \
+	-IcYandexDisk/curl/windows/win64/include -IcYandexDisk/pthreads-win32/include
 endif
 
 libprozubilib_la_SOURCES = \
