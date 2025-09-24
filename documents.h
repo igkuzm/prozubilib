@@ -27,7 +27,6 @@
 #include "images.h"
 #include "str.h"
 #include "rtf.h"
-#include "docx.h"
 #include "fm.h"
 
 #define OUTDIR "out.rtfd"
