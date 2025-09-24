@@ -199,7 +199,7 @@ __attribute__((nonnull(1)));
 #ifdef _WIN32
 #include <io.h>
 #include <windows.h>
-#include <fileapi.h>
+//#include <fileapi.h>
 #define F_OK 0
 #define access _access
 #define _SLASH_ "\\"
