@@ -107,11 +107,6 @@ prozubi_stop_sync(
 	if (_prozubi_check_lib(p))
 		return -1;
 	
-	if (!p->tid){
-		ON_ERR(p, "thread id is NULL");
-		return -1;
-	}
-	
 	p->do_update = false;
 	return 0;
 }
@@ -127,8 +122,8 @@ prozubi_start_sync(
 
 	// try to join thread
 	p->do_update = false;
-	if (p->tid)
-		pthread_join(p->tid, NULL);
+	//if (p->tid)
+		//pthread_join(p->tid, NULL);
 	
 	_yd_daemon_init(p);	
 	return 0;
