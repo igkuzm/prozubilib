@@ -17,24 +17,29 @@ project(
 	LANGUAGES C 
 )
 
-SET(KDATA2_SOURCE_DIR ${KDATA2_SOURCE_DIR}/kdata2)
+SET(KDATA2_SOURCE_DIR ${PROZUBI_SOURCE_DIR}/kdata2)
 add_subdirectory(${KDATA2_SOURCE_DIR})
 
 if(APPLE)
 	SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -framework Foundation")
 endif()
 
-add_library(${TARGET} STATIC
-	prozubilib.c
-)
-
 if(WIN32)
+	set(ADDLIBS stbimage)
+	INCLUDE_DIRECTORIES(${PROZUBI_SOURCE_DIR}/win32)		
+	INCLUDE_DIRECTORIES(${KDATA2_SOURCE_DIR}/cYandexDisk/pthreads-win32/include)	
 elseif(APPLE)
+	set(ADDSRC stb_image.c)
 else()
 	if (NOT ANDROID)
 		LIST(APPEND ADDLIBS pthread dl)
 	endif()
 endif()
+
+add_library(${TARGET} STATIC
+	prozubilib.c
+	text_on_bitmap.c
+)
 
 target_link_libraries(${TARGET} kdata2 ${ADDLIBS})
 
