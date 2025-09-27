@@ -246,7 +246,7 @@ prozubi_mkb_foreach(
 			sqlite3_finalize(stmt_c);
 		}
 	}
-	free(SQL);
+	//free(SQL);
 	sqlite3_finalize(stmt_p);
 	sqlite3_close(db);
 }
