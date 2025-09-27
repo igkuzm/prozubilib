@@ -183,12 +183,8 @@ prozubi_mkb_foreach(
 			MKB_COLUMNS
 			#undef MKB_COLUMN_INT
 			#undef MKB_COLUMN_TEX
-			
-			strcat(SQL_c, "1 FROM ");
-			strcat(SQL_c, MKB_TABL);
-			strcat(SQL_c, " WHERE parent = '");
-			strcat(SQL_c, c->iD);
-			strcat(SQL_c, "'");
+		
+			sprintf(SQL_c, "%s 1 FROM %s WHERE parent = %d", SQL_c, MKB_TABL, c->iD);	
 
 			if (p->on_log)
 				p->on_log(p->on_log_data, STR("SQL: %s\n", SQL_c));		
