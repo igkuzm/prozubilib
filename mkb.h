@@ -109,7 +109,6 @@ prozubi_mkb_foreach(
 	if (SQL == NULL)
 		return;
 	strcpy(SQL, "");
-	if (predicate){
 		strcat(SQL, "SELECT ");
 #define MKB_COLUMN_INT(title) strcat(SQL, #title); strcat(SQL, ", "); 
 #define MKB_COLUMN_TEX(title) strcat(SQL, #title); strcat(SQL, ", "); 
@@ -118,17 +117,10 @@ prozubi_mkb_foreach(
 #undef MKB_COLUMN_TEX
 		strcat(SQL, "1 FROM ");
 		strcat(SQL, MKB_TABL);
+	if (predicate){
 		strcat(SQL, " ");
 		strcat(SQL, predicate);
 	}else{
-		strcat(SQL, "SELECT ");
-#define MKB_COLUMN_INT(title) strcat(SQL, #title); strcat(SQL, ", "); 
-#define MKB_COLUMN_TEX(title) strcat(SQL, #title); strcat(SQL, ", "); 
-		MKB_COLUMNS
-#undef MKB_COLUMN_INT
-#undef MKB_COLUMN_TEX
-		strcat(SQL, "1 FROM ");
-		strcat(SQL, MKB_TABL);
 		strcat(SQL, " WHERE parent = 0 ");
 	}
 
@@ -146,74 +138,38 @@ prozubi_mkb_foreach(
 		if (!c)
 			break;
 
-		if (predicate)	{
 			/* iterate columns */
-				int i;
-				for (i = 0; i < MKB_COLS_NUM; ++i) {
-					/* handle values */
-					switch (i) {
-
-#define MKB_COLUMN_TEX(title) \
-						case MKB_##title:\
-						{\
-							size_t len = sqlite3_column_bytes(stmt_p, i);\
-							const unsigned char *value = sqlite3_column_text(stmt_p, i);\
-							c->title = strdup((const char *)value);\
-							break;\
-						};				
-#define MKB_COLUMN_INT(title) \
-						case MKB_##title:\
-						{\
-							int value = sqlite3_column_int(stmt_p, i);\
-							c->title = value;\
-							break;\
-						};				
-
-					MKB_COLUMNS
-
-#undef MKB_COLUMN_TEX			
-#undef MKB_COLUMN_INT			
-
-						default:
-							break;					
-					}
-				}		
-				/* callback */
-				callback(user_data, NULL, c);
-
-		} else {
-			/* handle values */
 			int i;
 			for (i = 0; i < MKB_COLS_NUM; ++i) {
 				/* handle values */
 				switch (i) {
-						
+
 #define MKB_COLUMN_TEX(title) \
-				case MKB_##title:\
-				{\
-					size_t len = sqlite3_column_bytes(stmt_p, i);\
-					const unsigned char *value = sqlite3_column_text(stmt_p, i);\
-					c->title = strdup((const char *)value);\
-					break;\
-				};				
+					case MKB_##title:\
+					{\
+						size_t len = sqlite3_column_bytes(stmt_p, i);\
+						const unsigned char *value = sqlite3_column_text(stmt_p, i);\
+						c->title = strdup((const char *)value);\
+						break;\
+					};				
 #define MKB_COLUMN_INT(title) \
-				case MKB_##title:\
-				{\
-					int value = sqlite3_column_int(stmt_p, i);\
-					c->title = value;\
-					break;\
-				};				
-						
-						MKB_COLUMNS
-						
+					case MKB_##title:\
+					{\
+						int value = sqlite3_column_int(stmt_p, i);\
+						c->title = value;\
+						break;\
+					};				
+
+				MKB_COLUMNS
+
 #undef MKB_COLUMN_TEX			
 #undef MKB_COLUMN_INT			
-						
+
 					default:
 						break;					
 				}
 			}		
-			
+
 			/* callback */
 			void *parent = callback(user_data, NULL, c);
 
@@ -230,9 +186,9 @@ prozubi_mkb_foreach(
 			#undef MKB_COLUMN_TEX
 			
 			strcat(SQL_c, "1 FROM ");
-			strcat(SQL_c, NOMENKLATURA_TABL);
-			strcat(SQL_c, " WHERE headName = '");
-			strcat(SQL_c, c->name);
+			strcat(SQL_c, MKB_TABL);
+			strcat(SQL_c, " WHERE parent = '");
+			strcat(SQL_c, c->iD);
 			strcat(SQL_c, "'");
 
 			if (p->on_log)
@@ -248,18 +204,18 @@ prozubi_mkb_foreach(
 			};
 
 			while (sqlite3_step(stmt_c) != SQLITE_DONE) {
-				nomenklatura_t *c = _nomenklatura_new(p);
+				mkb_t *c = _mkb_new(p);
 				if (!c)
 					break;
 				
 				/* iterate columns */
 				int i;
-				for (i = 0; i < NOMENKLATURA_COLS_NUM; ++i) {
+				for (i = 0; i < MKB_COLS_NUM; ++i) {
 					/* handle values */
 					switch (i) {
 
-#define NOMENKLATURA_COLUMN_TEX(title) \
-						case NOMENKLATURA_##title:\
+#define MKB_COLUMN_TEX(title) \
+						case MKB_##title:\
 						{\
 							size_t len = sqlite3_column_bytes(stmt_c, i);\
 							const unsigned char *value = sqlite3_column_text(stmt_c, i);\
@@ -267,7 +223,7 @@ prozubi_mkb_foreach(
 							c->title[len] = 0;\
 							break;\
 						};				
-#define NOMENKLATURA_COLUMN_INT(title) \
+#define MKB_COLUMN_INT(title) \
 						case NOMENKLATURA_##title:\
 						{\
 							int value = sqlite3_column_int(stmt_c, i);\
@@ -275,17 +231,17 @@ prozubi_mkb_foreach(
 							break;\
 						};				
 
-					NOMENKLATURA_COLUMNS
+					MKB_COLUMNS
 
-#undef NOMENKLATURA_COLUMN_TEX			
-#undef NOMENKLATURA_COLUMN_INT			
+#undef MKB_COLUMN_TEX			
+#undef MKB_COLUMN_INT			
 
 						default:
 							break;					
 					}
 				}		
 				/* callback */
-				callback(user_data, parent, c);
+				parent = callback(user_data, parent, c);
 			}	
 			sqlite3_finalize(stmt_c);
 		}
@@ -296,15 +252,15 @@ prozubi_mkb_foreach(
 }
 
 static void
-prozubi_nomenklatura_free(nomenklatura_t *c){
+prozubi_mkb_free(nomenklatura_t *c){
 	if (c){
 
-#define NOMENKLATURA_COLUMN_INT(title) 
-#define NOMENKLATURA_COLUMN_TEX(title) if(c->title) free(c->title); 
-		NOMENKLATURA_COLUMNS
+#define MKB_COLUMN_INT(title) 
+#define MKB_COLUMN_TEX(title) if(c->title) free(c->title); 
+		MKB_COLUMNS
 
-#undef NOMENKLATURA_COLUMN_TEX			
-#undef NOMENKLATURA_COLUMN_INT			
+#undef MKB_COLUMN_TEX			
+#undef MKB_COLUMN_INT			
 
 		free(c);
 		c = NULL;
