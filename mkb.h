@@ -38,7 +38,7 @@ typedef struct MKB_t {
 BEGIN_ENUM(MKB)
 	#define MKB_COLUMN_INT(title) MKB_##title,
 	#define MKB_COLUMN_TEX(title) MKB_##title,
-	NOMENKLATURA_COLUMNS
+	MKB_COLUMNS
 	#undef MKB_COLUMN_INT
 	#undef MKB_COLUMN_TEX
 	MKB_COLS_NUM
@@ -78,7 +78,7 @@ prozubi_mkb_foreach(
 		void * (*callback)(
 			void * user_data,
 			void * parent,
-			nomenklatura_t *ptr
+			mkb_t *ptr
 			)
 		)
 {
@@ -94,7 +94,7 @@ prozubi_mkb_foreach(
 
 	sqlite3 *db;
 	
-	if (sqlite3_open_v2(NOMENKLATURA_BASE, &db, 
+	if (sqlite3_open_v2(MKB_BASE, &db, 
 				SQLITE_OPEN_READONLY, NULL))
 	{
 		if (p->on_error)
@@ -181,7 +181,7 @@ prozubi_mkb_foreach(
 			
 			#define MKB_COLUMN_INT(title) strcat(SQL_c, #title); strcat(SQL_c, ", "); 
 			#define MKB_COLUMN_TEX(title) strcat(SQL_c, #title); strcat(SQL_c, ", "); 
-			NOMENKLATURA_COLUMNS
+			MKB_COLUMNS
 			#undef MKB_COLUMN_INT
 			#undef MKB_COLUMN_TEX
 			
@@ -224,7 +224,7 @@ prozubi_mkb_foreach(
 							break;\
 						};				
 #define MKB_COLUMN_INT(title) \
-						case NOMENKLATURA_##title:\
+						case MKB_##title:\
 						{\
 							int value = sqlite3_column_int(stmt_c, i);\
 							c->title = value;\
@@ -252,7 +252,7 @@ prozubi_mkb_foreach(
 }
 
 static void
-prozubi_mkb_free(nomenklatura_t *c){
+prozubi_mkb_free(mkb_t *c){
 	if (c){
 
 #define MKB_COLUMN_INT(title) 
