@@ -138,37 +138,36 @@ prozubi_mkb_foreach(
 		if (!c)
 			break;
 
-			/* iterate columns */
-			int i;
-			for (i = 0; i < MKB_COLS_NUM; ++i) {
-				/* handle values */
-				switch (i) {
+		/* iterate columns */
+		int i;
+		for (i = 0; i < MKB_COLS_NUM; ++i) {
+			/* handle values */
+			switch (i) {
 
 #define MKB_COLUMN_TEX(title) \
-					case MKB_##title:\
-					{\
-						size_t len = sqlite3_column_bytes(stmt_p, i);\
-						const unsigned char *value = sqlite3_column_text(stmt_p, i);\
-						c->title = strdup((const char *)value);\
-						break;\
-					};				
+				case MKB_##title:\
+				{\
+					size_t len = sqlite3_column_bytes(stmt_p, i);\
+					const unsigned char *value = sqlite3_column_text(stmt_p, i);\
+					c->title = strdup((const char *)value);\
+					break;\
+				};				
 #define MKB_COLUMN_INT(title) \
-					case MKB_##title:\
-					{\
-						int value = sqlite3_column_int(stmt_p, i);\
-						c->title = value;\
-						break;\
-					};				
+				case MKB_##title:\
+				{\
+					int value = sqlite3_column_int(stmt_p, i);\
+					c->title = value;\
+					break;\
+				};				
 
-				MKB_COLUMNS
+			MKB_COLUMNS
 
 #undef MKB_COLUMN_TEX			
 #undef MKB_COLUMN_INT			
 
-					default:
-						break;					
-				}
-			}		
+				default:
+					break;					
+			}
 
 			/* callback */
 			void *parent = callback(user_data, NULL, c);
