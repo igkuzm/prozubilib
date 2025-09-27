@@ -40,6 +40,7 @@ rtf_from_image(
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include "str.h"
 
 char *
 rtf_from_utf8(const char *s)
@@ -108,47 +109,13 @@ rtf_from_utf8(const char *s)
 	return out;
 }
 
-struct _rtf_str{
-	char *str;
-	int len;
-};
-
-static int 
-_rtf_str_init(struct _rtf_str *s)
-{
-	s->len  = 0;
-	s->str  = (char*)malloc(1);
-	if (s->str == NULL)
-		return -1;
-	return 0;
-}
-
-static void
-_rtf_str_append(struct _rtf_str *s, const char *str)
-{
-	int len = strlen(str);
-	int new_size = s->len + len + 1; 
-	void *ptr = realloc(s->str, new_size);
-	if (ptr == NULL)
-		return;
-	s->str = (char*)ptr;
-	int i;
-	for (i = 0; i < len; ++i)
-		s->str[s->len++] = str[i];
-	s->str[s->len] = 0;
-}
-
-#define _rtf_str_appendf(s, ...)\
-	({char str[BUFSIZ];sprintf(str, __VA_ARGS__);\
-			_rtf_str_append(s, str);});
-
 static void _rtf_table_add_row_column(
-		struct _rtf_str *s,
+		struct str *s,
 		int width_current,
 		int width_total,
 		const char *value)
 {
-		_rtf_str_appendf(s, 
+		str_appendf(s, 
 				"\\clbrdrt\\brdrs"
 				"\\clbrdrl\\brdrs"
 				"\\clbrdrb\\brdrs"
@@ -157,7 +124,7 @@ static void _rtf_table_add_row_column(
 				"\\cellx%d\n", 
 				width_current, width_total);		
 
-		_rtf_str_appendf(s, 
+		str_appendf(s, 
 				"\\intbl %s \\cell\n",
 				rtf_from_utf8(value));	
 }
@@ -167,11 +134,11 @@ rtf_table_row(
 		int colc, const char *colv[], int *width)
 {
 	int i, w=0;
-	struct _rtf_str s;
-	if (_rtf_str_init(&s))
+	struct str s;
+	if (str_init(&s))
 		return NULL;
 
-	_rtf_str_append(&s, 
+	str_append(&s, 
 				"\\trowd\n");
 	
 	for (i = 0; i < colc; ++i)
@@ -181,7 +148,7 @@ rtf_table_row(
 				&s, width[i], w, colv[i]);
 	}
 	
-	 _rtf_str_appendf(&s, 
+	 str_appendf(&s, 
 				"\\row\n");
 	
 	return s.str;
@@ -228,12 +195,12 @@ static char *rtf_from_image(
 		return NULL;
 	
 	int i;
-	struct _rtf_str s;
-	if (_rtf_str_init(&s))
+	struct str s;
+	if (str_init(&s))
 		return NULL;
 
 	// append image header to rtf
-	_rtf_str_appendf(&s, 
+	str_appendf(&s, 
 			"{\\pict\\picw0\\pich0\\picwgoal%d"
 			"\\pichgoal%d\\%sblip\n", width, height, format);
 	
@@ -242,11 +209,11 @@ static char *rtf_from_image(
 	_rtf_image_bin_to_strhex(
 			(unsigned char *)data,
 		len, &str);
-	_rtf_str_append(&s, (char*)str);
+	str_append(&s, (char*)str);
 	free(str);
 	
 	// append image close to rtf
-	_rtf_str_appendf(&s, "}\n");
+	str_appendf(&s, "}\n");
 
 	return s.str;
 }
