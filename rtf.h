@@ -138,7 +138,7 @@ rtf_table_row(
 	if (str_init(&s))
 		return NULL;
 
-	str_append(&s, 
+	str_appendf(&s, 
 				"\\trowd\n");
 	
 	for (i = 0; i < colc; ++i)
@@ -209,7 +209,7 @@ static char *rtf_from_image(
 	_rtf_image_bin_to_strhex(
 			(unsigned char *)data,
 		len, &str);
-	str_append(&s, (char*)str);
+	str_append(&s, (char*)str, strlen(str));
 	free(str);
 	
 	// append image close to rtf
