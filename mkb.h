@@ -151,7 +151,7 @@ _prozubi_mkb_get_child(
 		parent = callback(user_data, parent, c);
 
 		// loop
-		/*_prozubi_mkb_get_child(p, db, c->iD, user_data, parent, callback);*/
+		_prozubi_mkb_get_child(p, db, c->iD, user_data, parent, callback);
 	}	
 	sqlite3_finalize(stmt_c);
 }
