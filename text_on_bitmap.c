@@ -14,8 +14,11 @@ int text_on_bitmap(
 		int x, int y)
 {
 	stbtt_fontinfo fnt;
-  int i,j,ascent,baseline,ch=0;
+  int i,j,ascent,baseline,size, l=0, ch=0;
   float scale, xpos=x;
+	unsigned char *buffer, *canvas;
+	unsigned int *str;
+	char *p;
 
 	FILE *fp = fopen(font, "rb");
 	if (!fp)
@@ -23,18 +26,22 @@ int text_on_bitmap(
 	
 	// get size
 	fseek(fp, 0, SEEK_END);
-	int size = ftell(fp);
+	size = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
 	
 	// read font
-	unsigned char buffer[size];
+	buffer = malloc(size);
+	if (buffer == NULL)
+		return 1;
 	fread(buffer, size, 1, fp);
   if (stbtt_InitFont(
 			&fnt, buffer, 0) == 0)
 		return 1;
 
 	// create bitmap for text
-	unsigned char canvas[height][width];
+	canvas = malloc(height*width);
+	if (canvas == NULL)
+		return 1;
 	memset(canvas, 0, width * height);
 
 	scale = stbtt_ScaleForPixelHeight(
@@ -44,8 +51,10 @@ int text_on_bitmap(
 	baseline = (int) (ascent*scale);
 
 	// get unicode
-	unsigned int str[strlen(text)+1];
-	int l=0; char *p = (char *)text;
+	str = malloc((strlen(text)+1)*sizeof(int));
+	if (str == NULL)
+		return 1;
+	p = (char *)text;
 	while (*p)
 		p = mbtoc32(&str[l++], p);
 	str[l] = 0;
@@ -97,6 +106,10 @@ int text_on_bitmap(
 			}
 		}
 	}
+
+	free(buffer);
+	free(canvas);
+	free(str);
 
 	return 0;
 }
