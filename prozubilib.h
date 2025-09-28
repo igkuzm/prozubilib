@@ -10,7 +10,6 @@
 #define PROZUBILIB_H
 
 #include <time.h>
-#include <stdint.h>
 
 #include "prozubilib_conf.h"
 
