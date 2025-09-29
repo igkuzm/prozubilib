@@ -9,6 +9,13 @@
 #ifndef PROZUBILIB_CONF_H
 #define PROZUBILIB_CONF_H
 
+#ifdef _WIN32
+#ifndef bool
+#define bool char
+#define true 1
+#define false 0
+#endif //bool
+#endif //_WIN32
 
 #ifndef UUIDCOLUMN
 #define UUIDCOLUMN "ZRECORDNAME"
@@ -20,6 +27,7 @@
 #include "kdata2/cYandexDisk/uuid4.h"
 #include "kdata2/cYandexDisk/log.h"
 #include "kdata2/cYandexDisk/log.h"
+#include "kdata2/cYandexDisk/alloc.h"
 
 typedef kdata2_t prozubi_t;
 

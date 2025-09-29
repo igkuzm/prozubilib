@@ -12,19 +12,10 @@
 #include "prozubilib_conf.h"
 
 #include "enum.h"
-#include "kdata2/cYandexDisk/alloc.h"
 
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
-
-#ifdef _WIN32
-#ifndef bool
-#define bool char
-#define true 1
-#define false 0
-#endif //bool
-#endif //_WIN32
 
 #define PASSPORT_TABLENAME "ZPASSPORT"
 
