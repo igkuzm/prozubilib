@@ -12,7 +12,7 @@
 #include "prozubilib_conf.h"
 
 #include "enum.h"
-#include "alloc.h"
+#include "kdata2/cYandexDisk/alloc.h"
 
 #include <string.h>
 #include <stdlib.h>
