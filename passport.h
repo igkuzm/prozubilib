@@ -88,6 +88,12 @@ prozubi_passport_foreach(
 		int      (*callback)(void *user_data, struct passport_t *p)
 		)
 {
+	int res, i, col_type;
+	size_t len;
+	sqlite3_stmt *stmt;
+	const unsigned char *value;
+	char SQL[BUFSIZ] = "SELECT ";
+	
 	/* check kdata */
 	if (!kdata){
 		return;
@@ -100,8 +106,6 @@ prozubi_passport_foreach(
 	}
 
 	/* create SQL string */
-	char SQL[BUFSIZ] = "SELECT ";
-
 #define PASSPORT_COLUMN_DATE(member, number, title) strcat(SQL, title); strcat(SQL, ", "); 
 #define PASSPORT_COLUMN_TEXT(member, number, title) strcat(SQL, title); strcat(SQL, ", "); 
 PASSPORT_COLUMNS
@@ -116,9 +120,6 @@ PASSPORT_COLUMNS
 	strcat(SQL, " ORDER BY ZFAMILIYA ASC, ZIMIA ASC, ZOTCHESTVO ASC");
 
 	/* start SQLite request */
-	int res;
-	sqlite3_stmt *stmt;
-	
 	res = sqlite3_prepare_v2(kdata->db, SQL, -1, &stmt, NULL);
 	if (res != SQLITE_OK) {
 		if (kdata->on_error)
@@ -128,7 +129,6 @@ PASSPORT_COLUMNS
 	}	
 
 	while (sqlite3_step(stmt) != SQLITE_DONE) {
-	
 		/* passort struct */
 		struct passport_t *p = NEW(struct passport_t, 
 			if (kdata->on_error)
@@ -136,11 +136,9 @@ PASSPORT_COLUMNS
 				STR_ERR("%s", "can't allocate struct passport_t")); return);
 
 		/* iterate columns */
-		int i;
 		for (i = 0; i < PASSPORT_COLS_NUM; ++i) {
 
 			fprintf(stderr, "data: %s\n", sqlite3_column_text(stmt, i));
-			
 
 			/* cast string */
 			switch (i) {
@@ -149,7 +147,7 @@ PASSPORT_COLUMNS
 				case number:\
 				{\
 					p->member = 0;\
-					int col_type = sqlite3_column_type(stmt, i);\
+					col_type = sqlite3_column_type(stmt, i);\
 					if (col_type == SQLITE_INTEGER) {\
 						p->member = sqlite3_column_int64(stmt, i);\
 					} else if (col_type == SQLITE_FLOAT) {\
@@ -161,8 +159,8 @@ PASSPORT_COLUMNS
 #define PASSPORT_COLUMN_TEXT(member, number, title) \
 				case number:\
 				{\
-					size_t len = sqlite3_column_bytes(stmt, i);\
-					const unsigned char *value = sqlite3_column_text(stmt, i);\
+					len = sqlite3_column_bytes(stmt, i);\
+					value = sqlite3_column_text(stmt, i);\
 					if (value){\
 						p->member = strdup((char*)value);\
 						p->len_##member = len;\
@@ -183,7 +181,7 @@ PASSPORT_COLUMNS
 		}
 
 		/* handle passport id */
-		const unsigned char *value = sqlite3_column_text(stmt, i);				
+		value = sqlite3_column_text(stmt, i);				
 		strncpy(p->id, (const char *)value, sizeof(p->id) - 1);
 		p->id[sizeof(p->id) - 1] = 0;		
 
