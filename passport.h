@@ -18,6 +18,14 @@
 #include <stdlib.h>
 #include <time.h>
 
+#ifdef _WIN32
+#ifndef bool
+#define bool char
+#define true 1
+#define false 0
+#endif //bool
+#endif //_WIN32
+
 #define PASSPORT_TABLENAME "ZPASSPORT"
 
 /*
@@ -213,10 +221,13 @@ prozubi_passport_new(
 		)
 {
 	/* allocate passport_t */
-	struct passport_t *p = NEW(struct passport_t, 
+	struct passport_t *p = NEW(struct passport_t);
+	if (p == NULL){
 			if (kdata->on_error)
 				kdata->on_error(kdata->on_error_data,			
-			STR_ERR("%s", "can't allocate struct passport_t")); return NULL);
+			STR_ERR("%s", "can't allocate struct passport_t")); 
+			return NULL;
+	}
 
 	if (!id){
 		/* create new uuid */
