@@ -18,7 +18,6 @@
 #include "enum.h"
 
 #include <time.h>
-#include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
 #include "str.h"
