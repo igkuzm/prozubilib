@@ -20,7 +20,6 @@
 #include <time.h>
 #include <string.h>
 #include <stdlib.h>
-#include "str.h"
 
 
 #define CASES_TABLENAME "ZCASES"

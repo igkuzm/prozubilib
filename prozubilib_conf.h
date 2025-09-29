@@ -28,6 +28,7 @@
 #include "kdata2/cYandexDisk/log.h"
 #include "kdata2/cYandexDisk/log.h"
 #include "kdata2/cYandexDisk/alloc.h"
+#include "kdata2/cYandexDisk/str.h"
 
 typedef kdata2_t prozubi_t;
 
