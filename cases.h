@@ -340,12 +340,14 @@ _prozubi_cases_list_new(
 		cJSON *cases_list_children
 		)
 {
-	
+	struct tm *tm;
+	char date[11], title[BUFSIZ] = "";
+	cJSON *json = cJSON_CreateObject();
+
 	if (!c){
 		return NULL;
 	}	
 
-	cJSON *json = cJSON_CreateObject();
 	if (!json){
 		return NULL;
 	}
@@ -354,12 +356,10 @@ _prozubi_cases_list_new(
 	cJSON_AddItemToObject(json, "id", cJSON_CreateString(c->id));
 
 	/* get date */
-	struct tm *tm = localtime(&c->date);
-	char date[11];
+	tm = localtime(&c->date);
 	strftime(date, 11, "%d.%m.%Y", tm);
 
 	/* set title */
-	char title[BUFSIZ] = "";
 	strcat(title, date);
 	if (c->name){
 		strcat(title, " - ");
@@ -383,8 +383,9 @@ _prozubi_cases_list_new(
 static struct case_t *
 _prozubi_case_new(){
 	/* allocate case_t */
-	struct case_t *c = NEW(struct case_t, 
-			return NULL);
+	struct case_t *c = NEW(struct case_t);
+	if (c == NULL) 
+			return NULL;
 	
 	/* init values to NULL */
 #define CASES_COLUMN_DATE(member, number, title      ) c->member = time(NULL); 
@@ -404,8 +405,7 @@ prozubi_planlecheniya_new(struct case_t *c)
 	if (c->planlecheniya)
 		cJSON_free(c->planlecheniya);
 	
-	cJSON *json = cJSON_CreateArray(); 
-	c->planlecheniya = json;
+	c->planlecheniya = cJSON_CreateArray();
 	return json;
 }
 
@@ -415,8 +415,7 @@ prozubi_bill_new(struct case_t *c)
 	if (c->bill)
 		cJSON_free(c->bill);
 	
-	cJSON *json = cJSON_CreateArray(); 
-	c->bill = json;
+	c->bill = cJSON_CreateArray();
 	return json;
 }
 
@@ -472,6 +471,11 @@ static int prozubi_case_set_##number(\
 
 static struct case_t *
 prozubi_case_new_for_patient(prozubi_t *p, char patientid[37]){
+	
+	int res, i;
+	const unsigned char *value;
+	char SQL[BUFSIZ] = "";
+	cJSON *cases_list_children;
 	/* allocate case_t */
 	struct case_t *c = _prozubi_case_new();
 	
@@ -480,7 +484,6 @@ prozubi_case_new_for_patient(prozubi_t *p, char patientid[37]){
 	uuid4_generate(c->id);
 	
 	/* get last case pro patient - to copy data from it */
-	char SQL[BUFSIZ] = "";
 	strcat(SQL, "SELECT ");
 #define CASES_COLUMN_DATE(member, number, title      )\
  	strcat(SQL, title); strcat(SQL, ", "); 
@@ -503,7 +506,6 @@ prozubi_case_new_for_patient(prozubi_t *p, char patientid[37]){
 	STR_ERR("%s", SQL));
 
 	/* start SQLite request */
-	int res;
 	sqlite3_stmt *stmt;
 	
 	res = sqlite3_prepare_v2(p->db, SQL,
@@ -596,7 +598,6 @@ prozubi_case_new_for_patient(prozubi_t *p, char patientid[37]){
 
 
 	/*write data to SQL */
-	int i;
 	for (i = 0; i < CASES_COLS_NUM; ++i) {
 		switch (i) {
 				
@@ -659,7 +660,6 @@ prozubi_cases_from_sql(
 		return NULL;
 
 	/* iterate columns */
-	int i;
 	for (i = 0; i < CASES_COLS_NUM; ++i) {
 		/* handle values */
 		switch (i) {
@@ -725,8 +725,7 @@ prozubi_cases_from_sql(
 	}		
 	
 	/* handle case id */
-	const unsigned char *value = 
-		sqlite3_column_text(stmt, i);				
+	value = sqlite3_column_text(stmt, i);				
 	if (value){
 		strncpy(c->id, 
 				(const char *)value, sizeof(c->id) - 1);
@@ -735,7 +734,7 @@ prozubi_cases_from_sql(
 
 	/* handle cases list */
 	/* get cases list children */
-	cJSON *cases_list_children = 
+	cases_list_children = 
 		cJSON_Parse(_prozubi_cases_list_string);
 	if (!cases_list_children) {
 		if (p->on_error)
@@ -768,6 +767,10 @@ prozubi_cases_foreach(
 		int       (*callback)(void *user_data, struct case_t *c)
 		)
 {
+	char SQL[BUFSIZ] = "SELECT ";
+	int res;
+	sqlite3_stmt *stmt;
+
 	/* check kdata */
 	if (!p){
 		return;
@@ -780,7 +783,6 @@ prozubi_cases_foreach(
 	}
 
 	/* create SQL string */
-	char SQL[BUFSIZ] = "SELECT ";
 
 #define CASES_COLUMN_DATE(member, number, title      )\
  	strcat(SQL, title); strcat(SQL, ", "); 
@@ -804,11 +806,8 @@ prozubi_cases_foreach(
 	strcat(SQL, " ORDER BY ZDATE ASC");
 
 	/* start SQLite request */
-	int res;
-	sqlite3_stmt *stmt;
 	
-	res = 
-		sqlite3_prepare_v2(p->db, SQL,
+	res = sqlite3_prepare_v2(p->db, SQL,
 			 	-1, &stmt, NULL);
 	if (res != SQLITE_OK) {
 		if (p->on_error)
@@ -970,6 +969,8 @@ _case_list_node_new(
 			char ** array
 		)
 {
+	struct case_list_node *n;
+
 	if (!p)
 		return NULL;
 	if (!c) {
@@ -979,12 +980,13 @@ _case_list_node_new(
 		return NULL;	
 	}
 
-	struct case_list_node *n = 
-		NEW(struct case_list_node,
-			if (p->on_error)
-				p->on_error(p->on_error_data,
-				STR_ERR("can't allocate struct case_list_node")); 
-			return NULL);
+	n = NEW(struct case_list_node);
+	if (n == NULL){
+		if (p->on_error)
+			p->on_error(p->on_error_data,
+			STR_ERR("can't allocate struct case_list_node")); 
+		return NULL;
+	}
 
 	n->c = c;
 	n->allocated_ptr = allocated_ptr;
@@ -1048,15 +1050,15 @@ prozubi_cases_list_foreach(
 	void *parent = NULL;
 	int key = -1, type = -1;
 
-	cJSON *json = c->case_list;
+	cJSON *jparent, *root, *element, *json = c->case_list;
+
 	if (!cJSON_IsObject(json)){
 		if (p->on_error)
 			p->on_error(p->on_error_data,
 			STR_ERR("json error"));
 		return;
 	}	
-	cJSON *jparent = 
-		cJSON_GetObjectItem(json, "parent");
+	jparent = cJSON_GetObjectItem(json, "parent");
 	if (!jparent){
 		if (p->on_error)
 			p->on_error(p->on_error_data,
@@ -1069,8 +1071,7 @@ prozubi_cases_list_foreach(
 			_case_list_node_new(p, c, c, title,
 			 	-1, -1, NULL));
 	
-	cJSON *root = 
-		cJSON_GetObjectItem(json, "children");
+	root = cJSON_GetObjectItem(json, "children");
 	if (!cJSON_IsArray(root)){
 		if (p->on_error)
 			p->on_error(p->on_error_data,
@@ -1078,32 +1079,29 @@ prozubi_cases_list_foreach(
 		return;
 	}
 
-	cJSON *element;
 	cJSON_ArrayForEach(element, root){
 		if (cJSON_IsArray(element)){
 			/* handle array */
-			cJSON *jtitle = 
-				cJSON_GetArrayItem(element, 0);
+			cJSON *jtitle, *jkey, *jtype; 
+			char *skey, stype;
+
+			jtitle = cJSON_GetArrayItem(element, 0);
 			title = cJSON_GetStringValue(jtitle);
 
-			cJSON *jkey = 
-				cJSON_GetArrayItem(element, 1); 
-			char  *skey = 
-				cJSON_GetStringValue(jkey); 
+			jkey = cJSON_GetArrayItem(element, 1); 
+			skey = cJSON_GetStringValue(jkey); 
 			key = getIndexCASES(skey);	
 
-			cJSON *jtype = 
-				cJSON_GetArrayItem(element, 2); 
-			char  *stype = 
-				cJSON_GetStringValue(jtype); 
+			jtype = cJSON_GetArrayItem(element, 2); 
+			stype = cJSON_GetStringValue(jtype); 
 			type = getIndexCASES_LIST_TYPE(stype);	
 			
 			array = NULL;
 			if (type == CASES_LIST_TYPE_COMBOBOX){
-				cJSON *jarray = 
+				int i = 0;
+				cJSON *item, *jarray = 
 					cJSON_GetArrayItem(element, 3); 
 				array =(char**) MALLOC(8*10,  break);
-				cJSON *item; int i = 0;
 				cJSON_ArrayForEach(item, jarray){
 					array[i++] = cJSON_GetStringValue(item); 
 				}
@@ -1115,47 +1113,50 @@ prozubi_cases_list_foreach(
 
 		} else if (cJSON_IsObject(element)){
 			/* handle object */
-			cJSON *jparent = 
-				cJSON_GetObjectItem(
-						element, "parent");
+			void *new_parent; 
+			cJSON *child, *child_element, 
+						*jparent = cJSON_GetObjectItem(element, "parent");
+			
 			title = cJSON_GetStringValue(jparent); 
-			void *new_parent = 
+			new_parent = 
 				item_callback(user_data, parent,
 					_case_list_node_new(p, c, NULL, 
 						title, -1, -1, NULL));
 			
-			cJSON *child = 
+			child = 
 				cJSON_GetObjectItem(
 						element, "children");
-			cJSON *child_element;
+
 			cJSON_ArrayForEach(child_element, child){
 				if (cJSON_IsArray(child_element)){
-					cJSON *jtitle = 
+
+					char  *skey, *stype;
+					cJSON *jkey, *jtype, *jtitle = 
 						cJSON_GetArrayItem(
 								child_element, 0);
+					
 					title = cJSON_GetStringValue(jtitle);
 
-					cJSON *jkey = 
+					jkey = 
 						cJSON_GetArrayItem(
 								child_element, 1); 
-					char  *skey = 
-						cJSON_GetStringValue(jkey); 
+					skey = cJSON_GetStringValue(jkey); 
 					key = getIndexCASES(skey);	
 
-					cJSON *jtype = 
+					jtype = 
 						cJSON_GetArrayItem(
 								child_element, 2); 
-					char  *stype = 
+					stype = 
 						cJSON_GetStringValue(jtype); 
 					type = getIndexCASES_LIST_TYPE(stype);	
 					
 					array = NULL;
 					if (type == CASES_LIST_TYPE_COMBOBOX){
-						cJSON *jarray = 
+						int i = 0;
+						cJSON *item, *jarray = 
 							cJSON_GetArrayItem(
 									child_element, 3); 
 						array = (char**)MALLOC(8*10,  break);
-						cJSON *item; int i = 0;
 						cJSON_ArrayForEach(item, jarray){
 							array[i++] = cJSON_GetStringValue(item); 
 						}
@@ -1242,8 +1243,11 @@ static int prozubi_case_set_data(
 static struct case_t * prozubi_case_get(
 		prozubi_t *p, const char *uuid)
 {
+	int res;
+	sqlite3_stmt *stmt;
 	/* create SQL string */
 	char SQL[BUFSIZ] = "SELECT ";
+	struct case_t *c = NULL;
 
 #define CASES_COLUMN_DATE(member, number, title      )\
  	strcat(SQL, title); strcat(SQL, ", "); 
@@ -1262,9 +1266,6 @@ static struct case_t * prozubi_case_get(
 				uuid));
 
 	/* start SQLite request */
-	int res;
-	sqlite3_stmt *stmt;
-	
 	res = 
 		sqlite3_prepare_v2(p->db, SQL,
 			 	-1, &stmt, NULL);
@@ -1276,8 +1277,6 @@ static struct case_t * prozubi_case_get(
 		return NULL;
 	}	
 
-	struct case_t *c = NULL;
-	
 	while (sqlite3_step(stmt) != SQLITE_DONE) {
 		c = prozubi_cases_from_sql(p, stmt);
 		break;
@@ -1372,15 +1371,7 @@ static size_t prozubi_case_zubformula_to_rtf(
 	prozubi_t *p, struct case_t *c, char **rtf)
 {
 	struct str s;
-	if (str_init(&s))
-	{
-		if (p->on_error)
-			p->on_error(p->on_error_data,
-					STR("can't allocate memory"));
-		return 0;
-	}
-
-	str_appendf(&s, 
+	char down[BUFSIZ], up[BUFSIZ], *tbl_header =
 		"\\pard\\par\\qc \\b Зубная формула \\b0 \\ \n" 
 		"\\pard\\par\\trowd\\qc\n"
 		"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb"
@@ -1430,9 +1421,18 @@ static size_t prozubi_case_zubformula_to_rtf(
 		"\\cellx9613\n"
 		"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb"
 		"\\brdrs\\clbrdrr\\brdrs\n"
-		"\\cellx10254\n");
+		"\\cellx10254\n";
 					
-	char up[BUFSIZ];
+	if (str_init(&s))
+	{
+		if (p->on_error)
+			p->on_error(p->on_error_data,
+					STR("can't allocate memory"));
+		return 0;
+	}
+
+	str_append(&s, tbl_header, strlen(tbl_header));
+
 	strcpy(up, "");
 #define ZUBFORMULA_TOOTH_UP(n)\
 	const char *v_##n = (char *)prozubi_case_get_##n(c);\
@@ -1483,7 +1483,6 @@ static size_t prozubi_case_zubformula_to_rtf(
 
 	str_append(&s, up, strlen(up));
 	
-	char down[BUFSIZ];
 	strcpy(down, "");
 #define ZUBFORMULA_TOOTH_DOWN(n)\
 	const char *v_##n = (char *)prozubi_case_get_##n(c);\
