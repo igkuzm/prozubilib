@@ -39,10 +39,15 @@ int text_on_bitmap(
 		return 1;
 
 	// create bitmap for text
-	canvas = malloc(height*width);
+	canvas = malloc(2*sizeof(char *));
 	if (canvas == NULL)
 		return 1;
-	memset(canvas, 0, width * height);
+	canvas[0] = malloc(height);
+	canvas[1] = malloc(width);
+	if (canvas[0] == NULL || canvas[1] == NULL)
+		return 1;
+	memset(canvas[0], 0, height);
+	memset(canvas[2], 0, width);
 
 	scale = stbtt_ScaleForPixelHeight(
 			&fnt, fsize);
@@ -108,6 +113,8 @@ int text_on_bitmap(
 	}
 
 	free(buffer);
+	free(canvas[0]);
+	free(canvas[1]);
 	free(canvas);
 	free(str);
 
