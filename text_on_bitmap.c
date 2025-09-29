@@ -16,7 +16,7 @@ int text_on_bitmap(
 	stbtt_fontinfo fnt;
   int i,j,ascent,baseline,size, l=0, ch=0;
   float scale, xpos=x;
-	unsigned char *buffer, *canvas;
+	unsigned char *buffer, *canvas[];
 	unsigned int *str;
 	char *p;
 
