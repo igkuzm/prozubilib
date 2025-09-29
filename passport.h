@@ -130,10 +130,13 @@ PASSPORT_COLUMNS
 
 	while (sqlite3_step(stmt) != SQLITE_DONE) {
 		/* passort struct */
-		struct passport_t *p = NEW(struct passport_t, 
+		struct passport_t *p = NEW(struct passport_t);
+		if (p == NULL){
 			if (kdata->on_error)
 				kdata->on_error(kdata->on_error_data,				
-				STR_ERR("%s", "can't allocate struct passport_t")); return);
+					STR_ERR("%s", "can't allocate struct passport_t")); 
+			return;
+		}	
 
 		/* iterate columns */
 		for (i = 0; i < PASSPORT_COLS_NUM; ++i) {
