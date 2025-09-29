@@ -478,6 +478,7 @@ prozubi_case_new_for_patient(prozubi_t *p, char patientid[37]){
 	cJSON *cases_list_children;
 	/* allocate case_t */
 	struct case_t *c = _prozubi_case_new();
+	sqlite3_stmt *stmt;
 	
 	/* create new uuid */
 	uuid4_init();
@@ -506,8 +507,6 @@ prozubi_case_new_for_patient(prozubi_t *p, char patientid[37]){
 	STR_ERR("%s", SQL));
 
 	/* start SQLite request */
-	sqlite3_stmt *stmt;
-	
 	res = sqlite3_prepare_v2(p->db, SQL,
 		 	-1, &stmt, NULL);
 	if (res != SQLITE_OK) {
@@ -654,6 +653,9 @@ prozubi_cases_from_sql(
 		prozubi_t *p,
 		sqlite3_stmt *stmt)
 {
+	int i;
+	const unsigned char *value;
+	cJSON *cases_list_children;
 	/* allocate and init case_t */
 	struct case_t *c = _prozubi_case_new();
 	if (!c)
