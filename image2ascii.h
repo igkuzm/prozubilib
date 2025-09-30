@@ -9,9 +9,20 @@
 #ifndef IMAGE_TO_ASCII_H
 #define IMAGE_TO_ASCII_H
 
+#include <stdarg.h>
 #include "stb_image.h"
 #include "stb_image_resize.h"
 #include "stb_image_write.h"
+
+static char _igm2ascii_buf[BUFSIZ];
+
+static char *_STR(const char *fmt, ...) {
+	va_list args;
+	va_start(args, fmt);
+	vsprintf(_igm2ascii_buf, fmt, args);
+	va_end(args);
+	return _igm2ascii_buf;
+}
 
 /* 
  * image2ascii
@@ -49,7 +60,7 @@ image2ascii(
 	if (!image){
 		if (on_error)
 			on_error(userdata, 
-					STR(
+					_STR(
 						"can't get image from data:"
 						" %p with len %ld", image_data, len));
 		return -1;
@@ -65,7 +76,7 @@ image2ascii(
 	if (!buf){
 		if (on_error)
 			on_error(userdata, 
-				STR("can't allocate buffer with size: %d", 
+				_STR("can't allocate buffer with size: %d", 
 				cols * rows * c)); 
 		return -1;
 	}
@@ -83,7 +94,7 @@ image2ascii(
 	if (!image){
 		if (on_error)
 			on_error(userdata, 
-				STR("can't allocate image with size: %d", 
+				_STR("can't allocate image with size: %d", 
 				cols * rows * gc)); 
 		return -1;
 	}
@@ -104,7 +115,7 @@ image2ascii(
 	if (!buf){
 		if (on_error)
 			on_error(userdata, 
-				STR("can't allocate buffer with size: %d", 
+				_STR("can't allocate buffer with size: %d", 
 				(cols * rows * 2) + rows + 1)); 
 		return -1;
 	}
