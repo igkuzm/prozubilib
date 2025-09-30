@@ -12,7 +12,6 @@
 #include "prozubilib_conf.h"
 
 #include "enum.h"
-#include "alloc.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -22,7 +21,6 @@
 #include "stb_image_write.h"
 
 #include "image2ascii.h"
-#include "str.h"
 
 #define IMAGES_TABLENAME "ZIMAGES"
 
@@ -246,12 +244,14 @@ static struct image_t *_prozubi_image_new(
 		prozubi_t *p)
 {
 	/* allocate image_t */
-	struct image_t *i = NEW(struct image_t, 
-			if (p->on_error)
+	struct image_t *i = NEW(struct image_t);
+	if (i == NULL){
+		if (p->on_error)
 				p->on_error(p->on_error_data,			
 			STR_ERR("%s", 
 				"can't allocate struct image_t")); 
-				return NULL);
+		return NULL;
+	} 
 
 //set values to NULL
 #define IMAGES_COLUMN_DATE(member, number, title      ) 
@@ -339,11 +339,13 @@ prozubi_image_new(
 		const char *id
 		)
 {
+	struct image_t *i;
+
 	if (!p)
 		return NULL;
 
 	/* allocate image_t */
-	struct image_t *i = _prozubi_image_new(p);
+	i = _prozubi_image_new(p);
 	if (!i)
 		return NULL;
 
@@ -377,6 +379,8 @@ prozubi_image_from_sql(
 		prozubi_t *p,
 		sqlite3_stmt *stmt)
 {
+	int i;
+	const unsigned char *value;
 	/* allocate image_t */	
 	struct image_t * image = 
 		_prozubi_image_new(p);
@@ -384,7 +388,6 @@ prozubi_image_from_sql(
 		return NULL;
 	
 	/* iterate columns */
-	int i;
 	for (i = 0; i < IMAGES_COLS_NUM; ++i) {
 		/* handle values */
 		switch (i) {
@@ -459,7 +462,7 @@ prozubi_image_from_sql(
 	}		
 
 	/* handle image id */
-	const unsigned char *value = 
+	value = 
 		sqlite3_column_text(stmt, i);				
 	strncpy(image->id, (const char *)value, 
 			sizeof(image->id) - 1);
@@ -479,6 +482,10 @@ prozubi_image_foreach(
 		int        (*callback)(
 			void *user_data, struct image_t *i))
 {
+	int res;
+	sqlite3_stmt *stmt;
+	char SQL[BUFSIZ] = "SELECT ";
+
 	/* check kdata */
 	if (!p){
 		return;
@@ -491,8 +498,6 @@ prozubi_image_foreach(
 	}
 
 	/* create SQL string */
-	char SQL[BUFSIZ] = "SELECT ";
-
 #define IMAGES_COLUMN_DATE(member, number, title      )\
  	strcat(SQL, title); strcat(SQL, ", "); 
 #define IMAGES_COLUMN_TEXT(member, number, title      )\
@@ -513,9 +518,6 @@ prozubi_image_foreach(
 		strcat(SQL, predicate);
 
 	/* start SQLite request */
-	int res;
-	sqlite3_stmt *stmt;
-	
 	res = sqlite3_prepare_v2(p->db, SQL, -1, &stmt, NULL);
 	if (res != SQLITE_OK) {
 		if (p->on_error)
@@ -676,6 +678,8 @@ static unsigned char * _prozubi_image_bin_to_strhex(
 static size_t prozubi_image_to_rtf(
 		prozubi_t *p, struct image_t *image, char **rtf)
 {
+	int x, y, c;
+	unsigned char *str;
 	struct str s;
 	if (str_init(&s))
 	{
@@ -686,7 +690,6 @@ static size_t prozubi_image_to_rtf(
 	}
 
 	// try to load image
-	int x, y, c;
 	if (!stbi_info_from_memory(
 				(stbi_uc*)image->data, 
 				image->len_data, &x, &y, &c))
@@ -703,7 +706,6 @@ static size_t prozubi_image_to_rtf(
 			"\\pichgoal6000\\jpegblip\n");
 	
 	// append image data to rtf
-	unsigned char *str;
 	_prozubi_image_bin_to_strhex(
 		(unsigned char*)(image->data),
 		image->len_data, &str);

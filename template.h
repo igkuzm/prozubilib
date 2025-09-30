@@ -110,6 +110,12 @@ prozubi_template_foreach(
 		int        (*callback)(void *user_data, struct template_t *p)
 		)
 {
+	
+	int res, i;
+	sqlite3_stmt *stmt;
+	const unsigned char *value;
+	char SQL[BUFSIZ] = "SELECT ";
+
 	/* check kdata */
 	if (!kdata){
 		return;
@@ -122,8 +128,6 @@ prozubi_template_foreach(
 	}
 
 	/* create SQL string */
-	char SQL[BUFSIZ] = "SELECT ";
-
 #define TEMPLATES_COLUMN_TEXT(member, number, title) strcat(SQL, title); strcat(SQL, ", "); 
 	TEMPLATES_COLUMNS
 #undef TEMPLATES_COLUMN_TEXT			
@@ -137,9 +141,6 @@ prozubi_template_foreach(
 		strcat(SQL, predicate);
 
 	/* start SQLite request */
-	int res;
-	sqlite3_stmt *stmt;
-	
 	res = sqlite3_prepare_v2(kdata->db, SQL, -1, &stmt, NULL);
 	if (res != SQLITE_OK) {
 		if (kdata->on_error)
@@ -159,7 +160,6 @@ prozubi_template_foreach(
 		}
 	
 		/* iterate columns */
-		int i;
 		for (i = 0; i < TEMPLATES_COLS_NUM; ++i) {
 			/* handle values */
 			switch (i) {
@@ -188,7 +188,7 @@ prozubi_template_foreach(
 		}		
 
 		/* handle template id */
-		const unsigned char *value = sqlite3_column_text(stmt, i);				
+		value = sqlite3_column_text(stmt, i);				
 		strncpy(t->id, (const char *)value, sizeof(t->id) - 1);
 		t->id[sizeof(t->id) - 1] = 0;		
 
