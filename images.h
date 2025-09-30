@@ -311,12 +311,15 @@ static int prozubi_image_set_##number(\
 	if(c->member)\
 		free(c->member);\
 	len = strlen(text);\
-   	c->member = (char *)MALLOC(len + 1,\
-			if (p->on_error)\
+  c->member = (char *)MALLOC(len + 1); \
+	if (c->member == NULL){ \
+		if (p->on_error)\
 				p->on_error(p->on_error_data,\
 			STR_ERR(\
 				"can't allocate size: %ld"\
-				, len + 1)); return -1);\
+				, len + 1)); \
+		return -1; \
+	} \
 	strncpy(c->member, text, len);\
 	c->len_##member = len;\
 	return 0;\
