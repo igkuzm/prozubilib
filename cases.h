@@ -406,7 +406,7 @@ prozubi_planlecheniya_new(struct case_t *c)
 		cJSON_free(c->planlecheniya);
 	
 	c->planlecheniya = cJSON_CreateArray();
-	return json;
+	return c->planlecheniya;
 }
 
 static cJSON *
@@ -1103,7 +1103,9 @@ prozubi_cases_list_foreach(
 				int i = 0;
 				cJSON *item, *jarray = 
 					cJSON_GetArrayItem(element, 3); 
-				array =(char**) MALLOC(8*10,  break);
+				array =(char**) MALLOC(8*10);
+				if (array == NULL) 
+					break;
 				cJSON_ArrayForEach(item, jarray){
 					array[i++] = cJSON_GetStringValue(item); 
 				}
@@ -1158,7 +1160,9 @@ prozubi_cases_list_foreach(
 						cJSON *item, *jarray = 
 							cJSON_GetArrayItem(
 									child_element, 3); 
-						array = (char**)MALLOC(8*10,  break);
+						array = (char**)MALLOC(8*10);
+						if (array == NULL) 
+							break;
 						cJSON_ArrayForEach(item, jarray){
 							array[i++] = cJSON_GetStringValue(item); 
 						}
@@ -1373,6 +1377,15 @@ static size_t prozubi_case_zubformula_to_rtf(
 	prozubi_t *p, struct case_t *c, char **rtf)
 {
 	struct str s;
+#define ZUBFORMULA_TOOTH_UP(n) \
+	const char *v_##n = (char *)prozubi_case_get_##n(c);
+	ZUBFORMULA_TEETH_UP
+#undef ZUBFORMULA_TEETH_UP
+#define ZUBFORMULA_TOOTH_DOWN(n)\
+	const char *v_##n = (char *)prozubi_case_get_##n(c);
+	ZUBFORMULA_TEETH_DOWN
+#undef ZUBFORMULA_TEETH_DOWN
+
 	char down[BUFSIZ], up[BUFSIZ], *tbl_header =
 		"\\pard\\par\\qc \\b Зубная формула \\b0 \\ \n" 
 		"\\pard\\par\\trowd\\qc\n"
@@ -1437,7 +1450,6 @@ static size_t prozubi_case_zubformula_to_rtf(
 
 	strcpy(up, "");
 #define ZUBFORMULA_TOOTH_UP(n)\
-	const char *v_##n = (char *)prozubi_case_get_##n(c);\
 	if (!v_##n) v_##n = "";\
 	strcat(up, "\\intbl ");\
 	strcat(up, v_##n);\
@@ -1487,7 +1499,6 @@ static size_t prozubi_case_zubformula_to_rtf(
 	
 	strcpy(down, "");
 #define ZUBFORMULA_TOOTH_DOWN(n)\
-	const char *v_##n = (char *)prozubi_case_get_##n(c);\
 	if (!v_##n) v_##n = "";\
 	strcat(down, "\\intbl ");\
 	strcat(down, v_##n);\
