@@ -12,7 +12,6 @@
 #include "prozubilib_conf.h"
 
 #include "enum.h"
-#include "alloc.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -76,10 +75,13 @@ prozubi_template_new(
 		return NULL;
 
 	/* allocate case_t */
-	struct template_t *t = NEW(struct template_t, 
+	struct template_t *t = NEW(struct template_t);
+	if (t == NULL){
 			if (kdata->on_error)
 				kdata->on_error(kdata->on_error_data,			
-				STR_ERR("%s", "can't allocate struct template_t")); return NULL);
+				STR_ERR("%s", "can't allocate struct template_t")); 
+			return NULL;
+	} 
 	
 	if (!id){
 		/* create new uuid */
@@ -148,10 +150,13 @@ prozubi_template_foreach(
 
 	while (sqlite3_step(stmt) != SQLITE_DONE) {
 	
-		struct template_t *t = NEW(struct template_t, 
+		struct template_t *t = NEW(struct template_t);
+		if (t == NULL){
 			if (kdata->on_error)
 				kdata->on_error(kdata->on_error_data,				
-				STR_ERR("%s", "can't allocate struct template_t")); return);
+				STR_ERR("%s", "can't allocate struct template_t")); 
+			return;
+		}
 	
 		/* iterate columns */
 		int i;

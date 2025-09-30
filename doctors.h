@@ -95,10 +95,13 @@ prozubi_doctor_new(
 		)
 {
 	/* allocate case_t */
-	struct doctor_t *d = NEW(struct doctor_t, 
-			if (kdata->on_error)
-				kdata->on_error(kdata->on_error_data,			
-			STR_ERR("%s", "can't allocate struct doctor_t")); return NULL);
+	struct doctor_t *d = NEW(struct doctor_t);
+	if (d == NULL){	
+		if (kdata->on_error)
+			kdata->on_error(kdata->on_error_data,			
+				STR_ERR("%s", "can't allocate struct doctor_t")); 
+		return NULL;
+	}
 	if (!id){
 		/* create new uuid */
 		uuid4_init();
@@ -169,10 +172,13 @@ prozubi_doctor_foreach(
 
 	while (sqlite3_step(stmt) != SQLITE_DONE) {
 	
-		struct doctor_t *d = NEW(struct doctor_t, 
+		struct doctor_t *d = NEW(struct doctor_t);
+		if (d == NULL){
 			if (kdata->on_error)
 				kdata->on_error(kdata->on_error_data,				
-				STR_ERR("%s", "can't allocate struct doctor_t")); return);
+				STR_ERR("%s", "can't allocate struct doctor_t")); 
+			return;
+		} 
 	
 		/* iterate columns */
 		for (i = 0; i < DOCTORS_COLS_NUM; ++i) {
