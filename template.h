@@ -71,11 +71,12 @@ prozubi_template_new(
 		const char *id
 		)
 {
+	struct template_t *t = NEW(struct template_t);
+	
 	if (!kdata)
 		return NULL;
 
 	/* allocate case_t */
-	struct template_t *t = NEW(struct template_t);
 	if (t == NULL){
 			if (kdata->on_error)
 				kdata->on_error(kdata->on_error_data,			

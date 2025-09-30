@@ -13,9 +13,6 @@
 #include "stb_image_resize.h"
 #include "stb_image_write.h"
 
-#define _STR(...)\
-	({char s[BUFSIZ]; snprintf(s, BUFSIZ-1, __VA_ARGS__); s;}) 
-
 /* 
  * image2ascii
  * return length of allocated ascii c string 
@@ -52,7 +49,7 @@ image2ascii(
 	if (!image){
 		if (on_error)
 			on_error(userdata, 
-					_STR(
+					STR(
 						"can't get image from data:"
 						" %p with len %ld", image_data, len));
 		return -1;
@@ -68,7 +65,7 @@ image2ascii(
 	if (!buf){
 		if (on_error)
 			on_error(userdata, 
-				_STR("can't allocate buffer with size: %d", 
+				STR("can't allocate buffer with size: %d", 
 				cols * rows * c)); 
 		return -1;
 	}
@@ -86,7 +83,7 @@ image2ascii(
 	if (!image){
 		if (on_error)
 			on_error(userdata, 
-				_STR("can't allocate image with size: %d", 
+				STR("can't allocate image with size: %d", 
 				cols * rows * gc)); 
 		return -1;
 	}
@@ -107,7 +104,7 @@ image2ascii(
 	if (!buf){
 		if (on_error)
 			on_error(userdata, 
-				_STR("can't allocate buffer with size: %d", 
+				STR("can't allocate buffer with size: %d", 
 				(cols * rows * 2) + rows + 1)); 
 		return -1;
 	}
