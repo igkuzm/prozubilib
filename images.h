@@ -290,12 +290,15 @@ static int prozubi_image_set_##number(\
 			return -1;\
 		if(c->member)\
 			free(c->member);\
-		c->member = MALLOC(len,\
+		c->member = MALLOC(len); \
+		if (c->member == NULL){ \
 			if (p->on_error)\
 				p->on_error(p->on_error_data,\
 				STR_ERR(\
 					"can't allocate size: %ld"\
-					, len)); return -1);\
+					, len)); \
+			return -1;\
+		} \
 		memcpy(c->member, data, len);\
 		c->len_##member = len;\
 	}\
@@ -306,11 +309,11 @@ static int prozubi_image_set_##number(\
 		kdata2_t *p, struct image_t *c, const char *text){\
 	size_t len; \
 	if (!kdata2_set_text_for_uuid(p, IMAGES_TABLENAME,\
-			 	title, text, c->id))\
-		return -1;\
-	if(c->member)\
-		free(c->member);\
-	len = strlen(text);\
+			 	title, text, c->id)) \
+		return -1; \
+	if(c->member) \
+		free(c->member); \
+	len = strlen(text); \
   c->member = (char *)MALLOC(len + 1); \
 	if (c->member == NULL){ \
 		if (p->on_error)\
