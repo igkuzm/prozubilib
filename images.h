@@ -190,14 +190,16 @@ prozubi_image_set_image_from_mem(
 		struct image_t *i,
 		void * data, int len)
 {
+	int w, h, c, ret;
+	stbi_uc *image; 
+
 	if (!p)
 		return -1;
 	
 	if (!i)
 		return -1;
 	
-	int w, h, c;
-	stbi_uc *image = 
+	image = 
 			stbi_load_from_memory((stbi_uc *)data, len,
 					&w, &h, &c,
 					0);
@@ -208,7 +210,7 @@ prozubi_image_set_image_from_mem(
 		return -1;
 	}
 	
-	int ret = prozubi_image_set_image_raw(p, i, 
+	ret = prozubi_image_set_image_raw(p, i, 
 			image, w, h, c);
 
 	stbi_image_free(image);
@@ -222,7 +224,7 @@ prozubi_image_set_image_from_file(
 		const char *filename)
 {
 	// try to load file
-	int w=0, h=0, c;
+	int w=0, h=0, c, ret;
 	stbi_uc *image = 
 		stbi_load(filename, &w, &h, &c,
 				0);
@@ -234,7 +236,7 @@ prozubi_image_set_image_from_file(
 		return -1;
 	}
 
-	int ret = prozubi_image_set_image_raw(
+	ret = prozubi_image_set_image_raw(
 			p, i, image, w, h, 
 			c);
 	stbi_image_free(image);

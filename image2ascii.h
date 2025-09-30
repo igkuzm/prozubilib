@@ -102,7 +102,7 @@ image2ascii(
 			 p != buf + (cols * rows * c);
 			 p += c, pg += gc)
 	{
-		*pg = (uint8_t)((*p + *(p + 1) + *(p + 2)) / 3.0);
+		*pg = (unsigned char)((*p + *(p + 1) + *(p + 2)) / 3.0);
 		if (c == 4)
 			*(pg + 1) = *(p + 3);
 	}
