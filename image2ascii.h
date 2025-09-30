@@ -49,8 +49,8 @@ image2ascii(
 		)
 {
 	const char map[11] = " .,:;ox%#@";// map of image convert
-	stbi_uc *image, *buf;             // image pointer
-	int w, h, c, x, y, index;
+	stbi_uc *image, *buf, *p, *pg, *ptr;             
+	int w, h, c, x, y, index, gc;
 	size_t i = 0;
 	
 	/*read image */
@@ -89,7 +89,7 @@ image2ascii(
 	stbi_image_free(image);	
 
 	// set image to gray 
-	int gc = c == 4 ? 2 : 1; // set channels for gray
+	gc = c == 4 ? 2 : 1; // set channels for gray
 	image = (stbi_uc *)malloc(cols*rows*gc);
 	if (!image){
 		if (on_error)
@@ -98,7 +98,6 @@ image2ascii(
 				cols * rows * gc)); 
 		return -1;
 	}
-	stbi_uc *p, *pg;
 	for (p  = buf, pg = image; 
 			 p != buf + (cols * rows * c);
 			 p += c, pg += gc)
@@ -119,7 +118,7 @@ image2ascii(
 				(cols * rows * 2) + rows + 1)); 
 		return -1;
 	}
-	stbi_uc *ptr = image;
+	ptr = image;
 	for (y = 0; y < rows; y++)
 	{
 			for (x = 0; x < cols; x++)
