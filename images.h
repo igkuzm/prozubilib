@@ -304,12 +304,13 @@ static int prozubi_image_set_##number(\
 #define IMAGES_COLUMN_TEXT(member, number, title)\
 static int prozubi_image_set_##number(\
 		kdata2_t *p, struct image_t *c, const char *text){\
+	size_t len; \
 	if (!kdata2_set_text_for_uuid(p, IMAGES_TABLENAME,\
 			 	title, text, c->id))\
 		return -1;\
 	if(c->member)\
 		free(c->member);\
-	size_t len = strlen(text);\
+	len = strlen(text);\
    	c->member = (char *)MALLOC(len + 1,\
 			if (p->on_error)\
 				p->on_error(p->on_error_data,\
@@ -398,8 +399,8 @@ prozubi_image_from_sql(
 #define IMAGES_COLUMN_DATE(member, number, title) \
 			case number:\
 			{\
-				image->member = 0;\
 				int col_type = sqlite3_column_type(stmt, i);\
+				image->member = 0;\
 				if (col_type == SQLITE_INTEGER) {\
 					image->member = sqlite3_column_int64(stmt, i);\
 				} else if (col_type == SQLITE_FLOAT) {\
