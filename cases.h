@@ -416,7 +416,7 @@ prozubi_bill_new(struct case_t *c)
 		cJSON_free(c->bill);
 	
 	c->bill = cJSON_CreateArray();
-	return json;
+	return c->bill;
 }
 
 #define CASES_COLUMN_DATE(member, number, title)\
@@ -1380,11 +1380,12 @@ static size_t prozubi_case_zubformula_to_rtf(
 #define ZUBFORMULA_TOOTH_UP(n) \
 	const char *v_##n = (char *)prozubi_case_get_##n(c);
 	ZUBFORMULA_TEETH_UP
-#undef ZUBFORMULA_TEETH_UP
+#undef ZUBFORMULA_TOOTH_UP
+
 #define ZUBFORMULA_TOOTH_DOWN(n)\
 	const char *v_##n = (char *)prozubi_case_get_##n(c);
 	ZUBFORMULA_TEETH_DOWN
-#undef ZUBFORMULA_TEETH_DOWN
+#undef ZUBFORMULA_TOOTH_DOWN
 
 	char down[BUFSIZ], up[BUFSIZ], *tbl_header =
 		"\\pard\\par\\qc \\b Зубная формула \\b0 \\ \n" 
@@ -1456,7 +1457,7 @@ static size_t prozubi_case_zubformula_to_rtf(
 	strcat(up, " \\cell\n");\
 
 	ZUBFORMULA_TEETH_UP
-#undef ZUBFORMULA_TEETH_UP
+#undef ZUBFORMULA_TOOTH_UP
 	strcat(up,
 					"\\row\n"
 					"\\intbl 1.8 \\cell\n"
@@ -1505,7 +1506,7 @@ static size_t prozubi_case_zubformula_to_rtf(
 	strcat(down, " \\cell\n");\
 
 	ZUBFORMULA_TEETH_DOWN
-#undef ZUBFORMULA_TEETH_DOWN
+#undef ZUBFORMULA_TOOTH_DOWN
 	strcat(down, "\\row\\lastrow\n");
 	
 	str_append(&s, down, strlen(down));
