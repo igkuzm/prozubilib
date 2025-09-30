@@ -12,7 +12,6 @@
 #include "prozubilib_conf.h"
 
 #include "enum.h"
-#include "alloc.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -130,6 +129,11 @@ prozubi_doctor_foreach(
 		int        (*callback)(void *user_data, struct doctor_t *d)
 		)
 {
+	const unsigned char *value;
+	int res, i;
+	sqlite3_stmt *stmt;
+	char SQL[BUFSIZ] = "SELECT ";
+	
 	/* check kdata */
 	if (!kdata){
 		return;
@@ -142,8 +146,6 @@ prozubi_doctor_foreach(
 	}
 
 	/* create SQL string */
-	char SQL[BUFSIZ] = "SELECT ";
-
 #define DOCTORS_COLUMN_TEXT(member, number, title      ) strcat(SQL, title); strcat(SQL, ", "); 
 #define DOCTORS_COLUMN_DATA(member, number, title, type) strcat(SQL, title); strcat(SQL, ", "); 
 	DOCTORS_COLUMNS
@@ -157,9 +159,6 @@ prozubi_doctor_foreach(
 		strcat(SQL, predicate);
 
 	/* start SQLite request */
-	int res;
-	sqlite3_stmt *stmt;
-	
 	res = sqlite3_prepare_v2(kdata->db, SQL, -1, &stmt, NULL);
 	if (res != SQLITE_OK) {
 		if (kdata->on_error)
@@ -176,7 +175,6 @@ prozubi_doctor_foreach(
 				STR_ERR("%s", "can't allocate struct doctor_t")); return);
 	
 		/* iterate columns */
-		int i;
 		for (i = 0; i < DOCTORS_COLS_NUM; ++i) {
 			/* handle values */
 			switch (i) {
@@ -218,7 +216,7 @@ prozubi_doctor_foreach(
 		}		
 
 		/* handle doctor id */
-		const unsigned char *value = sqlite3_column_text(stmt, i);				
+		value = sqlite3_column_text(stmt, i);				
 		strncpy(d->id, (const char *)value, sizeof(d->id) - 1);
 		d->id[sizeof(d->id) - 1] = 0;		
 
