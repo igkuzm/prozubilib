@@ -143,6 +143,7 @@ prozubi_image_set_image_raw(
 		unsigned char * raw_image, 
 		int width, int height, int channels)
 {
+	int res;
 	struct prozubi_image_jpg_write_s s;
 	s.data = malloc(1);
 	if (!s.data){
@@ -152,7 +153,7 @@ prozubi_image_set_image_raw(
 	s.len = 0;
 	s.p = p;
 
-	int res = stbi_write_jpg_to_func(
+	res = stbi_write_jpg_to_func(
 			_prozubi_image_jpg_write_func,
 			&s, 
 			width, height, channels, 
