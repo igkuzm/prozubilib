@@ -68,7 +68,7 @@ int _prozubi_check_lib(prozubi_t *p){
 	}
 	/* check SQLite database */
 	if (p->db == NULL) {
-		ON_ERR(p,  "%s", "SQLite database is NULL");
+		ON_ERR(p,  "SQLite database is NULL");
 		return -1;
 	}	
 
@@ -87,7 +87,7 @@ prozubi_set_token(
 	
 	/* check token */
 	if (!token){
-		ON_ERR(p, "%s", "token is NULL");
+		ON_ERR(p, "token is NULL");
 		return -1;
 	}
 	
