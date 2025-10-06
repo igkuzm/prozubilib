@@ -9,7 +9,6 @@
 #ifndef NOMENKLATURA_H
 #define NOMENKLATURA_H
 
-#include "alloc.h"
 #include "prozubilib_conf.h"
 #include "enum.h"
 #include "kdata2/cYandexDisk/log.h"
@@ -56,11 +55,13 @@ END_ENUM_STRING(NOMENKLATURA)
 static nomenklatura_t *
 _nomenklatura_new(prozubi_t *p)
 {
-	nomenklatura_t *c = NEW(nomenklatura_t,
+	nomenklatura_t *c = NEW(nomenklatura_t);
+	if (c == NULL){
 			if (p->on_error)
 				p->on_error(p->on_error_data,		
 				STR("%s", "cant allocate memory"));
-			return NULL);
+			return NULL;
+	}
 	
 	#define NOMENKLATURA_COLUMN_INT(title) c->title = -1;
 	#define NOMENKLATURA_COLUMN_TEX(title) c->title = NULL;
@@ -83,6 +84,12 @@ prozubi_nomenklatura_foreach(
 			)
 		)
 {
+	sqlite3 *db;
+	sqlite3_stmt *stmt_p;
+	char *SQL = (char *)malloc(BUFSIZ);
+	if (SQL == NULL)
+		return;
+	
 	if (!p)
 		return;
 
@@ -93,8 +100,6 @@ prozubi_nomenklatura_foreach(
 		return;
 	}
 
-	sqlite3 *db;
-	
 	if (sqlite3_open_v2(NOMENKLATURA_BASE, &db, 
 				SQLITE_OPEN_READONLY, NULL))
 	{
@@ -106,7 +111,6 @@ prozubi_nomenklatura_foreach(
 	}
 	
 	/* create SQL string */
-	char *SQL = (char *)malloc(BUFSIZ);
 	strcpy(SQL, "");
 	if (predicate){
 		strcat(SQL, "SELECT ");
@@ -126,7 +130,6 @@ prozubi_nomenklatura_foreach(
 	}
 
 	/* start SQLite request for parent*/
-	sqlite3_stmt *stmt_p;
 	if(sqlite3_prepare_v2(db, SQL, -1, &stmt_p, NULL)){
 		if (p->on_error)
 			p->on_error(p->on_error_data,				
@@ -176,6 +179,9 @@ prozubi_nomenklatura_foreach(
 
 		} else {
 			/* handle values */
+			char SQL_c[BUFSIZ] = "SELECT ";
+			sqlite3_stmt *stmt_c;
+			void *parent;
 			size_t len = sqlite3_column_bytes(stmt_p, 0);
 			const unsigned char *value = sqlite3_column_text(stmt_p, 0);
 			c->name = strdup((const char *)value);
@@ -183,13 +189,11 @@ prozubi_nomenklatura_foreach(
 			c->headName  = strdup("");
 
 			/* callback */
-			void *parent = callback(user_data, NULL, c);
+			parent = callback(user_data, NULL, c);
 
 			/* get children */
-			sqlite3_stmt *stmt_c;
 			
 			/* create SQL string */
-			char SQL_c[BUFSIZ] = "SELECT ";
 			
 			#define NOMENKLATURA_COLUMN_INT(title) strcat(SQL_c, #title); strcat(SQL_c, ", "); 
 			#define NOMENKLATURA_COLUMN_TEX(title) strcat(SQL_c, #title); strcat(SQL_c, ", "); 
@@ -216,12 +220,12 @@ prozubi_nomenklatura_foreach(
 			};
 
 			while (sqlite3_step(stmt_c) != SQLITE_DONE) {
+				int i;
 				nomenklatura_t *c = _nomenklatura_new(p);
 				if (!c)
 					break;
 				
 				/* iterate columns */
-				int i;
 				for (i = 0; i < NOMENKLATURA_COLS_NUM; ++i) {
 					/* handle values */
 					switch (i) {
