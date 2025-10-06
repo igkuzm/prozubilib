@@ -7,7 +7,6 @@
  */
 #ifndef DIAGNOSIS_H
 #define DIAGNOSIS_H
-#include "alloc.h"
 #include "prozubilib_conf.h"
 #include "cases.h"
 
@@ -68,12 +67,13 @@ prozubi_diagnosis_get(
 			struct case_t *c
 		)
 {
+	int i, pze;
+	char *pt[] = {"R", "Pt"};		
 	char *str = (char*)MALLOC(BUFSIZ, 
 			if (p->on_error)
 				p->on_error(p->on_error_data, "can't allocate memory"); 
 			return NULL);
 	str[0] = 0;
-	int i;
 
 #define DIAGNOSIS_TEETH\
 	DIAGNOSIS_TOOTH(z11, "1.1")\
@@ -109,8 +109,6 @@ prozubi_diagnosis_get(
 	DIAGNOSIS_TOOTH(z47, "4.7")\
 	DIAGNOSIS_TOOTH(z48, "4.8")
 	
-	char *pt[] = {"R", "Pt"};		
-	
 	#define DIAGNOSIS_TOOTH(n, t)\
 		for (i = 0; i < 2; ++i) {\
 			if (strcmp(c->n, pt[i]) == 0){\
@@ -141,7 +139,7 @@ prozubi_diagnosis_get(
 	DIAGNOSIS_TEETH
 	#undef DIAGNOSIS_TOOTH
 
-	int pze = _prozubi_diagnosis_poteria_zhevatelnoy_effectivnosti(c);
+	pze = _prozubi_diagnosis_poteria_zhevatelnoy_effectivnosti(c);
 	if (pze){
 			char s[256];
 			sprintf(s, "K08.1 Потеря зубов. Потеря жевательной эффективности на %d%%.", pze);
