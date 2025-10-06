@@ -12,7 +12,6 @@
 #include "prozubilib_conf.h"
 
 #include "enum.h"
-#include "alloc.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -73,14 +72,19 @@ prozubi_price_new(
 		const char *id
 		)
 {
+	struct price_t *p;
+	
 	if (!kdata)
 		return NULL;
 
 	/* allocate case_t */
-	struct price_t *p = NEW(struct price_t, 
+	p = NEW(struct price_t);
+	if (p == NULL){
 		if (kdata->on_error)
 			kdata->on_error(kdata->on_error_data,			
-			STR_ERR("%s", "can't allocate struct price_t")); return NULL);
+			STR_ERR("%s", "can't allocate struct price_t")); 
+		return NULL;
+	}	
 
 	if (!id){
 		/* create new uuid */
@@ -110,6 +114,11 @@ prozubi_price_foreach(
 		int        (*callback)(void *user_data, struct price_t *p)
 		)
 {
+	char SQL[BUFSIZ] = "SELECT ";
+	int res;
+	sqlite3_stmt *stmt;
+	const unsigned char *value;
+	
 	/* check kdata */
 	if (!kdata){
 		return;
@@ -122,8 +131,6 @@ prozubi_price_foreach(
 	}
 
 	/* create SQL string */
-	char SQL[BUFSIZ] = "SELECT ";
-
 #define PRICES_COLUMN_TEXT(member, number, title) strcat(SQL, title); strcat(SQL, ", "); 
 	PRICES_COLUMNS
 #undef PRICES_COLUMN_TEXT			
@@ -135,9 +142,6 @@ prozubi_price_foreach(
 		strcat(SQL, predicate);
 
 	/* start SQLite request */
-	int res;
-	sqlite3_stmt *stmt;
-	
 	res = sqlite3_prepare_v2(kdata->db, SQL, -1, &stmt, NULL);
 	if (res != SQLITE_OK) {
 		if (kdata->on_error)
@@ -147,14 +151,16 @@ prozubi_price_foreach(
 	}	
 
 	while (sqlite3_step(stmt) != SQLITE_DONE) {
-	
-		struct price_t *p = NEW(struct price_t, 
+		int i;
+		struct price_t *p = NEW(struct price_t);
+		if (p == NULL){
 			if (kdata->on_error)
 				kdata->on_error(kdata->on_error_data,				
-				STR_ERR("%s", "can't allocate struct price_t")); return);
+				STR_ERR("%s", "can't allocate struct price_t")); 
+			return;
+		}	
 
 		/* iterate columns */
-		int i;
 		for (i = 0; i < PRICES_COLS_NUM; ++i) {
 			/* handle values */
 			switch (i) {
@@ -183,7 +189,7 @@ prozubi_price_foreach(
 		}		
 
 		/* handle price id */
-		const unsigned char *value = sqlite3_column_text(stmt, i);				
+		value = sqlite3_column_text(stmt, i);				
 		strncpy(p->id, (const char *)value, sizeof(p->id) - 1);
 		p->id[sizeof(p->id) - 1] = 0;		
 
