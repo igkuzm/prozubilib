@@ -423,12 +423,14 @@ prozubi_image_from_sql(
 				const unsigned char *value =\
 			 	sqlite3_column_text(stmt, i);\
 				if (value){\
-					char *str = (char *)MALLOC(len + 1,\
-						if (p->on_error)\
+					char *str = (char *)MALLOC(len + 1);\
+					if (str == NULL){ \
+					if (p->on_error)\
 							p->on_error(p->on_error_data,\
 						STR_ERR(\
 							"can't allocate string with len: %ld",\
-						 	len+1)); break);\
+						 	len+1)); break;\
+					}	\
 					strncpy(str, (const char *)value, len);\
 					str[len] = 0;\
 					image->member = str;\
@@ -447,12 +449,14 @@ prozubi_image_from_sql(
 				if (\
 					IMAGES_DATA_TYPE_##type == IMAGES_DATA_TYPE_void)\
 				{\
-					void *data = MALLOC(len,\
+					void *data = MALLOC(len);\
+					if (data == NULL){ \
 						if (p->on_error)\
 							p->on_error(p->on_error_data,\
 						STR_ERR(\
 							"can't allocate data with len: %ld",\
-						 	len)); break);\
+						 	len)); break;\
+					} \
 					memcpy(data, value, len);\
 					image->member = data;\
 					image->len_##member = len;\
