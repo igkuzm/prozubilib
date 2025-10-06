@@ -19,6 +19,14 @@ prozubi_init(
 		void      (*on_log)        (void *on_log_data, const char *message)		
 		)
 {
+	struct kdata2_table *zcases;	
+	struct kdata2_table *zdoctors;	
+	struct kdata2_table *zimages;	
+	struct kdata2_table *zpassport;	
+	struct kdata2_table *zprices;	
+	struct kdata2_table *ztemplates;	
+	kdata2_t *kdata;
+
 	if (on_log)
 		on_log(on_log_data, STR_ERR("%s", "init..."));
 	
@@ -35,26 +43,14 @@ prozubi_init(
 			on_log(on_log_data, STR_ERR("%s", "token is NULL"));
 
 	/* init tables */
-	struct kdata2_table *zcases;	
 	prozubi_cases_table_init(&zcases); 
-
-	struct kdata2_table *zdoctors;	
 	prozubi_doctors_table_init(&zdoctors);
-	
-	struct kdata2_table *zimages;	
 	prozubi_images_table_init(&zimages);
-
-	struct kdata2_table *zpassport;	
 	prozubi_passport_table_init(&zpassport);
-
-	struct kdata2_table *zprices;	
 	prozubi_prices_table_init(&zprices);
-
-	struct kdata2_table *ztemplates;	
 	prozubi_templates_table_init(&ztemplates);
 
 	/* init kdata */ 
-	kdata2_t *kdata;
 	if (kdata2_init(&kdata, filepath, token,
 		   on_error_data, on_error, on_log_data, on_log,	
 			60,

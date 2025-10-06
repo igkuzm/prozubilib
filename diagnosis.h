@@ -69,10 +69,12 @@ prozubi_diagnosis_get(
 {
 	int i, pze;
 	char *pt[] = {"R", "Pt"};		
-	char *str = (char*)MALLOC(BUFSIZ, 
-			if (p->on_error)
-				p->on_error(p->on_error_data, "can't allocate memory"); 
-			return NULL);
+	char *str = (char*)MALLOC(BUFSIZ);
+	if (str == NULL){
+		if (p->on_error)
+			p->on_error(p->on_error_data, "can't allocate memory"); 
+		return NULL;
+	}	
 	str[0] = 0;
 
 #define DIAGNOSIS_TEETH\
