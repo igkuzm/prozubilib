@@ -62,69 +62,69 @@ extern "C" {
 /* fexists
  * true if file exists and writable
  * %path - file path */
-static bool fexists(const char *path);
+bool fexists(const char *path);
 
 /* fsize
  * return file size
  * %path - file path */
-static off_t fsize(const char *path);
+off_t fsize(const char *path);
 
 /* homedir
  * return allocated string with path to home directory */
-static char * homedir();
+char * homedir();
 
 /* parentdir
  * modify argument string - remove last path component
  * from path string
  * %path - name or path of file */
-static char * parentdir(char *path);
+char * parentdir(char *path);
 
 /* isdir
  * true if directory at path exists
  * and is accesable
  * %path - directory path */
-static bool isdir(const char *path);
+bool isdir(const char *path);
 
 /* islink
  * true if file or directory is link
  * %path - file/directory path */
-static bool islink(const char *path);
+bool islink(const char *path);
 
 /* slink
  * create symbolic link
  * %path - file/directory path
  * %linkname */
-static int slink(const char *path, const char *linkname);
+int slink(const char *path, const char *linkname);
 
 /* hlink
  * create hard link
  * %path - file/directory path
  * %linkname */
-static int hlink(const char *path, const char *linkname);
+int hlink(const char *path, const char *linkname);
 
 /* fext
  * return file extension or NULL on error 
  * %filename - name or path of file */
-static const char * fext(const char *filename);
+const char * fext(const char *filename);
 
 /* fname
  * return allocated string with file name without 
  * extension and path
  * %path - name or path of file */
-static char * fname(char *path);
+char * fname(char *path);
 
 /* dname
  * return allocated string with name of 
  * directory path (like POSIX dirname())
  * %path - path of file */
-static char * dname(const char *path);
+char * dname(const char *path);
 
 /* fcopy 
  * copy and overwrite file 
  * return 0 on success
  * %from - filepath source file
  * %to   - filepath dastination file */ 
-static int fcopy(const char *from, const char *to);
+int fcopy(const char *from, const char *to);
 
 /* dcopy 
  * copy directory recursive
@@ -132,7 +132,7 @@ static int fcopy(const char *from, const char *to);
  * %from - filepath source file
  * %to   - filepath dastination file 
  * %overwrite - overwrite destination file if true */ 
-static int dcopy(
+int dcopy(
 		const char *from, const char *to, bool overwrite);
 
 /* dcopyf
@@ -143,7 +143,7 @@ static int dcopy(
  * %to   - filepath dastination file 
  * %overwrite - overwrite destination file if true
  * %filters - coma-separated filters like '*' or '*.ext' */
-static int dcopyf(
+int dcopyf(
 		const char *from, const char *to, bool overwrite, 
 		char *filters);
 
@@ -153,7 +153,7 @@ static int dcopyf(
  * for unix/windows args
  * %path - directory path with name
  * %mode - access mode (not used in windows) */
-static int newdir(const char *path, int mode);
+int newdir(const char *path, int mode);
 
 /* dir_foreach
  * scans directory and handle each file
@@ -166,9 +166,15 @@ typedef struct dirent {
     char        d_name[MAX_PATH];
 } dirent_t;
 
+#ifndef rmdir
+#define rmdir RemoveDirectory
 #endif
 
-#ifdef _WIN32
+int alphasort(
+		const struct dirent **a, const struct dirent **b);
+int versionsort(
+	const struct dirent **a, const struct dirent **b);
+
 /* scandir - implimation for Windows
  * scans the directory dirp, calling filter()
  * on each directory entry.
@@ -189,7 +195,7 @@ typedef struct dirent {
  * %filter - filter funcion
  * %compar - sort function 
  * int (*compar)(const struct dirent**, const struct dirent**) */
-static int 
+int 
 scandir(
 		 const char * dirp,
 		 struct dirent *** namelist,

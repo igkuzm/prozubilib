@@ -17,11 +17,14 @@ static void free_out_dir(){
 	remove(OUTFILE);
 	
 	// remove outdir
-	dir_foreach(OUTDIR, file){
-		char path[BUFSIZ];
-		sprintf(path, "%s/%s", OUTDIR, file->d_name);
-		remove(path);
-	}
+	do {
+		dir_foreach(OUTDIR, file){
+			char path[BUFSIZ];
+			sprintf(path, "%s/%s", OUTDIR, file->d_name);
+			remove(path);
+		}
+	} while(0);
+
 	rmdir(OUTDIR);
 	newdir(OUTDIR, 0755);
 }
@@ -33,6 +36,10 @@ struct pl_images{
 
 static int
 pl_images_cb(void *d, struct image_t *image){
+	char path[BUFSIZ];
+	FILE *fp;
+	int x, y, c;
+	size_t i;
 	struct pl_images *img = (struct pl_images *)d;	
 	if (!image){
 		if (img->p->on_error)
@@ -42,7 +49,6 @@ pl_images_cb(void *d, struct image_t *image){
 	}	
 	
 	// try to load image
-	int x, y, c;
 	if (!stbi_info_from_memory(
 				(const stbi_uc *)(image->data), 
 				image->len_data, &x, &y, &c))
@@ -54,15 +60,13 @@ pl_images_cb(void *d, struct image_t *image){
 	}
 	
 	// add image to rtfd for macos support
-	char path[BUFSIZ];
 	sprintf(path, OUTDIR "/%s.jpeg", image->id);
-	FILE *fp = fopen(path, "w");
+	fp = fopen(path, "w");
 	if (fp){
 		fwrite(image->data, image->len_data, 1, fp);
 		fclose(fp);
 	}
 	
-	int i;
 	str_appendf(&img->str,
 		"{\\pict\\picw0\\pich0\\picwgoal10254\\pichgoal6000\\jpegblip\n");
 
@@ -155,7 +159,7 @@ enum {
 
 static const char *pl_needle_array[] = 
 {
-	#define PL_REP(needle, ...) needle,
+	#define PL_REP(needle, rep, type) needle,
 PL_REPS
 	#undef PL_REP
 	NULL
@@ -260,6 +264,7 @@ _documents_parse_rtf(prozubi_t *p, FILE *in, FILE *out,
 		if (ch == '$'){
 			// get word
 			char buf[256];
+			char **needles;
 			i=0;
 			while (
 				   ch != ' ' && ch != '\\' && 
@@ -278,7 +283,7 @@ _documents_parse_rtf(prozubi_t *p, FILE *in, FILE *out,
 			
 			// convert buf to replace
 			i = 0;
-			char **needles = (char **)pl_needle_array;
+			needles = (char **)pl_needle_array;
 			while (needles[i]) {
 				char *needle = needles[i];	
 				if (strcmp(buf, needle) == 0)
@@ -313,22 +318,26 @@ documents_get_plan_lecheniya(
 {
 	// open template
 	FILE *in, *out;
+	char *table;
+	int duration;
+	int total;
+	char summa[128];
+	char sroki[128];
+	char *zformula;
+	void *zdata; size_t zlen;
+	struct pl_images img;
+
 	if (_documents_template_prepare(template_file_path, p, &in, &out))
 		return NULL;
 
 	// get table
-	char *table;
 	prozubi_planlecheniya_to_rtf(p, c->planlecheniya, &table);
-	int duration = prozubi_planlecheniya_get_duration_total(p, c->planlecheniya);
-	char sroki[128];
+	duration = prozubi_planlecheniya_get_duration_total(p, c->planlecheniya);
 	sprintf(sroki,"Общая продолжительность лечения (мес.): %d", duration);
-	int total = prozubi_planlecheniya_get_price_total(p, c->planlecheniya);
-	char summa[128];
+	total = prozubi_planlecheniya_get_price_total(p, c->planlecheniya);
 	sprintf(summa,"%d ", total);
 
 	// get zformula
-	char *zformula;
-	void *zdata; size_t zlen;
 	if (prozubi_planlecheniya_zformula_image(p, c,
 			 	ZFORMULAIMG,
 			 	&zdata, &zlen))
@@ -338,21 +347,22 @@ documents_get_plan_lecheniya(
 
 	} else {
 		// add image to rtf
+		stbi_uc *image;
+		char path[BUFSIZ];
 		struct str s;
-		str_init(&s);
+		int x, y, c,
+			to_x = 450, to_y = 225;
 		char *img = rtf_from_image("png", zdata, zlen,
 								   10250, 6000);
 		
+		str_init(&s);
 		str_append(&s, img, strlen(img));
 		
 		// MAC OS add image to rtfd
-		char path[BUFSIZ];
 		sprintf(path, OUTDIR "/" ZFORMULAIMG);
 		//fcopy(ZFORMULAIMG, path);
 		
-		int x, y, c,
-			to_x = 450, to_y = 225;
-		stbi_uc *image = stbi_load_from_memory((unsigned char *)zdata, zlen, &x, &y, &c, 0);
+		image = stbi_load_from_memory((unsigned char *)zdata, zlen, &x, &y, &c, 0);
 		if (image){
 			stbi_uc *resized = malloc(to_x*to_y*c);
 			if (resized){
@@ -370,7 +380,6 @@ documents_get_plan_lecheniya(
 	}
 
 	// load images
-	struct pl_images img;
 	if (str_init(&img.str)){
 		perror("malloc");
 		return NULL;
@@ -416,12 +425,12 @@ documents_get_akt(
 		)
 {
 	// open template
+	char *bill = NULL;
 	FILE *in, *out;
 	if (_documents_template_prepare(template_file_path, p, &in, &out))
 		return NULL;
 		
 	// get table
-	char *bill = NULL;
 	prozubi_bill_to_rtf(p, c->bill, &bill);
 	
 	if (bill){
@@ -444,11 +453,11 @@ documents_get_dogovor(
 		)
 {
 	// open template
+	struct case_t c;
 	FILE *in, *out;
 	if (_documents_template_prepare(template_file_path, p, &in, &out))
 		return NULL;
 	
-	struct case_t c;
 	c.date = time(NULL);
 
 	// parse RTF
