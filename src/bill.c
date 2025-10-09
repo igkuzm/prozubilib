@@ -69,6 +69,11 @@ prozubi_bill_foreach(
 			struct bill_t *t)
 		)
 {
+	int total_price = 0, item_i=0;
+	cJSON *item;
+	char *kod, *title, *price_str_item, *count_str, *total_str, *price_title, *price_str;
+	int price, count, total;
+
 	if (!p)
 		return;
 
@@ -77,8 +82,6 @@ prozubi_bill_foreach(
 		return;	
 	}
 
-	int total_price = 0, item_i=0;
-	cJSON *item;
 	cJSON_ArrayForEach(item, bill){
 		if (!cJSON_IsObject(item)){
 			ON_ERR(p, 
@@ -86,37 +89,33 @@ prozubi_bill_foreach(
 			continue;	
 		}
 
-		char *kod  = 
-			cJSON_GetStringValue(
+		kod  = cJSON_GetStringValue(
 				cJSON_GetObjectItem(item, "kod"));
 		if (!kod) kod = strdup("");
 
-		char *title  =     
-			cJSON_GetStringValue(
+		title = cJSON_GetStringValue(
 					cJSON_GetObjectItem(item, "title"));
 		if (!title) title = strdup("");
 
-		char *price_str =
-			cJSON_GetStringValue(
+		price_str_item = cJSON_GetStringValue(
 					cJSON_GetObjectItem(item, "price"));
 		if (!price_str) price_str = strdup("");
 
-		char *count_str =
-			cJSON_GetStringValue(
+		count_str = cJSON_GetStringValue(
 					cJSON_GetObjectItem(item, "count"));
 		if (!count_str) count_str = strdup("");
 
-		int price = atoi(price_str);
-		int count = atoi(count_str);
-		int total = price * count;
-		char *total_str = (char*)malloc(32);
+		price = atoi(price_str);
+		count = atoi(count_str);
+		total = price * count;
+		total_str = (char*)malloc(32);
 		sprintf(total_str, "%d", total);
 
 		/* callback item */
 		callback(
 			userdata, _bill_new(
 				p, bill, BILL_TYPE_ITEM, item_i, 
-				title, kod, price_str, count_str, total_str));
+				title, kod, price_str_item, count_str, total_str));
 		
 		total_price += total;
 
@@ -124,8 +123,8 @@ prozubi_bill_foreach(
 	}
 
 	/* callback total price */
-	char *price_title = strdup("Итого:");
-	char *price_str = (char*)malloc(32);
+	price_title = strdup("Итого:");
+	price_str = (char*)malloc(32);
 	sprintf(price_str, "%d", total_price);
 	callback(
 		userdata, _bill_new(
@@ -143,6 +142,14 @@ prozubi_bill_add_item(
 		int count
 		)
 {
+	int index;
+	cJSON *item;
+	char number[32];
+	char price_str[32];
+	char count_str[32];
+	char child_str[32];
+	char total_str[32];
+
 	if (!kdata)
 		return NULL;
 
@@ -151,10 +158,9 @@ prozubi_bill_add_item(
 		return NULL;	
 	}
 
-	int index = cJSON_GetArraySize(bill);
-	cJSON *item = cJSON_CreateObject();
+	index = cJSON_GetArraySize(bill);
+	item = cJSON_CreateObject();
 
-	char number[32];
 	sprintf(number, "%d", index+1);
 	cJSON_AddItemToObject(item, "number", 
 			cJSON_CreateString(number));
@@ -164,19 +170,15 @@ prozubi_bill_add_item(
 			cJSON_CreateString(kod));
 	cJSON_AddItemToObject(item, "title", 
 			cJSON_CreateString(title));
-	char price_str[32];
 	sprintf(price_str, "%d", price);
 	cJSON_AddItemToObject(item, "price", 
 			cJSON_CreateString(price_str));
-	char count_str[32];
 	sprintf(count_str, "%d", count);
 	cJSON_AddItemToObject(item, "count", 
 			cJSON_CreateString(count_str));
-	char child_str[32];
 	sprintf(child_str, "%d", index);
 	cJSON_AddItemToObject(item, "childIndex",
 			cJSON_CreateString(child_str));
-	char total_str[32];
 	sprintf(total_str, "%d", price * count);
 	cJSON_AddItemToObject(item, "total", 
 			cJSON_CreateString(total_str));
@@ -195,6 +197,7 @@ prozubi_bill_remove_item(
 		int item_index
 		)
 {
+	cJSON *item;
 	if (!kdata)
 		return;
 
@@ -203,7 +206,7 @@ prozubi_bill_remove_item(
 		return;	
 	}
 
-	cJSON *item = cJSON_GetArrayItem(bill, item_index);
+	item = cJSON_GetArrayItem(bill, item_index);
 	if (!cJSON_IsObject(item)){
 		ON_ERR(kdata, STR("can't read bill item %d", item_index));
 		return;	
@@ -221,6 +224,8 @@ prozubi_bill_set_item_title(
 		const char *title
 		)
 {
+	cJSON *item;
+
 	if (!kdata)
 		return cJSON_False;	
 
@@ -229,7 +234,7 @@ prozubi_bill_set_item_title(
 		return cJSON_False;	
 	}
 
-	cJSON *item = cJSON_GetArrayItem(bill, item_index);
+	item = cJSON_GetArrayItem(bill, item_index);
 	if (!cJSON_IsObject(item)){
 		ON_ERR(kdata, STR("can't read bill item %d", item_index));
 		return cJSON_False;	
@@ -248,6 +253,8 @@ prozubi_bill_set_item_kod(
 		const char *kod
 		)
 {
+	cJSON *item;
+
 	if (!kdata)
 		return cJSON_False;	
 
@@ -256,7 +263,7 @@ prozubi_bill_set_item_kod(
 		return cJSON_False;	
 	}
 
-	cJSON *item = cJSON_GetArrayItem(bill, item_index);
+	item = cJSON_GetArrayItem(bill, item_index);
 	if (!cJSON_IsObject(item)){
 		ON_ERR(kdata, STR("can't read bill item %d", item_index));
 		return cJSON_False;	
@@ -275,6 +282,11 @@ prozubi_bill_set_item_price(
 		int price
 		)
 {
+	cJSON *item, *count_j;
+	char *count;
+	char price_str[32];
+	char total[32];
+
 	if (!kdata)
 		return cJSON_False;	
 
@@ -283,26 +295,23 @@ prozubi_bill_set_item_price(
 		return cJSON_False;	
 	}
 
-	cJSON *item = cJSON_GetArrayItem(bill, item_index);
+	item = cJSON_GetArrayItem(bill, item_index);
 	if (!cJSON_IsObject(item)){
 		ON_ERR(kdata, STR("can't read bill item %d", item_index));
 		return cJSON_False;	
 	}
 	
-	char *count;
-	cJSON *count_j =  cJSON_GetObjectItem(item, "count"); 
+	count_j =  cJSON_GetObjectItem(item, "count"); 
 	if (count_j)
 		count = cJSON_GetStringValue(count_j);
 	if (!count)
 		count = (char*)"";
 
-	char price_str[32];
 	sprintf(price_str, "%d", price);
 	if (!cJSON_ReplaceItemInObject(item, "price",
 				cJSON_CreateString(price_str)))
 		return cJSON_False;
 
-	char total[32];
 	sprintf(total, "%d", price * atoi(count));
 	if (!cJSON_ReplaceItemInObject(item, "total",
 				cJSON_CreateString(total)))
@@ -319,6 +328,12 @@ prozubi_bill_set_item_count(
 		int count
 		)
 {
+	cJSON *item;
+	cJSON *price_j;
+	char *price;
+	char count_str[32];
+	char total[32];
+
 	if (!kdata)
 		return cJSON_False;	
 
@@ -327,25 +342,22 @@ prozubi_bill_set_item_count(
 		return cJSON_False;	
 	}
 
-	cJSON *item = cJSON_GetArrayItem(bill, item_index);
+	item = cJSON_GetArrayItem(bill, item_index);
 	if (!cJSON_IsObject(item)){
 		ON_ERR(kdata, STR("can't read bill item %d", item_index));
 		return cJSON_False;	
 	}
 	
-	char *price;
-	cJSON *price_j =  cJSON_GetObjectItem(item, "price"); 
+	price_j =  cJSON_GetObjectItem(item, "price"); 
 	if (price_j)
 		price = cJSON_GetStringValue(price_j);
 	if (!price)
 		price = (char*)"";
 
-	char count_str[32];
 	sprintf(count_str, "%d", count);
 	if (!cJSON_ReplaceItemInObject(item, "count", cJSON_CreateString(count_str)))
 		return cJSON_False;
 
-	char total[32];
 	sprintf(total, "%d", count * atoi(price));
 	if (!cJSON_ReplaceItemInObject(item, "total", cJSON_CreateString(total)))
 		return cJSON_False;
@@ -359,47 +371,43 @@ prozubi_bill_set_item_count(
 	struct str *s = (struct str *)d;
 	if (t->type == BILL_TYPE_ITEM)
 	{
-		char index[32];
-		sprintf(index, "%d", t->itemIndex + 1);
-		const char *row[] = {
-			index,
-			t->title,
-			t->count,
-			t->price,
-			t->total
-		};
-		
+		const char *row[5];
 		int width[] = 
 		{400, 6854, 1000, 1000, 1000};
+		char *tbl;
+		char index[32];
+		sprintf(index, "%d", t->itemIndex + 1);
+		row[0] = index;
+		row[1] = t->title;
+		row[2] = t->count;
+		row[3] = t->price;
+		row[4] = t->total;
 		
-		char *tbl = 
-			rtf_table_row(5, row, width);
+		tbl = rtf_table_row(5, row, width);
 		
-		str_append(
-				   s, tbl, strlen(tbl));
+		str_append(s, tbl, strlen(tbl));
 	}
 	else if (t->type == BILL_TYPE_TOTAL_PRICE)
 	{
 		char title[BUFSIZ];
-		snprintf(title,BUFSIZ,"\\b %s \\b0", t->title);
 		char total[BUFSIZ];
-		snprintf(total,BUFSIZ,"\\b %s руб. \\b0", t->total);
-		const char *row[] = {
-			"",
-			title,
-			"",
-			"",
-			total
-		};
-		
+		const char *row[5];
 		int width[] = 
 		{400, 6854, 1000, 1000, 1000};
+		char *tbl;
+
+		sprintf(title,"\\b %s \\b0", t->title);
+		sprintf(total,"\\b %s руб. \\b0", t->total);
+
+		row[0] = "";
+		row[1] = title;
+		row[2] = "";
+		row[3] = "";
+		row[4] = total;
 		
-		char *tbl = 
-			rtf_table_row(5, row, width);	
+		tbl = rtf_table_row(5, row, width);	
 		
-		str_append(
-				   s, tbl, strlen(tbl));
+		str_append(s, tbl, strlen(tbl));
 		
 		str_appendf(s, "\\lastrow\n");
 	}
@@ -409,11 +417,6 @@ prozubi_bill_set_item_count(
 		prozubi_t *p, cJSON *bill, char **rtf)
 {
 	struct str s;
-	if (str_init(&s)){
-		ON_ERR(p, "can't allocate memory");
-		return 0;
-	}
-
 	// create RTF table
 	const char *titles[] =
 	{
@@ -428,6 +431,11 @@ prozubi_bill_set_item_count(
 	char *tbl = 
 		rtf_table_row(5, titles, width);
 	
+	if (str_init(&s)){
+		ON_ERR(p, "can't allocate memory");
+		return 0;
+	}
+
 	str_append(&s, tbl, strlen(tbl));
 	free(tbl);
 
