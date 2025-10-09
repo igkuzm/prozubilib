@@ -62,6 +62,7 @@ add_library(${TARGET} STATIC
 	src/rtf.c
 	src/prozubilib.c
 	src/text_on_bitmap.c
+	src/fm.c
 	${ADDSRC}
 )
 

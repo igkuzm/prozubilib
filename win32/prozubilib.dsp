@@ -41,7 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
+# ADD CPP /nologo /W3 /GX /O2 /D "NDEBUG" /D "WIN32" /D "_LIB" /D "_MBCS" /YX /FD /c
 # ADD BASE RSC /l 0x419 /d "NDEBUG"
 # ADD RSC /l 0x419 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -63,8 +63,8 @@ LIB32=link.exe -lib
 # PROP Output_Dir "Debug"
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ  /c
-# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ  /c
+# ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
+# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /D "_DEBUG" /D "WIN32" /D "_LIB" /D "_MBCS" /YX /FD /GZ /c
 # ADD BASE RSC /l 0x419 /d "_DEBUG"
 # ADD RSC /l 0x419 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -83,6 +83,74 @@ LIB32=link.exe -lib
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
+# Begin Source File
+
+SOURCE=..\SRC\bill.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\SRC\cases.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\SRC\diagnosis.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\SRC\doctors.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\SRC\documents.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\SRC\fm.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\SRC\images.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\SRC\mkb.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\SRC\nomenklatura.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\SRC\passport.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\SRC\planlecheniya.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\SRC\prices.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\SRC\prozubilib.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\SRC\rtf.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\SRC\stb_image.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\SRC\template.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\SRC\text_on_bitmap.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
