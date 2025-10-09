@@ -27,10 +27,11 @@ endif()
 
 if(WIN32)
 	#set(ADDLIBS stbimage)
-	ADD_LIBRARY(stb_image STATIC IMPORTED)
-	SET_TARGET_PROPERTIES(stb_image PROPERTIES IMPORTED_LOCATION
-		${PROZUBI_SOURCE_DIR}/win32/stb_image.a)	
+	#ADD_LIBRARY(stb_image STATIC IMPORTED)
+	#SET_TARGET_PROPERTIES(stb_image PROPERTIES IMPORTED_LOCATION
+		#${PROZUBI_SOURCE_DIR}/win32/stb_image.a)	
 	INCLUDE_DIRECTORIES(${PROZUBI_SOURCE_DIR}/win32)		
+	set(ADDSRC stb_image.c)
 elseif(APPLE)
 	set(ADDSRC stb_image.c)
 else()
