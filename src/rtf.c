@@ -157,7 +157,6 @@ static unsigned char * _rtf_image_bin_to_strhex(
 		const char *format, void *data, size_t len,
 		int width, int height)
 {
-	int i;
 	struct str s;
 	unsigned char *str;
 	
