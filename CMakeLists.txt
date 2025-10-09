@@ -28,13 +28,17 @@ endif()
 if(WIN32)
 	set(ADDLIBS stbimage)
 	INCLUDE_DIRECTORIES(${PROZUBI_SOURCE_DIR}/win32)		
-	INCLUDE_DIRECTORIES(${KDATA2_SOURCE_DIR}/cYandexDisk/pthreads-win32/include)	
 elseif(APPLE)
 	set(ADDSRC stb_image.c)
 else()
 	if (NOT ANDROID)
 		LIST(APPEND ADDLIBS pthread dl)
 	endif()
+endif()
+
+
+if(MSVC)
+	INCLUDE_DIRECTORIES(${KDATA2_SOURCE_DIR}/cYandexDisk/pthreads-win32/include)	
 endif()
 
 add_library(${TARGET} STATIC
