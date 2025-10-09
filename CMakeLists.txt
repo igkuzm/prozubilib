@@ -26,15 +26,16 @@ if(APPLE)
 endif()
 
 if(WIN32)
-	#set(ADDLIBS stbimage)
-	#ADD_LIBRARY(stb_image STATIC IMPORTED)
-	#SET_TARGET_PROPERTIES(stb_image PROPERTIES IMPORTED_LOCATION
-		#${PROZUBI_SOURCE_DIR}/win32/stb_image.a)	
+	set(ADDLIBS stbimage)
+	ADD_LIBRARY(stb_image STATIC IMPORTED)
+	SET_TARGET_PROPERTIES(stb_image PROPERTIES IMPORTED_LOCATION
+		${PROZUBI_SOURCE_DIR}/win32/stb_image.a)	
 	INCLUDE_DIRECTORIES(${PROZUBI_SOURCE_DIR}/win32)		
-	set(ADDSRC stb_image.c)
+	set(ADDSRC stb_image)
 elseif(APPLE)
 	set(ADDSRC stb_image.c)
 else()
+	set(ADDSRC stb_image.c)
 	if (NOT ANDROID)
 		LIST(APPEND ADDLIBS pthread dl)
 	endif()
@@ -63,7 +64,7 @@ add_library(${TARGET} STATIC
 	src/text_on_bitmap.c
 )
 
-target_link_libraries(${TARGET} kdata2 ${ADDLIBS})
+target_link_libraries(${TARGET} kdata2 ${ADDLIBS} ${ADDSRC})
 
 if(${PROZUBI_BUILD_TEST})
 	add_executable(${TARGET}_test test.c)
