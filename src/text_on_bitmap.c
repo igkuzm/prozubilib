@@ -1,10 +1,11 @@
+#include "../include/text_on_bitmap.h"
 #include <stddef.h>
 #include <stdio.h>
 #define STB_TRUETYPE_IMPLEMENTATION  // force following include to generate implementation
-#include "stb_truetype.h"
-#include "stb_image.h"
-#include "stb_image_write.h"
-#include "utf.h"
+#include "../include/stb_truetype.h"
+#include "../include/stb_image.h"
+#include "../include/stb_image_write.h"
+#include "../include/utf.h"
 
 int text_on_bitmap(
 		unsigned char *bitmap,

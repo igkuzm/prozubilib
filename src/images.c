@@ -6,91 +6,9 @@
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
-#ifndef IMAGES_H
-#define IMAGES_H
+#include "../include/images.h"
 
-#include "prozubilib_conf.h"
-
-#include "enum.h"
-
-#include <string.h>
-#include <stdlib.h>
-
-#include "stb_image.h"
-#include "stb_image_resize.h"
-#include "stb_image_write.h"
-
-#include "image2ascii.h"
-
-#define IMAGES_TABLENAME "ZIMAGES"
-
-/*
- * IMAGES_COLUMN_DATE(struct member, enum number, SQLite column title)
- * IMAGES_COLUMN_TEXT(struct member, enum number, SQLite column title, size)
- * IMAGES_COLUMN_DATA(struct member, enum number, SQLite column title, type)
- */
-#define IMAGES_COLUMNS \
-	IMAGES_COLUMN_DATE(date, IMAGEDATE,   "ZLASTMODIFIED")\
-	IMAGES_COLUMN_TEXT(title, IMAGETITLE,  "ZTITLE"       )\
-	IMAGES_COLUMN_TEXT(caseid, IMAGECASEID, "ZCASEID"      )\
-	IMAGES_COLUMN_DATA(data, IMAGEDATA,   "ZIMAGEDATA", void)
-
-#define IMAGES_DATA_TYPES\
-	IMAGES_DATA_TYPE(void)
-
-enum image_data_types {
-#define IMAGES_DATA_TYPE(type) IMAGES_DATA_TYPE_##type, 
-	IMAGES_DATA_TYPES
-#undef IMAGES_DATA_TYPE
-
-	IMAGES_DATA_TYPES_NUM,
-};
-
-struct image_t {
-	uuid4_str id;         /* uuid of the image */
-
-#define IMAGES_COLUMN_DATE(member, number, title      )\
-	time_t member; 
-#define IMAGES_COLUMN_TEXT(member, number, title      )\
-	char * member; size_t len_##member; 
-#define IMAGES_COLUMN_DATA(member, number, title, type)\
-	type * member; size_t len_##member; 
-	IMAGES_COLUMNS
-#undef IMAGES_COLUMN_DATE
-#undef IMAGES_COLUMN_TEXT
-#undef IMAGES_COLUMN_DATA
-};
-
-
-BEGIN_ENUM(IMAGES) 
-#define IMAGES_COLUMN_DATE(member, number, title      )\
-		DECL_ENUM_ELEMENT(number), 
-#define IMAGES_COLUMN_TEXT(member, number, title      )\
-		DECL_ENUM_ELEMENT(number), 
-#define IMAGES_COLUMN_DATA(member, number, title, type)\
-		DECL_ENUM_ELEMENT(number), 
-	IMAGES_COLUMNS
-#undef IMAGES_COLUMN_DATE
-#undef IMAGES_COLUMN_TEXT
-#undef IMAGES_COLUMN_DATA
-
-	IMAGES_COLS_NUM,
-END_ENUM(IMAGES)
-
-BEGIN_ENUM_STRING(IMAGES) 
-#define IMAGES_COLUMN_DATE(member, number, title      )\
-		DECL_ENUM_STRING_ELEMENT(number), 
-#define IMAGES_COLUMN_TEXT(member, number, title      )\
-		DECL_ENUM_STRING_ELEMENT(number), 
-#define IMAGES_COLUMN_DATA(member, number, title, type)\
-		DECL_ENUM_STRING_ELEMENT(number), 
-	IMAGES_COLUMNS
-#undef IMAGES_COLUMN_DATE
-#undef IMAGES_COLUMN_TEXT
-#undef IMAGES_COLUMN_DATA
-END_ENUM_STRING(IMAGES)	
-
-static void	
+ void	
 prozubi_images_table_init(struct kdata2_table **images){
 	kdata2_table_init(images, IMAGES_TABLENAME,
 
@@ -108,13 +26,7 @@ prozubi_images_table_init(struct kdata2_table **images){
 			NULL); 
 } 
 
-struct prozubi_image_jpg_write_s {
-	void *data;
-	size_t len;
-	prozubi_t *p;
-};
-
-static void 
+ void 
 _prozubi_image_jpg_write_func(
 		void *context, void *data, int size)
 {
@@ -136,7 +48,7 @@ _prozubi_image_jpg_write_func(
 	s->len += size;
 }
 
-static int
+ int
 prozubi_image_set_image_raw(
 		prozubi_t *p,
 		struct image_t *i,
@@ -184,7 +96,7 @@ prozubi_image_set_image_raw(
 	return 0;
 }
 
-static int
+ int
 prozubi_image_set_image_from_mem(
 		prozubi_t *p,
 		struct image_t *i,
@@ -217,7 +129,7 @@ prozubi_image_set_image_from_mem(
 	return ret;
 }
 
-static int
+ int
 prozubi_image_set_image_from_file(
 		prozubi_t *p,
 		struct image_t *i,
@@ -271,7 +183,7 @@ static struct image_t *_prozubi_image_new(
 }
 
 #define IMAGES_COLUMN_DATE(member, number, title)\
-static int prozubi_image_set_##number(\
+ int prozubi_image_set_##number(\
 		kdata2_t *p, struct image_t *c, time_t t){\
 	if (!kdata2_set_number_for_uuid(p, IMAGES_TABLENAME,\
 			 	title, t, c->id))\
@@ -280,7 +192,7 @@ static int prozubi_image_set_##number(\
 	return 0;\
 }
 #define IMAGES_COLUMN_DATA(member, number, title, type)\
-static int prozubi_image_set_##number(\
+ int prozubi_image_set_##number(\
 		kdata2_t *p, struct image_t *c,\
 	   	void *data, size_t len)\
 {\
@@ -305,7 +217,7 @@ static int prozubi_image_set_##number(\
 	return 0;\
 }
 #define IMAGES_COLUMN_TEXT(member, number, title)\
-static int prozubi_image_set_##number(\
+ int prozubi_image_set_##number(\
 		kdata2_t *p, struct image_t *c, const char *text){\
 	size_t len; \
 	if (!kdata2_set_text_for_uuid(p, IMAGES_TABLENAME,\
@@ -333,7 +245,7 @@ static int prozubi_image_set_##number(\
 #undef IMAGES_COLUMN_DATA			
 
 /* allocate and init new image */
-static struct image_t *
+ struct image_t *
 prozubi_image_new(
 		prozubi_t *p,
 #define IMAGES_COLUMN_DATE(member, number, title      )\
@@ -384,7 +296,7 @@ prozubi_image_new(
 	return i;
 }
 
-static struct image_t *
+ struct image_t *
 prozubi_image_from_sql(
 		prozubi_t *p,
 		sqlite3_stmt *stmt)
@@ -487,7 +399,7 @@ prozubi_image_from_sql(
 
 /* callback all images with case id; set caseid to NULL 
  * to get all images in database */
-static void 
+ void 
 prozubi_image_foreach(
 		prozubi_t  *p,
 		const char *caseid,
@@ -556,7 +468,7 @@ prozubi_image_foreach(
 	sqlite3_finalize(stmt);
 }
 
-static void
+ void
 prozubi_image_free(struct image_t *i){
 	if (i){
 
@@ -575,7 +487,7 @@ prozubi_image_free(struct image_t *i){
 	}
 }
 
-static int prozubi_image_set_text(
+ int prozubi_image_set_text(
 		IMAGES key, 
 		kdata2_t *p, 
 		struct image_t *c, 
@@ -602,7 +514,7 @@ static int prozubi_image_set_text(
 	return -1;
 }
 
-static int prozubi_image_set_date(
+ int prozubi_image_set_date(
 		IMAGES key, kdata2_t *p, struct image_t *c, time_t t)
 {
 	switch (key) {
@@ -626,7 +538,7 @@ static int prozubi_image_set_date(
 	return -1;
 }
 
-static int prozubi_image_set_data(
+ int prozubi_image_set_data(
 		IMAGES key, 
 		kdata2_t *p, 
 		struct image_t *c, 
@@ -655,7 +567,7 @@ static int prozubi_image_set_data(
 	return -1;
 }
 
-static int prozubi_image_remove(
+ int prozubi_image_remove(
 		kdata2_t *p, struct image_t *c)
 {
 	return kdata2_remove_for_uuid(p,
@@ -689,7 +601,7 @@ static unsigned char * _prozubi_image_bin_to_strhex(
 }
 
 /* convert image to RTF string */
-static size_t prozubi_image_to_rtf(
+ size_t prozubi_image_to_rtf(
 		prozubi_t *p, struct image_t *image, char **rtf)
 {
 	int x, y, c;
@@ -738,4 +650,3 @@ static size_t prozubi_image_to_rtf(
 	return s.len;
 }
 
-#endif /* ifndef IMAGES_H */

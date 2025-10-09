@@ -6,60 +6,18 @@
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
-#ifndef PROZUBILIB_MKB_H
-#define PROZUBILIB_MKB_H
-
-#include "alloc.h"
-#include "prozubilib_conf.h"
-#include "enum.h"
-#include "kdata2/cYandexDisk/log.h"
-#include "kdata2/sqlite3.h"
-#include <stdio.h>
-#include <stdlib.h>
-
-
-#define MKB_BASE "MKBCodes.sqlite"
-#define MKB_TABL "kodiMKB"
-
-#define MKB_COLUMNS \
-	MKB_COLUMN_INT(iD) \
-	MKB_COLUMN_INT(parent) \
-	MKB_COLUMN_TEX(kod) \
-	MKB_COLUMN_TEX(name) \
-
-typedef struct MKB_t {
-	#define MKB_COLUMN_INT(title) int    title;
-	#define MKB_COLUMN_TEX(title) char * title;
-	MKB_COLUMNS
-	#undef MKB_COLUMN_INT
-	#undef MKB_COLUMN_TEX
-} mkb_t;
-
-BEGIN_ENUM(MKB)
-	#define MKB_COLUMN_INT(title) MKB_##title,
-	#define MKB_COLUMN_TEX(title) MKB_##title,
-	MKB_COLUMNS
-	#undef MKB_COLUMN_INT
-	#undef MKB_COLUMN_TEX
-	MKB_COLS_NUM
-END_ENUM(MKB)
-
-BEGIN_ENUM_STRING(MKB)
-	#define MKB_COLUMN_INT(title) "MKB_" #title,
-	#define MKB_COLUMN_TEX(title) "MKB_" #title,
-	MKB_COLUMNS
-	#undef MKB_COLUMN_INT
-	#undef MKB_COLUMN_TEX
-END_ENUM_STRING(MKB)
+#include "../include/mkb.h"
 
 static mkb_t *
 _mkb_new(prozubi_t *p)
 {
-	mkb_t *c = NEW(mkb_t,
-			if (p->on_error)
-				p->on_error(p->on_error_data,		
-				STR("%s", "cant allocate memory"));
-			return NULL);
+	mkb_t *c = NEW(mkb_t);
+	if (c == NULL){
+		if (p->on_error)
+			p->on_error(p->on_error_data,		
+			STR("%s", "cant allocate memory"));
+		return NULL;
+	}
 	
 	#define MKB_COLUMN_INT(title) c->title = -1;
 	#define MKB_COLUMN_TEX(title) c->title = NULL;
@@ -156,7 +114,7 @@ _prozubi_mkb_get_child(
 	sqlite3_finalize(stmt_c);
 }
 
-static void
+ void
 prozubi_mkb_foreach(
 		prozubi_t *p,
 		const char *predicate,
@@ -268,7 +226,7 @@ prozubi_mkb_foreach(
 	sqlite3_close(db);
 }
 
-static void
+ void
 prozubi_mkb_free(mkb_t *c){
 	if (c){
 
@@ -284,4 +242,3 @@ prozubi_mkb_free(mkb_t *c){
 	}
 }
 
-#endif // PROZUBILIB_MKB_H	

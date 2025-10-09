@@ -6,51 +6,9 @@
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
-#ifndef TEMPLATES_H
-#define TEMPLATES_H
+#include "../include/template.h"
 
-#include "prozubilib_conf.h"
-
-#include "enum.h"
-
-#include <string.h>
-#include <stdlib.h>
-
-#define TEMPLATES_TABLENAME "ZTEMPLATES"
-
-/*
- * TEMPLATES_COLUMN_TEXT(struct member, enum number, SQLite column title, size)
- * TEMPLATES_COLUMN_TEXT_P(struct member, enum number, SQLite column title)
- */
-#define TEMPLATES_COLUMNS \
-	TEMPLATES_COLUMN_TEXT(name,     TEMPLATENAME,  "ZTEMPLATENAME")\
-	TEMPLATES_COLUMN_TEXT(title,    TEMPLATETITLE, "ZTITLE")\
-	TEMPLATES_COLUMN_TEXT(text,     TEMPLATETEXT,  "ZTEXT")
-
-struct template_t {
-	uuid4_str id;         /* uuid of the template */
-
-#define TEMPLATES_COLUMN_TEXT(member, number, title) char * member; size_t len_##member; 
-	TEMPLATES_COLUMNS
-#undef TEMPLATES_COLUMN_TEXT
-};
-
-
-BEGIN_ENUM(TEMPLATES) 
-#define TEMPLATES_COLUMN_TEXT(member, number, title) DECL_ENUM_ELEMENT(number), 
-	TEMPLATES_COLUMNS
-#undef TEMPLATES_COLUMN_TEXT
-
-	TEMPLATES_COLS_NUM
-END_ENUM(TEMPLATES)
-
-BEGIN_ENUM_STRING(TEMPLATES) 
-#define TEMPLATES_COLUMN_TEXT(member, number, title) DECL_ENUM_STRING_ELEMENT(number), 
-	TEMPLATES_COLUMNS
-#undef TEMPLATES_COLUMN_TEXT
-END_ENUM_STRING(TEMPLATES)	
-
-static void	
+ void	
 prozubi_templates_table_init(struct kdata2_table **templates){
 	kdata2_table_init(templates, TEMPLATES_TABLENAME,
 
@@ -62,7 +20,7 @@ prozubi_templates_table_init(struct kdata2_table **templates){
 } 
 
 /* allocate and init new template */
-static struct template_t *
+ struct template_t *
 prozubi_template_new(
 		kdata2_t *kdata,
 #define TEMPLATES_COLUMN_TEXT(member, number, title) const char * member, 
@@ -102,7 +60,7 @@ prozubi_template_new(
 }
 
 /* callback all templates for template name; set template name to NULL to list all templates*/
-static void 
+ void 
 prozubi_template_foreach(
 		kdata2_t   *kdata,
 		const char *templatename,
@@ -203,7 +161,7 @@ prozubi_template_foreach(
 }
 
 #define TEMPLATES_COLUMN_TEXT(member, number, title)\
-static int prozubi_template_set_##number (kdata2_t *p, struct template_t *t,\
+ int prozubi_template_set_##number (kdata2_t *p, struct template_t *t,\
 		const char *text, bool update)\
 {\
 	if (update)\
@@ -218,7 +176,7 @@ static int prozubi_template_set_##number (kdata2_t *p, struct template_t *t,\
 		TEMPLATES_COLUMNS
 #undef TEMPLATES_COLUMN_TEXT			
 
-static int prozubi_template_set(
+ int prozubi_template_set(
 		TEMPLATES key, kdata2_t *p, struct template_t *t, const char *text, bool update)
 {
 	switch (key) {
@@ -234,7 +192,7 @@ static int prozubi_template_set(
 	return -1;
 }
 
-static void
+ void
 prozubi_template_free(struct template_t *d){
 	if (d){
 
@@ -247,13 +205,10 @@ prozubi_template_free(struct template_t *d){
 	}
 }
 
-static int prozubi_template_remove(
+ int prozubi_template_remove(
 		kdata2_t *p, struct template_t *t
 		)
 {
 	return kdata2_remove_for_uuid(p,
 		 	TEMPLATES_TABLENAME, t->id);
 }
-
-
-#endif /* ifndef TEMPLATES_H */

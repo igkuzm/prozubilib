@@ -6,37 +6,10 @@
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
-#ifndef BILL_H
-#define BILL_H
+#include "../include/bill.h"
+#include "../include/rtf.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "kdata2/kdata2.h"
-#include "prozubilib_conf.h"
-#include "str.h"
-#include "rtf.h"
-#include "alloc.h"
-#include "kdata2/cYandexDisk/cJSON.h"
-
-typedef enum BILL_TYPE {
-	BILL_TYPE_ITEM,
-	BILL_TYPE_TOTAL_PRICE,
-	
-} BILL_TYPE;
-
-struct bill_t {
-	cJSON *bill;
-	BILL_TYPE type;
-	int itemIndex;
-	char * title;
-	char * kod;
-	char * price;
-	char * count;
-	char * total;
-};
-
-static struct bill_t *
+ struct bill_t *
 _bill_new(
 		prozubi_t *p,
 		cJSON *bill,
@@ -49,9 +22,11 @@ _bill_new(
 		char * total)
 {
 	struct bill_t *t =
-			NEW(struct bill_t,
-					ON_ERR(p, "can't allocate bill_t"); 
-					return NULL);
+			NEW(struct bill_t);
+	if (t == NULL){
+		ON_ERR(p, "can't allocate bill_t"); 
+		return NULL;
+	}
 
 	t->bill          = bill;
 	t->type          = type;
@@ -65,7 +40,7 @@ _bill_new(
 	return t;
 }
 
-static void
+ void
 prozubi_bill_free(struct bill_t *t)
 {
 	if (!t)
@@ -84,7 +59,7 @@ prozubi_bill_free(struct bill_t *t)
 	free(t);
 }
 
-static void
+ void
 prozubi_bill_foreach(
 		prozubi_t *p,
 		cJSON *bill,
@@ -158,7 +133,7 @@ prozubi_bill_foreach(
 			price_title, NULL, NULL, NULL, price_str));
 }
 
-static cJSON *
+ cJSON *
 prozubi_bill_add_item(
 		prozubi_t *kdata,
 		cJSON *bill,
@@ -213,7 +188,7 @@ prozubi_bill_add_item(
 	return item;
 }
 
-static void
+ void
 prozubi_bill_remove_item(
 		prozubi_t *kdata,
 		cJSON *bill,
@@ -238,7 +213,7 @@ prozubi_bill_remove_item(
 }
 
 
-static cJSON_bool
+ cJSON_bool
 prozubi_bill_set_item_title(
 		prozubi_t *kdata,
 		cJSON *bill,
@@ -265,7 +240,7 @@ prozubi_bill_set_item_title(
 				cJSON_CreateString(title));
 }
 
-static cJSON_bool
+ cJSON_bool
 prozubi_bill_set_item_kod(
 		prozubi_t *kdata,
 		cJSON *bill,
@@ -292,7 +267,7 @@ prozubi_bill_set_item_kod(
 				cJSON_CreateString(kod));
 }
 
-static cJSON_bool
+ cJSON_bool
 prozubi_bill_set_item_price(
 		prozubi_t *kdata,
 		cJSON *bill,
@@ -336,7 +311,7 @@ prozubi_bill_set_item_price(
 	return cJSON_True;
 }
 
-static cJSON_bool
+ cJSON_bool
 prozubi_bill_set_item_count(
 		prozubi_t *kdata,
 		cJSON *bill,
@@ -378,7 +353,7 @@ prozubi_bill_set_item_count(
 	return cJSON_True;
 }
 
-static void _prozubi_bill_to_rtf_cb(
+ void _prozubi_bill_to_rtf_cb(
 		void *d, struct bill_t *t)
 {
 	struct str *s = (struct str *)d;
@@ -386,7 +361,7 @@ static void _prozubi_bill_to_rtf_cb(
 	{
 		char index[32];
 		sprintf(index, "%d", t->itemIndex + 1);
-		char *row[] = {
+		const char *row[] = {
 			index,
 			t->title,
 			t->count,
@@ -409,7 +384,7 @@ static void _prozubi_bill_to_rtf_cb(
 		snprintf(title,BUFSIZ,"\\b %s \\b0", t->title);
 		char total[BUFSIZ];
 		snprintf(total,BUFSIZ,"\\b %s руб. \\b0", t->total);
-		char *row[] = {
+		const char *row[] = {
 			"",
 			title,
 			"",
@@ -430,7 +405,7 @@ static void _prozubi_bill_to_rtf_cb(
 	}
 }
 
-static size_t prozubi_bill_to_rtf(
+ size_t prozubi_bill_to_rtf(
 		prozubi_t *p, cJSON *bill, char **rtf)
 {
 	struct str s;
@@ -473,5 +448,3 @@ static size_t prozubi_bill_to_rtf(
 		
 	return s.len;
 }
-
-#endif /* ifndef BILL_H */

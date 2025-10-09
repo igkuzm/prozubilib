@@ -11,7 +11,7 @@ if (NOT DEFINED PROZUBI_SOURCE_DIR)
 endif ()
 
 project(
-	${TARGET} VERSION 1.0 
+	${TARGET} VERSION 1.2 
 	DESCRIPTION "C library to handle dental clinic"
 	HOMEPAGE_URL ""
 	LANGUAGES C 
@@ -37,8 +37,21 @@ else()
 endif()
 
 add_library(${TARGET} STATIC
-	prozubilib.c
-	text_on_bitmap.c
+	src/bill.c
+	src/cases.c
+	src/diagnosis.c
+	src/doctors.c
+	src/documents.c
+	src/images.c
+	src/mkb.c
+	src/nomenklatura.c
+	src/passport.c
+	src/planlecheniya.c
+	src/prices.c
+	src/template.c
+	src/rtf.c
+	src/prozubilib.c
+	src/text_on_bitmap.c
 )
 
 target_link_libraries(${TARGET} kdata2 ${ADDLIBS})

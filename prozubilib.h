@@ -11,16 +11,21 @@
 
 #include <time.h>
 
-#include "prozubilib_conf.h"
+#include "include/prozubilib_conf.h"
 
-#include "passport.h"
-#include "cases.h"
-#include "doctors.h"
-#include "template.h"
-#include "images.h"
-#include "prices.h"
-#include "nomenklatura.h"
-#include "diagnosis.h"
+#include "include/bill.h"
+#include "include/cases.h"
+#include "include/diagnosis.h"
+#include "include/doctors.h"
+#include "include/documents.h"
+#include "include/images.h"
+#include "include/mkb.h"
+#include "include/nomenklatura.h"
+#include "include/passport.h"
+#include "include/planlecheniya.h"
+#include "include/prices.h"
+#include "include/template.h"
+#include "include/rtf.h"
 
 /* init prozubi database and start yandex disk sync */
 prozubi_t *

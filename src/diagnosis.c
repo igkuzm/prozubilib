@@ -5,12 +5,9 @@
  * Last Modified Date: 24.08.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
-#ifndef DIAGNOSIS_H
-#define DIAGNOSIS_H
-#include "prozubilib_conf.h"
-#include "cases.h"
 
-static int 
+#include "../include/diagnosis.h"
+ int 
 _prozubi_diagnosis_poteria_zhevatelnoy_effectivnosti(
 		struct case_t *c
 		)
@@ -61,7 +58,7 @@ _prozubi_diagnosis_poteria_zhevatelnoy_effectivnosti(
 	return pze;
 }
 
-static char *
+ char *
 prozubi_diagnosis_get(
 			prozubi_t *p,
 			struct case_t *c
@@ -149,4 +146,4 @@ prozubi_diagnosis_get(
 	}
 	return str;
 }
-#endif /* ifndef DIAGNOSIS_H */
+

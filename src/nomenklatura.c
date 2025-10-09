@@ -6,51 +6,7 @@
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
-#ifndef NOMENKLATURA_H
-#define NOMENKLATURA_H
-
-#include "prozubilib_conf.h"
-#include "enum.h"
-#include "kdata2/cYandexDisk/log.h"
-#include "kdata2/sqlite3.h"
-#include <stdio.h>
-#include <stdlib.h>
-
-
-#define NOMENKLATURA_BASE "nomenklatura.sqlite"
-#define NOMENKLATURA_TABL "nomenklatura"
-
-#define NOMENKLATURA_COLUMNS \
-	NOMENKLATURA_COLUMN_INT(iD) \
-	NOMENKLATURA_COLUMN_INT(parent) \
-	NOMENKLATURA_COLUMN_TEX(kod) \
-	NOMENKLATURA_COLUMN_TEX(name) \
-	NOMENKLATURA_COLUMN_TEX(headName)
-
-typedef struct NOMENKLATURA_t {
-	#define NOMENKLATURA_COLUMN_INT(title) int    title;
-	#define NOMENKLATURA_COLUMN_TEX(title) char * title;
-	NOMENKLATURA_COLUMNS
-	#undef NOMENKLATURA_COLUMN_INT
-	#undef NOMENKLATURA_COLUMN_TEX
-} nomenklatura_t;
-
-BEGIN_ENUM(NOMENKLATURA)
-	#define NOMENKLATURA_COLUMN_INT(title) NOMENKLATURA_##title,
-	#define NOMENKLATURA_COLUMN_TEX(title) NOMENKLATURA_##title,
-	NOMENKLATURA_COLUMNS
-	#undef NOMENKLATURA_COLUMN_INT
-	#undef NOMENKLATURA_COLUMN_TEX
-	NOMENKLATURA_COLS_NUM
-END_ENUM(NOMENKLATURA)
-
-BEGIN_ENUM_STRING(NOMENKLATURA)
-	#define NOMENKLATURA_COLUMN_INT(title) "NOMENKLATURA_" #title,
-	#define NOMENKLATURA_COLUMN_TEX(title) "NOMENKLATURA_" #title,
-	NOMENKLATURA_COLUMNS
-	#undef NOMENKLATURA_COLUMN_INT
-	#undef NOMENKLATURA_COLUMN_TEX
-END_ENUM_STRING(NOMENKLATURA)
+#include "../include/nomenklatura.h"
 
 static nomenklatura_t *
 _nomenklatura_new(prozubi_t *p)
@@ -72,7 +28,7 @@ _nomenklatura_new(prozubi_t *p)
 	return c;
 }
 
-static void
+ void
 prozubi_nomenklatura_foreach(
 		prozubi_t *p,
 		const char *predicate,
@@ -267,7 +223,7 @@ prozubi_nomenklatura_foreach(
 	sqlite3_close(db);
 }
 
-static void
+ void
 prozubi_nomenklatura_free(nomenklatura_t *c){
 	if (c){
 
@@ -283,4 +239,3 @@ prozubi_nomenklatura_free(nomenklatura_t *c){
 	}
 }
 
-#endif // NOMENKLATURA_H	

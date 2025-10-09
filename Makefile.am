@@ -1,6 +1,6 @@
 #config to create static prozubi lib with automake
 #ACLOCAL_AMFLAGS="-I m4"
-
+AUTOMAKE_OPTIONS = subdir-objects
 SUBDIRS = kdata2
 
 lib_LTLIBRARIES = libprozubilib.la
@@ -8,8 +8,21 @@ libprozubilib_la_CFLAGS =
 libprozubilib_la_LDFLAGS =
 
 libprozubilib_la_SOURCES = \
-	prozubilib.c \
-	text_on_bitmap.c text_on_bitmap.h
+	src/bill.c \
+	src/cases.c \
+	src/diagnisis.c \
+	src/doctors.c \
+	src/documents.c \
+	src/images.c \
+	src/mkb.c \
+	src/nomenklatura.c \
+	src/passport.c \
+	src/planlecheniya.c \
+	src/prices.c \
+	src/template.c \
+	src/rtf.c \
+	src/prozubilib.c \
+	src/text_on_bitmap.c text_on_bitmap.h
 
 if WIN64
 CURL_LIBDIR = -Lkdata2/cYandexDisk/curl/windows/win64/lib

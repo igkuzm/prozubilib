@@ -6,66 +6,9 @@
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
-#ifndef PASSPORT_H
-#define PASSPORT_H
+#include "../include/passport.h"
 
-#include "prozubilib_conf.h"
-
-#include "enum.h"
-
-#include <string.h>
-#include <stdlib.h>
-#include <time.h>
-
-#define PASSPORT_TABLENAME "ZPASSPORT"
-
-/*
- * PASSPORT_COLUMN_DATE(struct member, enum number, SQLite column title)
- * PASSPORT_COLUMN_TEXT(struct member, enum number, SQLite column title, size)
- */
-#define PASSPORT_COLUMNS \
-	PASSPORT_COLUMN_TEXT(patientid,   PATIENTID,           "ZPATIENTID"  )\
-	PASSPORT_COLUMN_TEXT(familiya,    PASSPORTFAMILIYA,    "ZFAMILIYA"   )\
-	PASSPORT_COLUMN_TEXT(imia,        PASSPOTIMIA,         "ZIMIA"       )\
-	PASSPORT_COLUMN_TEXT(otchestvo,   PASSPORTOTCHESTVO,   "ZOTCHESTVO"  )\
-	PASSPORT_COLUMN_TEXT(address,     PASSPORTADDRESS,     "ZADDRESS"    )\
-	PASSPORT_COLUMN_TEXT(document,    PASSPORTDOCUMENT,    "ZDOCUMENT"   )\
-	PASSPORT_COLUMN_TEXT(comment,     PASSPORTCOMMENT,     "ZCOMMENT"    )\
-	PASSPORT_COLUMN_TEXT(tel,         PASSPORTTEL,         "ZTEL"        )\
-	PASSPORT_COLUMN_TEXT(email,       PASSPORTEMAIL,       "ZEMAIL"      )\
-	PASSPORT_COLUMN_DATE(dateofbirth, PASSPORTDATEOFBIRTH, "ZDATEOFBIRTH")
-
-struct passport_t {
-	uuid4_str id;              /* uuid of the passport (patientid/recordname) */
-
-#define PASSPORT_COLUMN_DATE(member, number, title) time_t member; 
-#define PASSPORT_COLUMN_TEXT(member, number, title) char * member; size_t len_##member; 
-	PASSPORT_COLUMNS
-#undef PASSPORT_COLUMN_DATE
-#undef PASSPORT_COLUMN_TEXT
-	
-};
-
-
-BEGIN_ENUM(PASSPORT) 
-#define PASSPORT_COLUMN_DATE(member, number, title) DECL_ENUM_ELEMENT(number), 
-#define PASSPORT_COLUMN_TEXT(member, number, title) DECL_ENUM_ELEMENT(number), 
-	PASSPORT_COLUMNS
-#undef PASSPORT_COLUMN_DATE
-#undef PASSPORT_COLUMN_TEXT	
-
-	PASSPORT_COLS_NUM,
-END_ENUM(PASSPORT)
-
-BEGIN_ENUM_STRING(PASSPORT) 
-#define PASSPORT_COLUMN_DATE(member, number, title) DECL_ENUM_STRING_ELEMENT(number), 
-#define PASSPORT_COLUMN_TEXT(member, number, title) DECL_ENUM_STRING_ELEMENT(number), 
-	PASSPORT_COLUMNS
-#undef PASSPORT_COLUMN_DATE
-#undef PASSPORT_COLUMN_TEXT	
-END_ENUM_STRING(PASSPORT)	
-
-static void	
+ void	
 prozubi_passport_table_init(struct kdata2_table **passport){
 	kdata2_table_init(passport, PASSPORT_TABLENAME,
 
@@ -79,7 +22,7 @@ PASSPORT_COLUMNS
 } 
 
 /* do callback for each patient in database */
-static void 
+ void 
 prozubi_passport_foreach(
 		kdata2_t *kdata,
 		const char *predicate,
@@ -197,7 +140,7 @@ PASSPORT_COLUMNS
 }
 
 /* allocate, init and add new passport */
-static struct passport_t *
+ struct passport_t *
 prozubi_passport_new(
 		kdata2_t *kdata,
 
@@ -244,7 +187,7 @@ prozubi_passport_new(
 	return p;
 }
 
-static void
+ void
 prozubi_passport_free(struct passport_t *d){
 	if (d){
 
@@ -260,14 +203,14 @@ prozubi_passport_free(struct passport_t *d){
 }
 
 #define PASSPORT_COLUMN_DATE(member, number, title)\
-	static time_t prozubi_passport_get_##number(struct passport_t *c){\
+	 time_t prozubi_passport_get_##number(struct passport_t *c){\
 		return c->member;\
 	}
 #define PASSPORT_COLUMN_TEXT(member, number, title)\
-	static char * prozubi_passport_get_##number(struct passport_t *c){\
+	 char * prozubi_passport_get_##number(struct passport_t *c){\
 		return c->member;\
 	}\
-	static size_t prozubi_passport_get_len_##number(struct passport_t *c){\
+	 size_t prozubi_passport_get_len_##number(struct passport_t *c){\
 		return c->len_##member;\
 	}	
    	
@@ -276,7 +219,7 @@ prozubi_passport_free(struct passport_t *d){
 #undef PASSPORT_COLUMN_TEXT
 
 
-static void * 
+ void * 
 prozubi_passport_get(struct passport_t *c, PASSPORT key){
 	switch (key) {
 #define PASSPORT_COLUMN_DATE(member, number, title)\
@@ -299,7 +242,7 @@ prozubi_passport_get(struct passport_t *c, PASSPORT key){
 	return NULL;
 }
 
-static size_t 
+ size_t 
 prozubi_passport_get_len(struct passport_t *c, const char *name){
 	int index = getIndexPASSPORT(name);	
 	if (index == -1)
@@ -325,7 +268,7 @@ prozubi_passport_get_len(struct passport_t *c, const char *name){
 }
 
 #define PASSPORT_COLUMN_DATE(member, number, title)\
-static int prozubi_passport_set_##number (kdata2_t *p, struct passport_t *c,\
+ int prozubi_passport_set_##number (kdata2_t *p, struct passport_t *c,\
 		time_t t, bool update)\
 {\
 	if (update)\
@@ -335,7 +278,7 @@ static int prozubi_passport_set_##number (kdata2_t *p, struct passport_t *c,\
 	return 0;\
 }
 #define PASSPORT_COLUMN_TEXT(member, number, title)\
-static int prozubi_passport_set_##number (kdata2_t *p, struct passport_t *c,\
+ int prozubi_passport_set_##number (kdata2_t *p, struct passport_t *c,\
 		const char *text, bool update)\
 {\
 	if (update)\
@@ -351,7 +294,7 @@ static int prozubi_passport_set_##number (kdata2_t *p, struct passport_t *c,\
 #undef PASSPORT_COLUMN_DATE
 #undef PASSPORT_COLUMN_TEXT			
 
-static int prozubi_passport_set_text(
+ int prozubi_passport_set_text(
 		PASSPORT key, kdata2_t *p, struct passport_t *c, const char *text, bool update)
 {
 	switch (key) {
@@ -370,7 +313,7 @@ static int prozubi_passport_set_text(
 	return -1;
 }
 
-static int prozubi_passport_set_date(
+ int prozubi_passport_set_date(
 		PASSPORT key, kdata2_t *p, struct passport_t *c, time_t t, bool update)
 {
 	switch (key) {
@@ -389,7 +332,7 @@ static int prozubi_passport_set_date(
 	return -1;
 }
 
-static int prozubi_passport_update(
+ int prozubi_passport_update(
 		kdata2_t *p, struct passport_t *c
 		)
 {
@@ -426,11 +369,10 @@ static int prozubi_passport_update(
 	return 0;
 }
 
-static int prozubi_passport_remove(
+ int prozubi_passport_remove(
 		kdata2_t *p, struct passport_t *c
 		)
 {
 	return kdata2_remove_for_uuid(p, PASSPORT_TABLENAME, c->id);
 }
 
-#endif /* ifndef PASSPORT_H */

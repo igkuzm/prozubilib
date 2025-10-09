@@ -8,57 +8,29 @@
 
 /* functions to handle RTF files */
 
-#ifndef RTF_H_
-#define RTF_H_
-#include <stdio.h>
-
-/* rtf_from_utf8
- * return string with rtf code from utf8 multibite 
- * sting or NULL on error */
-static char *
-rtf_from_utf8(const char *s);
-
-/* rtf_table_row
- * return string with rtf code of table row
- * or NULL on error
- * %colc   - number of columns
- * %colv - columns values
- * %width  - array of columns width in twips*/
-static char *
-rtf_table_row(int colc, const char *colv[], int *width);
-
-/* convert image to RTF string 
- * valid formats: emf, png, jpeg
- * with and height are in twips (inches * 20) - 
- * for A4 13011x16838 */
-static char *
-rtf_from_image(
-		const char *format, void *data, size_t len,
-		int width, int height);
-
 /* IMPLIMATION */
-#include <string.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include "str.h"
+#include "../include/rtf.h"
 
 char *
 rtf_from_utf8(const char *s)
 {
+	size_t len;
+	char *out, *ptr, buf[8] = "";
+	unsigned int c32;
+
 	if (!s)
 		return NULL;
 	
-	size_t len = strlen(s);
-	char *out = (char *)malloc(len * 6 + 1);
+	len = strlen(s);
+	out = (char *)malloc(len * 6 + 1);
 	if (!out)
 		return NULL;
 	strcpy(out, "\\uc0 ");
 
-	char *ptr = (char *)s, buf[8] = "";
-	uint32_t c32;
+	ptr = (char *)s;
 	while(*ptr){
 		// get char
-		uint8_t c = *ptr;
+		unsigned char c = *ptr;
 		if (c >= 252){/* 6-bytes */
 			c32  = (*ptr++ & 0x1)  << 30;  // 0b00000001
 			c32 |= (*ptr++ & 0x3F) << 24;  // 0b00111111
@@ -181,10 +153,14 @@ static unsigned char * _rtf_image_bin_to_strhex(
 }
 
 /* convert image to RTF string */
-static char *rtf_from_image(
+ char *rtf_from_image(
 		const char *format, void *data, size_t len,
 		int width, int height)
 {
+	int i;
+	struct str s;
+	unsigned char *str;
+	
 	if (!format || !data || !len)
 		return NULL;
 	
@@ -194,8 +170,6 @@ static char *rtf_from_image(
 			strcmp(format, "emf"))
 		return NULL;
 	
-	int i;
-	struct str s;
 	if (str_init(&s))
 		return NULL;
 
@@ -205,11 +179,10 @@ static char *rtf_from_image(
 			"\\pichgoal%d\\%sblip\n", width, height, format);
 	
 	// append image data to rtf
-	unsigned char *str;
 	_rtf_image_bin_to_strhex(
 			(unsigned char *)data,
 		len, &str);
-	str_append(&s, (char*)str, strlen(str));
+	str_append(&s, (char*)str, strlen((char *)str));
 	free(str);
 	
 	// append image close to rtf
@@ -217,5 +190,3 @@ static char *rtf_from_image(
 
 	return s.str;
 }
-
-#endif /* ifndef RTF_H_ */

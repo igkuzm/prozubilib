@@ -93,7 +93,8 @@ static char *c32tomb(char *s, unsigned int c32)
 static char *mbtoc32(unsigned int *s32, const char *s)
 {
 	int i=0;
-	if (s[i] >= 252){/* 6-bytes */
+	unsigned char *us;
+	if (us[i] >= 252){/* 6-bytes */
 		*s32  = (s[i++] & 0x1)  << 30;  // 0b00000001
 		*s32 |= (s[i++] & 0x3F) << 24;  // 0b00111111	
 		*s32 |= (s[i++] & 0x3F) << 18;  // 0b00111111
@@ -101,25 +102,25 @@ static char *mbtoc32(unsigned int *s32, const char *s)
 		*s32 |= (s[i++] & 0x3F) << 6;   // 0b00111111
 		*s32 |=  s[i++] & 0x3F;         // 0b00111111
 	} 
-	else if (s[i] >= 248){/* 5-bytes */
+	else if (us[i] >= 248){/* 5-bytes */
 		*s32  = (s[i++] & 0x3)  << 24;  // 0b00000011
 		*s32 |= (s[i++] & 0x3F) << 18;  // 0b00111111
 		*s32 |= (s[i++] & 0x3F) << 12;  // 0b00111111
 		*s32 |= (s[i++] & 0x3F) << 6;   // 0b00111111
 		*s32 |=  s[i++] & 0x3F;         // 0b00111111
 	}
-	else if (s[i] >= 240){/* 4-bytes */
+	else if (us[i] >= 240){/* 4-bytes */
 		*s32  = (s[i++] & 0x7)  << 18;  // 0b00000111
 		*s32 |= (s[i++] & 0x3F) << 12;  // 0b00111111
 		*s32 |= (s[i++] & 0x3F) << 6;   // 0b00111111
 		*s32 |=  s[i++] & 0x3F;         // 0b00111111
 	} 
-	else if (s[i] >= 224){/* 3-bytes */
+	else if (us[i] >= 224){/* 3-bytes */
 		*s32  = (s[i++] & 0xF)  << 12;  // 0b00001111
 		*s32 |= (s[i++] & 0x3F) << 6;   // 0b00111111
 		*s32 |=  s[i++] & 0x3F;         // 0b00111111
 	}
-	else if (s[i] >= 192){/* 2-bytes */
+	else if (us[i] >= 192){/* 2-bytes */
 		*s32  = (s[i++] & 0x1F) << 6;   // 0b00011111
 		*s32 |=  s[i++] & 0x3F;         // 0b00111111 
 	} 

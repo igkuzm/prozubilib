@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([prozubilib], [1.1])
+AC_INIT([prozubilib], [1.2])
 AM_INIT_AUTOMAKE
 AM_MAINTAINER_MODE
 

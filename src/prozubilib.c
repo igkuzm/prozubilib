@@ -6,8 +6,7 @@
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
-#include "prozubilib.h"
-#include "kdata2/kdata2.h"
+#include "../prozubilib.h"
 
 prozubi_t *
 prozubi_init(

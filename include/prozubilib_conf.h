@@ -15,19 +15,29 @@
 #define true 1
 #define false 0
 #endif //bool
+#else // _WIN32
+#include <stdbool.h>
 #endif //_WIN32
 
 #ifndef UUIDCOLUMN
 #define UUIDCOLUMN "ZRECORDNAME"
 #endif /* ifndef UUIDCOLUMN */
 
-#include "kdata2/kdata2.h"
-#include "kdata2/sqlite3.h"
-#include "kdata2/cYandexDisk/cJSON.h"
-#include "kdata2/cYandexDisk/uuid4.h"
-#include "kdata2/cYandexDisk/log.h"
-#include "kdata2/cYandexDisk/alloc.h"
-#include "kdata2/cYandexDisk/str.h"
+#include <time.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stddef.h>
+
+#include "enum.h"
+#include "fm.h"
+#include "../kdata2/kdata2.h"
+#include "../kdata2/sqlite3.h"
+#include "../kdata2/cYandexDisk/cJSON.h"
+#include "../kdata2/cYandexDisk/uuid4.h"
+#include "../kdata2/cYandexDisk/log.h"
+#include "../kdata2/cYandexDisk/alloc.h"
+#include "../kdata2/cYandexDisk/str.h"
 
 typedef kdata2_t prozubi_t;
 

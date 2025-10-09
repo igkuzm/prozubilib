@@ -5,29 +5,8 @@
  * Last Modified Date: 05.10.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
-#ifndef DOCUMENTS_H
-#define DOCUMENTS_H
 
-
-#include <stdint.h>
-#include <time.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-
-#include "images.h"
-#include "kdata2/cYandexDisk/cJSON.h"
-#include "passport.h"
-#include "planlecheniya.h"
-#include "cases.h"
-#include "prozubilib.h"
-#include "bill.h"
-#include "images.h"
-#include "str.h"
-#include "rtf.h"
-#include "fm.h"
+#include "../include/documents.h"
 
 #define OUTDIR "out.rtfd"
 #define OUTFILE OUTDIR "/TXT.rtf"
@@ -243,7 +222,7 @@ _documents_template_prepare(const char *template_file_path,
 		if (p->on_error)
 			p->on_error(p->on_error_data,			
 						STR_ERR("can't wtite file: %s", OUTFILE));
-		fclose(in);
+		fclose(*in);
 		return 1;	
 	}
 	
@@ -324,7 +303,7 @@ _documents_parse_rtf(prozubi_t *p, FILE *in, FILE *out,
 	}	
 }
 
-static const char * 
+ const char * 
 documents_get_plan_lecheniya(
 		const char *template_file_path,
 		prozubi_t *p,
@@ -408,7 +387,7 @@ documents_get_plan_lecheniya(
 	return _documents_finish(p, in, out);
 }
 
-static const char * 
+ const char * 
 documents_get_case(
 		const char *template_file_path,
 		prozubi_t *p,
@@ -428,7 +407,7 @@ documents_get_case(
 	return _documents_finish(p, in, out);
 }
 
-static const char * 
+ const char * 
 documents_get_akt(
 		const char *template_file_path,
 		prozubi_t *p,
@@ -457,7 +436,7 @@ documents_get_akt(
 }
 
 
-static const char * 
+ const char * 
 documents_get_dogovor(
 		const char *template_file_path,
 		prozubi_t *p,
@@ -479,5 +458,3 @@ documents_get_dogovor(
 	return _documents_finish(p, in, out);
 }
 
-
-#endif /* ifndef DOCUMENTS_H */
