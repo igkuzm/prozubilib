@@ -8,6 +8,20 @@
 
 #include "../include/doctors.h"
 
+void	
+prozubi_doctors_table_init(struct kdata2_table **doctors)
+{
+	kdata2_table_init(doctors, DOCTORS_TABLENAME,
+
+#define DOCTORS_COLUMN_TEXT(member, number, title) KDATA2_TYPE_TEXT, title, 
+#define DOCTORS_COLUMN_DATA(member, number, title, type) KDATA2_TYPE_DATA, title, 
+DOCTORS_COLUMNS
+#undef DOCTORS_COLUMN_TEXT
+#undef DOCTORS_COLUMN_DATA			
+			
+			NULL); 
+} 
+
 /* allocate and init new case */
  struct doctor_t *
 prozubi_doctor_new(
