@@ -44,8 +44,6 @@ extern "C" {
 #endif /* bool */
 #else /* _WIN32 */
 #include <stdbool.h>
-#include <dirent.h>
-#include <libgen.h>   /* basename, basedir */
 #endif /* _WIN32 */
 
 #include <stdio.h>
@@ -53,6 +51,8 @@ extern "C" {
 #include <sys/types.h>
 #include <string.h>
 #include <errno.h>
+#include <dirent.h>
+#include <libgen.h>   /* basename, basedir */
 
 /* fexists
  * true if file exists and writable
@@ -183,7 +183,7 @@ scandir(
 		 const char *restrict dirp,
 		 struct dirent ***restrict namelist,
 		 int (*filter)(const struct dirent *),
-		 int (*compar)(const void *, const void *))
+		 int (*compar)(const void *, const void *));
 #endif
 
 /********************************************/
