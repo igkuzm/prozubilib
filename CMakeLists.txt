@@ -30,7 +30,7 @@ if(WIN32)
 	#SET_TARGET_PROPERTIES(stb_image PROPERTIES IMPORTED_LOCATION
 		#${PROZUBI_SOURCE_DIR}/win32/stb_image.a)	
 	#INCLUDE_DIRECTORIES(${PROZUBI_SOURCE_DIR}/win32)		
-	#set(ADDSRC stb_image)
+	#set(ADDLIBS stb_image)
 	set(ADDSRC stb_image.c)
 elseif(APPLE)
 	set(ADDSRC stb_image.c)
@@ -62,9 +62,10 @@ add_library(${TARGET} STATIC
 	src/rtf.c
 	src/prozubilib.c
 	src/text_on_bitmap.c
+	${ADDSRC}
 )
 
-target_link_libraries(${TARGET} kdata2 ${ADDLIBS} ${ADDSRC})
+target_link_libraries(${TARGET} kdata2 ${ADDLIBS})
 
 if(${PROZUBI_BUILD_TEST})
 	add_executable(${TARGET}_test test.c)
