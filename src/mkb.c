@@ -42,6 +42,8 @@ _prozubi_mkb_get_child(
 			)
 		)
 {
+	int i;
+
 	/* get children */
 	sqlite3_stmt *stmt_c;
 	
@@ -74,7 +76,6 @@ _prozubi_mkb_get_child(
 			break;
 		
 		/* iterate columns */
-		int i;
 		for (i = 0; i < MKB_COLS_NUM; ++i) {
 			/* handle values */
 			switch (i) {
@@ -126,6 +127,10 @@ prozubi_mkb_foreach(
 			)
 		)
 {
+	sqlite3 *db;
+	sqlite3_stmt *stmt_p;
+	char *SQL;
+	
 	if (!p)
 		return;
 
@@ -136,8 +141,6 @@ prozubi_mkb_foreach(
 		return;
 	}
 
-	sqlite3 *db;
-	
 	if (sqlite3_open_v2(MKB_BASE, &db, 
 				SQLITE_OPEN_READONLY, NULL))
 	{
@@ -149,7 +152,7 @@ prozubi_mkb_foreach(
 	}
 	
 	/* create SQL string */
-	char *SQL = (char *)malloc(BUFSIZ);
+	SQL = (char *)malloc(BUFSIZ);
 	if (SQL == NULL)
 		return;
 	strcpy(SQL, "");
@@ -169,7 +172,6 @@ prozubi_mkb_foreach(
 	}
 
 	/* start SQLite request for parent*/
-	sqlite3_stmt *stmt_p;
 	if(sqlite3_prepare_v2(db, SQL, -1, &stmt_p, NULL)){
 		if (p->on_error)
 			p->on_error(p->on_error_data,				
@@ -178,12 +180,13 @@ prozubi_mkb_foreach(
 		return;
 	};
 	while (sqlite3_step(stmt_p) != SQLITE_DONE) {
+		int i;
+		void *parent = NULL;
 		mkb_t *c = _mkb_new(p);
 		if (!c)
 			break;
 
 		/* iterate columns */
-		int i;
 		for (i = 0; i < MKB_COLS_NUM; ++i) {
 			/* handle values */
 			switch (i) {
@@ -215,7 +218,7 @@ prozubi_mkb_foreach(
 		}
 
 		/* callback */
-		void *parent = callback(user_data, NULL, c);
+		parent = callback(user_data, NULL, c);
 
 		// loop
 		_prozubi_mkb_get_child(p, db, c->iD, user_data, parent, callback);
