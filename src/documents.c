@@ -1,8 +1,8 @@
 /**
- * File              : documents.h
+ * File              : documents.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 25.07.2023
- * Last Modified Date: 05.10.2024
+ * Last Modified Date: 09.10.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -329,7 +329,7 @@ documents_get_plan_lecheniya(
 	// get zformula
 	char *zformula;
 	void *zdata; size_t zlen;
-	if (_prozubi_zformula_image(p, c,
+	if (prozubi_planlecheniya_zformula_image(p, c,
 			 	ZFORMULAIMG,
 			 	&zdata, &zlen))
 	{

@@ -2,7 +2,7 @@
  * File              : prozubilib_conf.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 17.04.2023
- * Last Modified Date: 13.09.2024
+ * Last Modified Date: 09.10.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -14,10 +14,10 @@
 #define bool char
 #define true 1
 #define false 0
-#endif //bool
-#else // _WIN32
+#endif /* bool */
+#else /* _WIN32 */
 #include <stdbool.h>
-#endif //_WIN32
+#endif /*_WIN32 */
 
 #ifndef UUIDCOLUMN
 #define UUIDCOLUMN "ZRECORDNAME"

@@ -761,7 +761,7 @@ prozubi_cases_list_foreach(
 		if (cJSON_IsArray(element)){
 			/* handle array */
 			cJSON *jtitle, *jkey, *jtype; 
-			char *skey, stype;
+			char *skey, *stype;
 
 			jtitle = cJSON_GetArrayItem(element, 0);
 			title = cJSON_GetStringValue(jtitle);
@@ -771,8 +771,8 @@ prozubi_cases_list_foreach(
 			key = getIndexCASES(skey);	
 
 			jtype = cJSON_GetArrayItem(element, 2); 
-			stype = (char *)cJSON_GetStringValue(jtype); 
-			type = (int)getIndexCASES_LIST_TYPE(stype);	
+			stype = cJSON_GetStringValue(jtype); 
+			type = getIndexCASES_LIST_TYPE(stype);	
 			
 			array = NULL;
 			if (type == CASES_LIST_TYPE_COMBOBOX){

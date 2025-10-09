@@ -2,7 +2,7 @@
  * File              : fm.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 04.09.2021
- * Last Modified Date: 27.08.2024
+ * Last Modified Date: 09.10.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -41,12 +41,12 @@ extern "C" {
 #define bool char
 #define true 1
 #define false 0
-#endif //bool
-#else // _WIN32
+#endif /* bool */
+#else /* _WIN32 */
 #include <stdbool.h>
 #include <dirent.h>
-#include <libgen.h>   // basename, basedir
-#endif //_WIN32
+#include <libgen.h>   /* basename, basedir */
+#endif /* _WIN32 */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -57,12 +57,12 @@ extern "C" {
 /* fexists
  * true if file exists and writable
  * %path - file path */
-static bool fexists(const char *path)
+static bool fexists(const char *path);
 
 /* fsize
  * return file size
  * %path - file path */
-//static off_t fsize(const char *path)
+static off_t fsize(const char *path);
 
 /* homedir
  * return allocated string with path to home directory */
@@ -72,54 +72,54 @@ static char * homedir();
  * modify argument string - remove last path component
  * from path string
  * %path - name or path of file */
-static char * parentdir(char *path)
+static char * parentdir(char *path);
 
 /* isdir
  * true if directory at path exists
  * and is accesable
  * %path - directory path */
-static bool isdir(const char *path)
+static bool isdir(const char *path);
 
 /* islink
  * true if file or directory is link
  * %path - file/directory path */
-static bool islink(const char *path)
+static bool islink(const char *path);
 
 /* slink
  * create symbolic link
  * %path - file/directory path
  * %linkname */
-static int slink(const char *path, const char *linkname)
+static int slink(const char *path, const char *linkname);
 
 /* hlink
  * create hard link
  * %path - file/directory path
  * %linkname */
-static int hlink(const char *path, const char *linkname)
+static int hlink(const char *path, const char *linkname);
 
 /* fext
  * return file extension or NULL on error 
  * %filename - name or path of file */
-static const char * fext(const char *filename)
+static const char * fext(const char *filename);
 
 /* fname
  * return allocated string with file name without 
  * extension and path
  * %path - name or path of file */
-static char * fname(char *path)
+static char * fname(char *path);
 
 /* dname
  * return allocated string with name of 
  * directory path (like POSIX dirname())
  * %path - path of file */
-static char * dname(const char *path)
+static char * dname(const char *path);
 
 /* fcopy 
  * copy and overwrite file 
  * return 0 on success
  * %from - filepath source file
  * %to   - filepath dastination file */ 
-static int fcopy(const char *from, const char *to)
+static int fcopy(const char *from, const char *to);
 
 /* dcopy 
  * copy directory recursive
@@ -128,7 +128,7 @@ static int fcopy(const char *from, const char *to)
  * %to   - filepath dastination file 
  * %overwrite - overwrite destination file if true */ 
 static int dcopy(
-		const char *from, const char *to, bool overwrite)
+		const char *from, const char *to, bool overwrite);
 
 /* dcopyf
  * copy directory content with comma-separated filters 
@@ -140,7 +140,7 @@ static int dcopy(
  * %filters - coma-separated filters like '*' or '*.ext' */
 static int dcopyf(
 		const char *from, const char *to, bool overwrite, 
-		char *filters) 
+		char *filters);
 
 /* newdir
  * create new directory
@@ -148,7 +148,7 @@ static int dcopyf(
  * for unix/windows args
  * %path - directory path with name
  * %mode - access mode (not used in windows) */
-static int newdir(const char *path, int mode)
+static int newdir(const char *path, int mode);
 
 /* dir_foreach
  * scans directory and handle each file
@@ -190,10 +190,12 @@ scandir(
 /*IMPLIMATION *******************************/	
 /********************************************/
 
+char *strdup(const char *);
+
 #ifdef _WIN32
 #include <io.h>
 #include <windows.h>
-//#include <fileapi.h>
+/* #include <fileapi.h> */
 #define F_OK 0
 #define access _access
 #define _SLASH_ "\\"
@@ -201,7 +203,7 @@ scandir(
 #else
 #include <sys/stat.h>
 #include <unistd.h>
-#include <sys/stat.h> // mkdir, stat
+#include <sys/stat.h> /* mkdir, stat */
 #define _SLASH_ "/"
 #endif
 
@@ -441,28 +443,28 @@ int fcopy (const char *from, const char *to) {
 	FILE *src, *dst;
 	char buf[BUFSIZ];
 
-	// open source file
+	/* open source file */
 	if ((src = fopen(from, "rb")) == NULL)
 		return -1;
 
-	// open destination file
+	/*open destination file*/
 	if ((dst = fopen(to, "wb"))   == NULL){
 		fclose(src);
 		return -1;
 	}
 			
-	// do copy
+	/*do copy*/
 	while (feof(src) == 0){
 		fread (buf, sizeof(buf), 1, src);
 		fwrite(buf, sizeof(buf), 1, dst);
 	}
 
-	// check errors - to handle error call errno()
+	/*check errors - to handle error call errno()*/
 	int err = 0;
 	if ((err = ferror(src)) || 
 			(err = ferror(dst))){}
 
-	// close
+	/*close*/
 	fclose(src);
 	fclose(dst);
 
@@ -477,16 +479,16 @@ int fcopy (const char *from, const char *to) {
  * %overwrite - overwrite destination file if true */
 int dcopy(const char *from, const char *to, bool overwrite)
 {
-	// create `to` directory
+	/*create `to` directory*/
 	if (!fexists(to))
 		newdir(to, 0755);
 
 	dir_foreach(from, file){
-		// skip error
+		/*skip error*/
 		if (strcmp(file->d_name, "") == 0)
 			continue;
 
-		// skip system dir names
+		/*skip system dir names*/
 		if (strcmp(file->d_name, ".") == 0 ||
 				strcmp(file->d_name, "..") == 0)
 			continue;
@@ -495,20 +497,20 @@ int dcopy(const char *from, const char *to, bool overwrite)
 		sprintf(src, "%s" _SLASH_ "%s", from, file->d_name);
 		sprintf(dst, "%s" _SLASH_ "%s", to,   file->d_name);
 
-		// handle links
+		/*handle links*/
 		if (islink(src)){
 			if (!fexists(dst) || overwrite)
 				fcopy(src, dst);
 			continue;
 		}
 
-		// parse directory
+		/*parse directory*/
 		if (isdir(src)){
 			dcopy(src, dst, overwrite);
 			continue;
 		}
 			
-		// copy file
+		/*copy file*/
 		if (!fexists(dst) || overwrite)
 			fcopy(src, dst);
 	}
@@ -547,31 +549,31 @@ int dcopyf(
 	int err = 0;
 
 	dir_foreach(from, e){	
-		// drop errors 
+		/*drop errors */
 		if (e->d_name[0] == 0)
 			continue;
 		
-		// drop '.' and '..'
+		/*drop '.' and '..'*/
 		if (strcmp(e->d_name, ".")  == 0 ||
 				strcmp(e->d_name, "..") == 0 )
 			continue;
 
-		// copy names
+		/*copy names*/
 		char src[BUFSIZ], dst[BUFSIZ];
 		sprintf(src, "%s" _SLASH_ "%s", from, e->d_name);
 		sprintf(dst, "%s" _SLASH_ "%s", to, e->d_name);
 
-		// cycle through filters
+		/*cycle through filters*/
 		char *f = strdup(filters);
 		char *t;
 		for (t=strtok(f, ", ");
 				 t || ({if(f) free(f); 0;}); 
 				 t=strtok(NULL, ", "))
 		{
-			// check is dir			
+			/*check is dir			*/
 			if (isdir(src)){
 				char *dn = dname(t);
-				// copy if directory name matches
+				/*copy if directory name matches*/
 				if (dn && strcmp(e->d_name, dn) == 0){
 					char *error = NULL;
 					if ((err = dcopy(src, dst, overwrite)))
@@ -579,19 +581,19 @@ int dcopyf(
 				}
 				free(dn);
 			} else {
-				// this is file
-				// if file name is "*" - copy if extension matches
-				// oterwise copy if filename and extension matches 
+				/*this is file*/
+				/*if file name is "*" - copy if extension matches*/
+				/*oterwise copy if filename and extension matches */
 				const char *ext = fext(t);
 				char *name = fname(t);
 				if (name[0] == '*'){
-					// copy file if extension matches
+					/*copy file if extension matches*/
 					if (strcmp(ext, 
 								fext(e->d_name)) == 0)
 						if ((err = fcopy(src, dst)))
 							return err;
 				} else {
-					// copy if name and extension matches
+					/*copy if name and extension matches*/
 					if (strcmp(t, e->d_name) == 0)
 						if ((err = fcopy(src, dst)))
 							return err;

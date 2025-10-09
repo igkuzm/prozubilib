@@ -1,8 +1,8 @@
 /**
- * File              : planlecheniya.h
+ * File              : planlecheniya.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.04.2023
- * Last Modified Date: 01.10.2024
+ * Last Modified Date: 09.10.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -664,8 +664,8 @@ prozubi_planlecheniya_set_stage_duration(
 	ZFORMULA_COORD(z38, 555, 165)
 
 
-static int
-_prozubi_zformula_image(
+int
+prozubi_planlecheniya_zformula_image(
 		prozubi_t *p, struct case_t *c, 
 		const char *imagepath, 
 		void **data, size_t *len)
@@ -757,7 +757,7 @@ static void * _prozubi_planlecheniya_to_rtf_cb(
 			}
 		case PLANLECHENIYA_TYPE_ITEM:
 			{
-				char *row[5];
+				const char *row[5];
 				int width[] = 
 					{400, 6854, 1000, 1000, 1000};
 				char *tbl; 
@@ -778,7 +778,7 @@ static void * _prozubi_planlecheniya_to_rtf_cb(
 			}
 		case PLANLECHENIYA_TYPE_STAGE_PRICE:
 			{
-				char *row[5];
+				const char *row[5];
 				char title[BUFSIZ];
 				char total[BUFSIZ];
 				int width[] = 
@@ -801,7 +801,7 @@ static void * _prozubi_planlecheniya_to_rtf_cb(
 			}
 		case PLANLECHENIYA_TYPE_STAGE_DURATION:
 			{
-				char *row[5];
+				const char *row[5];
 				char title[BUFSIZ];
 				char count[BUFSIZ];
 				int width[] = 

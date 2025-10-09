@@ -2,7 +2,7 @@
  * File              : planlecheniya.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.04.2023
- * Last Modified Date: 01.10.2024
+ * Last Modified Date: 09.10.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -10,6 +10,7 @@
 #define PLANLECHENIYA_H
 
 #include "prozubilib_conf.h"
+#include "cases.h"
 
 typedef enum PLANLECHENIYA_TYPE {
 	PLANLECHENIYA_TYPE_STAGE,
@@ -150,4 +151,9 @@ extern int prozubi_planlecheniya_get_price_total(
 extern int prozubi_planlecheniya_get_duration_total(
 		prozubi_t *p, cJSON *planlecheniya);
 
+extern int
+prozubi_planlecheniya_zformula_image(
+		prozubi_t *p, struct case_t *c, 
+		const char *imagepath, 
+		void **data, size_t *len);
 #endif /* ifndef PLANLECHENIYA_H */
