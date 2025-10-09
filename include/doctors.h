@@ -2,7 +2,7 @@
  * File              : doctors.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 24.08.2024
+ * Last Modified Date: 09.10.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -91,7 +91,7 @@ prozubi_doctor_foreach(
 extern void
 prozubi_doctor_free(struct doctor_t *d);
 
-static int prozubi_doctor_remove(
+extern int prozubi_doctor_remove(
 		kdata2_t *p, struct doctor_t *c
 		);
 

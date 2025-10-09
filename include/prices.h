@@ -2,7 +2,7 @@
  * File              : prices.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 24.08.2024
+ * Last Modified Date: 09.10.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -81,7 +81,7 @@ extern int prozubi_prices_set_text(
 extern void
 prozubi_prices_free(struct price_t *d);
 
-static int prozubi_price_remove(
+extern int prozubi_price_remove(
 		kdata2_t *p, struct price_t *c
 		);
 
