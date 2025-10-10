@@ -901,7 +901,7 @@ static void * _prozubi_planlecheniya_to_rtf_cb(
 	
 		if (!cJSON_IsObject(stage))
 			_planlecheniya_on_error(p, continue, 
-				"can't read planlecheniya stage", );
+				"can't read planlecheniya stage");
 		
 		array = cJSON_GetObjectItem(stage, "array");
 		if (!cJSON_IsArray(array))

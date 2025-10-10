@@ -58,7 +58,7 @@ prozubi_mkb_foreach(
 		);
 
 
-static void
+extern void
 prozubi_mkb_free(mkb_t *c);
 
 #endif // PROZUBILIB_MKB_H	
