@@ -7,6 +7,7 @@
  */
 
 #include "../include/images.h"
+#include <tiffio.h>
 
  void	
 prozubi_images_table_init(struct kdata2_table **images){
@@ -140,6 +141,28 @@ prozubi_image_set_image_from_file(
 	stbi_uc *image = 
 		stbi_load(filename, &w, &h, &c,
 				0);
+
+	if (!image){
+		// maybe TIFF?
+		TIFF *tif =
+			TIFFOpen(filename, "r");
+		if (tif){
+			c = 4;
+			TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &w);
+			TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &h);
+			if (w > 1 && h > 1){
+				image = (unsigned char *)_TIFFmalloc(w * h * w);
+				if (image){
+					if (!TIFFReadRGBAImage(
+								tif, w, h, (uint32_t *)image, 0))
+					{
+						free(image);
+						image = NULL;
+					}
+				}
+			}
+		}
+	}
 
 	if (!image){
 		if (p->on_error)
