@@ -93,7 +93,7 @@ static char *c32tomb(char *s, unsigned int c32)
 static char *mbtoc32(unsigned int *s32, const char *s)
 {
 	int i=0;
-	unsigned char *us;
+	unsigned char *us = (unsigned char *)s;
 	if (us[i] >= 252){/* 6-bytes */
 		*s32  = (s[i++] & 0x1)  << 30;  // 0b00000001
 		*s32 |= (s[i++] & 0x3F) << 24;  // 0b00111111	

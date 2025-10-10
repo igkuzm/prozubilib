@@ -1,4 +1,3 @@
-#include "../include/text_on_bitmap.h"
 #include <stddef.h>
 #include <stdio.h>
 #define STB_TRUETYPE_IMPLEMENTATION  // force following include to generate implementation
@@ -15,11 +14,11 @@ int text_on_bitmap(
 		int x, int y)
 {
 	stbtt_fontinfo fnt;
-  int i,j,ascent,baseline,size, l=0, ch=0;
-  float scale, xpos=(float)x;
-	unsigned char *buffer, **canvas;
-	unsigned int *str;
-	char *p;
+  int i,j,ascent,baseline,ch=0, size;
+  float scale, xpos=x;
+	unsigned char canvas[height][width];
+	unsigned int str[strlen(text)+1];
+	int l=0; char *p = (char *)text;
 
 	FILE *fp = fopen(font, "rb");
 	if (!fp)
@@ -31,24 +30,15 @@ int text_on_bitmap(
 	fseek(fp, 0, SEEK_SET);
 	
 	// read font
-	buffer = malloc(size);
-	if (buffer == NULL)
-		return 1;
+	do {
+	unsigned char buffer[size];
 	fread(buffer, size, 1, fp);
   if (stbtt_InitFont(
 			&fnt, buffer, 0) == 0)
 		return 1;
 
 	// create bitmap for text
-	canvas = malloc(2*sizeof(char *));
-	if (canvas == NULL)
-		return 1;
-	canvas[0] = malloc(height);
-	canvas[1] = malloc(width);
-	if (canvas[0] == NULL || canvas[1] == NULL)
-		return 1;
-	memset(canvas[0], 0, height);
-	memset(canvas[2], 0, width);
+	memset(canvas, 0, width * height);
 
 	scale = stbtt_ScaleForPixelHeight(
 			&fnt, fsize);
@@ -57,10 +47,6 @@ int text_on_bitmap(
 	baseline = (int) (ascent*scale);
 
 	// get unicode
-	str = malloc((strlen(text)+1)*sizeof(int));
-	if (str == NULL)
-		return 1;
-	p = (char *)text;
 	while (*p)
 		p = mbtoc32(&str[l++], p);
 	str[l] = 0;
@@ -112,12 +98,7 @@ int text_on_bitmap(
 			}
 		}
 	}
-
-	free(buffer);
-	free(canvas[0]);
-	free(canvas[1]);
-	free(canvas);
-	free(str);
+	} while(0);
 
 	return 0;
 }
