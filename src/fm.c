@@ -10,15 +10,13 @@
 
 #ifdef _WIN32
 #include <io.h>
-/* #include <fileapi.h> */
 #define F_OK 0
 #define access _access
 #define _SLASH_ "\\"
 #ifndef INVALID_FILE_ATTRIBUTES  
 #define INVALID_FILE_ATTRIBUTES ((DWORD)-1) 
 #endif
-
-#else
+#else /* _WIN32 */
 #include <sys/stat.h>
 #include <unistd.h>
 #include <sys/stat.h> /* mkdir, stat */
@@ -413,6 +411,17 @@ int dcopyf(
 }
 
 #ifdef _WIN32
+/* scandir support */
+int win_find_data_to_dirent(
+		WIN32_FIND_DATA *findData,
+		struct dirent *entry)
+{
+	strncpy(entry->d_name, (const char *)findData->cFileName, 
+			sizeof(entry->d_name) - 1);
+	entry->d_name[sizeof(entry->d_name)-1] = 0;
+
+	return 1;
+}
 
 #define ISDIGIT(a) isdigit(a)
 
@@ -426,7 +435,6 @@ int dcopyf(
 /* result_type: CMP: return diff; LEN: compare using len_diff/diff */
 #define  CMP    2
 #define  LEN    3
-
 
 /* Compare S1 and S2 as strings holding indices/version numbers,
    returning less than, equal to or greater than zero if S1 is less than,
@@ -566,5 +574,24 @@ scandir(
 
 	return len;
 }
-
 #endif 
+
+/* get bundle */
+char *execdir(const char *path) {
+  if (!path)
+    return NULL;
+#ifdef _WIN32
+  return dirname((char *)path);
+#else /* _WIN32 */
+#ifdef __APPLE__
+  return dirname((char *)path);
+#else /* __APPLE__ */
+  char selfpath[128];
+  if (readlink("/proc/self/exe", selfpath, sizeof(selfpath) - 1) < 0) {
+    return NULL;
+  }
+  return dirname(selfpath);
+#endif /* __APPLE__ */
+#endif /* _WIN32 */
+  return NULL;
+}

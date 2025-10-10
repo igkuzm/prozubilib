@@ -155,25 +155,35 @@ int dcopyf(
  * %mode - access mode (not used in windows) */
 int newdir(const char *path, int mode);
 
+/* execdir
+ * get executable directory */
+char *execdir(const char *path);
+
 /* dir_foreach
  * scans directory and handle each file
  * %path - directory path with name
  * %file - pointer to dirent entry 
  * dir_foreach(path, file) */
-
-#ifdef _MSC_VER
-typedef struct dirent {
-    char        d_name[MAX_PATH];
-} dirent_t;
-
-#ifndef rmdir
-#define rmdir RemoveDirectory
+#ifdef _WIN32
+#define dir_foreach(path, file) \
+char _fullpath[MAX_PATH];\
+WIN32_FIND_DATA _findData;\
+struct dirent file[1];\
+HANDLE _hFind;\
+int _r = 1;\
+sprintf(_fullpath, "%s\\*", path);\
+for (_hFind = FindFirstFile(_fullpath, &_findData);\
+		 _hFind != INVALID_HANDLE_VALUE && win_find_data_to_dirent(&_findData, file) && _r != 0 || !FindClose(_hFind);\
+		 _r = FindNextFile(_hFind, &_findData))
+#else
+#define dir_foreach(path, file)\
+	DIR *_dir = opendir(path);\
+	struct dirent *file = NULL;\
+	if (_dir)\
+		for(file = readdir(_dir);\
+				file || ({if(_dir) closedir(_dir); 0;});\
+				file = readdir(_dir))
 #endif
-
-int alphasort(
-		const struct dirent **a, const struct dirent **b);
-int versionsort(
-	const struct dirent **a, const struct dirent **b);
 
 /* scandir - implimation for Windows
  * scans the directory dirp, calling filter()
@@ -195,48 +205,37 @@ int versionsort(
  * %filter - filter funcion
  * %compar - sort function 
  * int (*compar)(const struct dirent**, const struct dirent**) */
-int 
-scandir(
+#ifdef _WIN32
+int alphasort(
+		const struct dirent **a, const struct dirent **b);
+int versionsort(
+	const struct dirent **a, const struct dirent **b);
+
+int scandir(
 		 const char * dirp,
 		 struct dirent *** namelist,
 		 int (*filter)(const struct dirent *),
 		 int (*compar)(const void *, const void *));
-#endif
 
-#ifdef _WIN32
-static int win_find_data_to_dirent(
+int win_find_data_to_dirent(
 		WIN32_FIND_DATA *findData,
-		struct dirent *entry)
-{
-	strncpy(entry->d_name, (const char *)findData->cFileName, 
-			sizeof(entry->d_name) - 1);
-	entry->d_name[sizeof(entry->d_name)-1] = 0;
+		struct dirent *entry);
 
-	return 1;
-}
-
-#define dir_foreach(path, file) \
-char _fullpath[MAX_PATH];\
-WIN32_FIND_DATA _findData;\
-struct dirent file[1];\
-HANDLE _hFind;\
-int _r = 1;\
-sprintf(_fullpath, "%s\\*", path);\
-for (_hFind = FindFirstFile(_fullpath, &_findData);\
-		 _hFind != INVALID_HANDLE_VALUE && win_find_data_to_dirent(&_findData, file) && _r != 0 || !FindClose(_hFind);\
-		 _r = FindNextFile(_hFind, &_findData))
-
-#else
-
-#define dir_foreach(path, file)\
-	DIR *_dir = opendir(path);\
-	struct dirent *file = NULL;\
-	if (_dir)\
-		for(file = readdir(_dir);\
-				file || ({if(_dir) closedir(_dir); 0;});\
-				file = readdir(_dir))
 #endif
 
+/* dirent for MSVC */
+#ifdef _MSC_VER
+typedef struct dirent {
+    char        d_name[MAX_PATH];
+} dirent_t;
+
+#ifndef rmdir
+#define rmdir RemoveDirectory
+#endif
+#ifndef chdir
+#define chdir SetCurrentDirectory
+#endif
+#endif
 
 #ifdef __cplusplus
 }
