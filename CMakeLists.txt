@@ -26,7 +26,7 @@ if(APPLE)
 endif()
 
 if(WIN32)
-	INCLUDE_DIRECTORIES(${PROZUBI_SOURCE_DIR}/kdata2/cYandexDisk/pthreads-win32/include)		
+	INCLUDE_DIRECTORIES(${PROZUBI_SOURCE_DIR}/kdata2/cYandexDisk/cygwin/include)		
 	INCLUDE_DIRECTORIES(${PROZUBI_SOURCE_DIR}/include/tiff)
 	set(ADDSRC ${PROZUBI_SOURCE_DIR}/win32/stb_image.obj)
 elseif(APPLE)
