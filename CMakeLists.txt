@@ -22,13 +22,24 @@ SET(KDATA2_SOURCE_DIR ${PROZUBI_SOURCE_DIR}/kdata2)
 add_subdirectory(${KDATA2_SOURCE_DIR})
 SET(CYANDEXDISK_SOURCE_DIR ${KDATA2_SOURCE_DIR}/cYandexDisk)
 
+if (NOT WIN32)
+
+find_package(TIFF)
+include_directories(${TIFF_INCLUDE_DIR})
+list(APPEND ADDLIBS ${TIFF_LIBRARIES})
+
+find_package(SQLite3)
+include_directories(${SQLite3_INCLUDE_DIRS})
+list(APPEND ADDLIBS ${SQLite3_LIBRARIES})
+
+endif()
+
 if(APPLE)
 	SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -framework Foundation")
 endif()
 
 if(WIN32)
-  include_directories(${PROZUBI_SOURCE_DIR}/include/tiff)
- #pthread
+#pthread
  add_library(pthread SHARED IMPORTED)
  set_target_properties(pthread PROPERTIES 
    IMPORTED_LOCATION
@@ -37,12 +48,17 @@ if(WIN32)
   include_directories(${CYANDEXDISK_SOURCE_DIR}/win32/pthreads-win32/include)
   list(APPEND ADDLIBS pthread)
 #curl
-  add_library(curl SHARED IMPORTED)		
-  set_target_properties(curl PROPERTIES 
-   IMPORTED_LOCATION
-   ${CYANDEXDISK_SOURCE_DIR}/win32/curl/bin/libcurl.dll	
-    IMPORTED_IMPLIB ${CYANDEXDISK_SOURCE_DIR}/win32/curl/lib/libcurl.dll.a)	
+   add_library(curl STATIC IMPORTED)		
+   set_target_properties(curl PROPERTIES 
+	 IMPORTED_LOCATION
+	 ${CYANDEXDISK_SOURCE_DIR}/win32/curl/lib/libcurl.dll.a)
    include_directories(${CYANDEXDISK_SOURCE_DIR}/win32/curl/include)	
+#tiff
+	add_library(tiff STATIC IMPORTED)		
+	set_target_properties(tiff PROPERTIES 
+		IMPORTED_LOCATION
+		${PROZUBI_SOURCE_DIR}/win32/tiff/lib/libtiff.dll.a)
+	include_directories(${PROZUBI_SOURCE_DIR}/win32/tiff/include)
 elseif(APPLE)
 else()
 	if (NOT ANDROID)
@@ -75,5 +91,21 @@ target_link_libraries(${TARGET} kdata2 ${ADDLIBS})
 
 if(${PROZUBI_BUILD_TEST})
 	add_executable(${TARGET}_test test.c)
-	target_link_libraries(${TARGET}_test ${TARGET})
+	target_link_libraries(${TARGET}_test ${TARGET} ${ADDLIBS})
+endif()
+
+#copy files
+if (WIN32)
+	#curl libs
+	#Copy DLLs
+	file(GLOB files 
+		"${PROZUBI_SOURCE_DIR}/win32/tiff/bin/*.dll"
+		)	
+	#Copy
+	foreach(_file ${files})
+			file(INSTALL
+				DESTINATION "${CMAKE_BINARY_DIR}"
+				FILES "${_file}"
+			)
+	endforeach()	
 endif()
