@@ -100,6 +100,10 @@ if (WIN32)
 	#Copy DLLs
 	file(GLOB files 
 		"${PROZUBI_SOURCE_DIR}/win32/tiff/bin/*.dll"
+		"${PROZUBI_SOURCE_DIR}/*.sqlite"
+		"${PROZUBI_SOURCE_DIR}/*.ttf"
+		"${PROZUBI_SOURCE_DIR}/*.png"
+		"${PROZUBI_SOURCE_DIR}/Templates"
 		)	
 	#Copy
 	foreach(_file ${files})
