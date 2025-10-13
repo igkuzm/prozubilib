@@ -156,7 +156,7 @@ int slink(const char *path, const char *linkname)
 			s[p-s] = '\\';
 			p = strrchr(s, '/');
 		}
-		ret = CreateSymbolicLink(linkname, s, 0);
+		//	ret = CreateSymbolicLink(linkname, s, 0);
 		free(s);
 		if (ret == 1)
 			return 0;
@@ -183,7 +183,7 @@ int hlink(const char *path, const char *linkname)
 			s[p-s] = '\\';
 			p = strrchr(s, '/');
 		}
-		ret = CreateHardLink(linkname, s, NULL);
+		// ret = CreateHardLink(linkname, s, NULL);
 		free(s);
 		if (ret == 1)
 			return 0;
