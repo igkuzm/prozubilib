@@ -20,15 +20,30 @@ set (CMAKE_C_STANDARD 99)
 
 SET(KDATA2_SOURCE_DIR ${PROZUBI_SOURCE_DIR}/kdata2)
 add_subdirectory(${KDATA2_SOURCE_DIR})
+SET(CYANDEXDISK_SOURCE_DIR ${KDATA2_SOURCE_DIR}/cYandexDisk)
 
 if(APPLE)
 	SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -framework Foundation")
 endif()
 
 if(WIN32)
-	include_directories(${PROZUBI_SOURCE_DIR}/kdata2/cYandexDisk/cygwin/include)		
-	include_directories(${PROZUBI_SOURCE_DIR}/include/tiff)
-	set(ADDSRC ${PROZUBI_SOURCE_DIR}/win32/stb_image.obj)
+  include_directories(${PROZUBI_SOURCE_DIR}/include/tiff)
+ #pthread
+ add_library(pthread SHARED IMPORTED)
+ set_target_properties(pthread PROPERTIES 
+   IMPORTED_LOCATION
+   ${CYANDEXDISK_SOURCE_DIR}/win32/pthreads-win32/lib/pthreadGC1.dll
+    IMPORTED_IMPLIB ${CYANDEXDISK_SOURCE_DIR}/win32/pthreads-win32/lib/libpthreadGC1.a)	
+  include_directories(${CYANDEXDISK_SOURCE_DIR}/win32/pthreads-win32/include)
+  list(APPEND ADDLIBS pthread)
+#curl
+  add_library(curl SHARED IMPORTED)		
+  set_target_properties(curl PROPERTIES 
+   IMPORTED_LOCATION
+   ${CYANDEXDISK_SOURCE_DIR}/win32/curl/bin/libcurl.dll	
+    IMPORTED_IMPLIB ${CYANDEXDISK_SOURCE_DIR}/win32/curl/lib/libcurl.dll.a)	
+   include_directories(${CYANDEXDISK_SOURCE_DIR}/win32/curl/include)	
+   set(ADDSRC ${PROZUBI_SOURCE_DIR}/win32/stb_image.obj)
 elseif(APPLE)
 	set(ADDSRC src/stb_image.c)
 else()
@@ -36,11 +51,6 @@ else()
 	if (NOT ANDROID)
 		LIST(APPEND ADDLIBS pthread dl)
 	endif()
-endif()
-
-
-if(MSVC)
-	INCLUDE_DIRECTORIES(${KDATA2_SOURCE_DIR}/cYandexDisk/pthreads-win32/include)	
 endif()
 
 add_library(${TARGET} STATIC
