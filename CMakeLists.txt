@@ -43,11 +43,8 @@ if(WIN32)
    ${CYANDEXDISK_SOURCE_DIR}/win32/curl/bin/libcurl.dll	
     IMPORTED_IMPLIB ${CYANDEXDISK_SOURCE_DIR}/win32/curl/lib/libcurl.dll.a)	
    include_directories(${CYANDEXDISK_SOURCE_DIR}/win32/curl/include)	
-   set(ADDSRC ${PROZUBI_SOURCE_DIR}/win32/stb_image.obj)
 elseif(APPLE)
-	set(ADDSRC src/stb_image.c)
 else()
-	set(ADDSRC src/stb_image.c)
 	if (NOT ANDROID)
 		LIST(APPEND ADDLIBS pthread dl)
 	endif()
@@ -70,6 +67,7 @@ add_library(${TARGET} STATIC
 	src/prozubilib.c
 	src/text_on_bitmap.c
 	src/fm.c
+	src/stb_image.c
 	${ADDSRC}
 )
 
