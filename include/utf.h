@@ -38,7 +38,7 @@ extern "C"{
 /* convert UTF-32 %c32 character to UTF-8 null-terminated 
  * multybite array, and return pointer to last 
  * character in it */ 
-static char EXPORTDLL *c32tomb(char *s, unsigned int c32)
+static char *c32tomb(char *s, unsigned int c32)
 {
 	char *p = s;
 	if (c32 <= 0x7F) {
@@ -90,7 +90,7 @@ static char EXPORTDLL *c32tomb(char *s, unsigned int c32)
 
 /* convert UTF-8 multybite character %s to UTF-32 %s32 
  * character and return pointer to next %s character */ 
-static char EXPORTDLL *mbtoc32(unsigned int *s32, const char *s)
+static char *mbtoc32(unsigned int *s32, const char *s)
 {
 	int i=0;
 	unsigned char *us = (unsigned char *)s;
