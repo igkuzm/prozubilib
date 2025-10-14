@@ -46,7 +46,7 @@ BEGIN_ENUM_STRING(NOMENKLATURA)
 	#undef NOMENKLATURA_COLUMN_TEX
 END_ENUM_STRING(NOMENKLATURA)
 
-extern void
+extern void EXPORTDLL
 prozubi_nomenklatura_foreach(
 		prozubi_t *p,
 		const char *predicate,
@@ -58,7 +58,7 @@ prozubi_nomenklatura_foreach(
 			)
 		);
 
-extern void
+extern void EXPORTDLL
 prozubi_nomenklatura_free(nomenklatura_t *c);
 
 #endif // NOMENKLATURA_H	

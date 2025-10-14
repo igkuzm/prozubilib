@@ -16,7 +16,7 @@
 #include "images.h"
 #include "rtf.h"
 
-extern const char * 
+extern const char EXPORTDLL * 
 documents_get_plan_lecheniya(
 		const char *template_file_path,
 		prozubi_t *p,
@@ -24,7 +24,7 @@ documents_get_plan_lecheniya(
 		struct case_t *c
 		);
 
-extern const char * 
+extern const char EXPORTDLL * 
 documents_get_case(
 		const char *template_file_path,
 		prozubi_t *p,
@@ -32,7 +32,7 @@ documents_get_case(
 		struct case_t *c
 		);
 
-extern const char * 
+extern const char EXPORTDLL * 
 documents_get_akt(
 		const char *template_file_path,
 		prozubi_t *p,
@@ -40,7 +40,7 @@ documents_get_akt(
 		struct case_t *c
 		);
 
-extern const char * 
+extern const char EXPORTDLL * 
 documents_get_dogovor(
 		const char *template_file_path,
 		prozubi_t *p,

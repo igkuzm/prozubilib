@@ -34,10 +34,10 @@ struct planlecheniya_t {
 	char * total;
 };
 
-extern void
+extern void EXPORTDLL
 prozubi_planlecheniya_free(struct planlecheniya_t *t);
 
-extern void
+extern void EXPORTDLL
 prozubi_planlecheniya_foreach(
 		prozubi_t *p,
 		cJSON *planlecheniya,
@@ -48,26 +48,26 @@ prozubi_planlecheniya_foreach(
 			struct planlecheniya_t *t)
 		);
 
-extern cJSON *
+extern cJSON EXPORTDLL *
 prozubi_planlecheniya_add_stage(
 		prozubi_t *p,
 		cJSON *planlecheniya
 		);
 
-extern void
+extern void EXPORTDLL
 prozubi_planlecheniya_remove_stage(
 		prozubi_t *p,
 		cJSON *planlecheniya,
 		int stage_index
 		);
 
-extern cJSON *
+extern cJSON EXPORTDLL *
 _planlecheniya_get_stage(
 		prozubi_t *p,
 		cJSON *planlecheniya,
 		int stage_index);
 
-extern cJSON *
+extern cJSON EXPORTDLL *
 prozubi_planlecheniya_insert_item(
 		prozubi_t *p,
 		cJSON *planlecheniya,
@@ -79,7 +79,7 @@ prozubi_planlecheniya_insert_item(
 		int count
 		);
 
-extern cJSON *
+extern cJSON EXPORTDLL *
 prozubi_planlecheniya_add_item(
 		prozubi_t *p,
 		cJSON *planlecheniya,
@@ -90,7 +90,7 @@ prozubi_planlecheniya_add_item(
 		int count
 		);
 
-extern void
+extern void EXPORTDLL
 prozubi_planlecheniya_remove_item(
 		prozubi_t *p,
 		cJSON *planlecheniya,
@@ -98,7 +98,7 @@ prozubi_planlecheniya_remove_item(
 		int item_index
 		);
 
-extern cJSON_bool
+extern cJSON_bool EXPORTDLL
 prozubi_planlecheniya_set_item_title(
 		prozubi_t *p,
 		cJSON *planlecheniya,
@@ -107,7 +107,7 @@ prozubi_planlecheniya_set_item_title(
 		const char *title
 		);
 
-extern cJSON_bool
+extern cJSON_bool EXPORTDLL
 prozubi_planlecheniya_set_item_kod(
 		prozubi_t *p,
 		cJSON *planlecheniya,
@@ -116,7 +116,7 @@ prozubi_planlecheniya_set_item_kod(
 		const char *kod
 		);
 
-extern cJSON_bool
+extern cJSON_bool EXPORTDLL
 prozubi_planlecheniya_set_item_price(
 		prozubi_t *p,
 		cJSON *planlecheniya,
@@ -125,7 +125,7 @@ prozubi_planlecheniya_set_item_price(
 		int price
 		);
 
-extern cJSON_bool
+extern cJSON_bool EXPORTDLL
 prozubi_planlecheniya_set_item_count(
 		prozubi_t *p,
 		cJSON *planlecheniya,
@@ -134,7 +134,7 @@ prozubi_planlecheniya_set_item_count(
 		int count
 		);
 
-extern cJSON_bool
+extern cJSON_bool EXPORTDLL
 prozubi_planlecheniya_set_stage_duration(
 		prozubi_t *p,
 		cJSON *planlecheniya,
@@ -142,16 +142,16 @@ prozubi_planlecheniya_set_stage_duration(
 		int duration
 		);
 
-extern size_t prozubi_planlecheniya_to_rtf(
+extern size_t EXPORTDLL prozubi_planlecheniya_to_rtf(
 		prozubi_t *p, cJSON *planlecheniya, char **rtf);
 
-extern int prozubi_planlecheniya_get_price_total(
+extern int EXPORTDLL prozubi_planlecheniya_get_price_total(
 		prozubi_t *p, cJSON *planlecheniya);
 
-extern int prozubi_planlecheniya_get_duration_total(
+extern int EXPORTDLL prozubi_planlecheniya_get_duration_total(
 		prozubi_t *p, cJSON *planlecheniya);
 
-extern int
+extern int EXPORTDLL
 prozubi_planlecheniya_zformula_image(
 		prozubi_t *p, struct case_t *c, 
 		const char *imagepath, 

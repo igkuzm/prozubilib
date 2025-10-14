@@ -36,6 +36,14 @@
 extern "C" {
 #endif
 
+#ifdef _MSC_VER
+#undef EXPORTDLL
+#define EXPORTDLL __declspec(dllexport)
+#else
+#undef EXPORTDLL
+#define EXPORTDLL
+#endif
+
 #ifdef _WIN32
 #include <windows.h>
 #ifndef bool
@@ -62,69 +70,69 @@ extern "C" {
 /* fexists
  * true if file exists and writable
  * %path - file path */
-bool fexists(const char *path);
+bool EXPORTDLL fexists(const char *path);
 
 /* fsize
  * return file size
  * %path - file path */
-off_t fsize(const char *path);
+off_t EXPORTDLL fsize(const char *path);
 
 /* homedir
  * return allocated string with path to home directory */
-char * homedir();
+char EXPORTDLL * homedir();
 
 /* parentdir
  * modify argument string - remove last path component
  * from path string
  * %path - name or path of file */
-char * parentdir(char *path);
+char EXPORTDLL * parentdir(char *path);
 
 /* isdir
  * true if directory at path exists
  * and is accesable
  * %path - directory path */
-bool isdir(const char *path);
+bool EXPORTDLL isdir(const char *path);
 
 /* islink
  * true if file or directory is link
  * %path - file/directory path */
-bool islink(const char *path);
+bool EXPORTDLL islink(const char *path);
 
 /* slink
  * create symbolic link
  * %path - file/directory path
  * %linkname */
-int slink(const char *path, const char *linkname);
+int EXPORTDLL slink(const char *path, const char *linkname);
 
 /* hlink
  * create hard link
  * %path - file/directory path
  * %linkname */
-int hlink(const char *path, const char *linkname);
+int EXPORTDLL hlink(const char *path, const char *linkname);
 
 /* fext
  * return file extension or NULL on error 
  * %filename - name or path of file */
-const char * fext(const char *filename);
+const char EXPORTDLL * fext(const char *filename);
 
 /* fname
  * return allocated string with file name without 
  * extension and path
  * %path - name or path of file */
-char * fname(char *path);
+char EXPORTDLL * fname(char *path);
 
 /* dname
  * return allocated string with name of 
  * directory path (like POSIX dirname())
  * %path - path of file */
-char * dname(const char *path);
+char EXPORTDLL * dname(const char *path);
 
 /* fcopy 
  * copy and overwrite file 
  * return 0 on success
  * %from - filepath source file
  * %to   - filepath dastination file */ 
-int fcopy(const char *from, const char *to);
+int EXPORTDLL fcopy(const char *from, const char *to);
 
 /* dcopy 
  * copy directory recursive
@@ -132,7 +140,7 @@ int fcopy(const char *from, const char *to);
  * %from - filepath source file
  * %to   - filepath dastination file 
  * %overwrite - overwrite destination file if true */ 
-int dcopy(
+int EXPORTDLL dcopy(
 		const char *from, const char *to, bool overwrite);
 
 /* dcopyf
@@ -143,7 +151,7 @@ int dcopy(
  * %to   - filepath dastination file 
  * %overwrite - overwrite destination file if true
  * %filters - coma-separated filters like '*' or '*.ext' */
-int dcopyf(
+int EXPORTDLL dcopyf(
 		const char *from, const char *to, bool overwrite, 
 		char *filters);
 
@@ -153,11 +161,11 @@ int dcopyf(
  * for unix/windows args
  * %path - directory path with name
  * %mode - access mode (not used in windows) */
-int newdir(const char *path, int mode);
+int EXPORTDLL newdir(const char *path, int mode);
 
 /* execdir
  * get executable directory */
-char *execdir(const char *path);
+char EXPORTDLL *execdir(const char *path);
 
 /* dir_foreach
  * scans directory and handle each file
@@ -206,18 +214,18 @@ for (_hFind = FindFirstFile(_fullpath, &_findData);\
  * %compar - sort function 
  * int (*compar)(const struct dirent**, const struct dirent**) */
 #ifdef _WIN32
-int alphasort(
+int EXPORTDLL alphasort(
 		const struct dirent **a, const struct dirent **b);
-int versionsort(
+int EXPORTDLL versionsort(
 	const struct dirent **a, const struct dirent **b);
 
-int scandir(
+int EXPORTDLL scandir(
 		 const char * dirp,
 		 struct dirent *** namelist,
 		 int (*filter)(const struct dirent *),
 		 int (*compar)(const void *, const void *));
 
-int win_find_data_to_dirent(
+int EXPORTDLL win_find_data_to_dirent(
 		WIN32_FIND_DATA *findData,
 		struct dirent *entry);
 

@@ -18,7 +18,7 @@
  * replace all founded words from searchwords array in 
  * (with argc len) filename docx file  with words from  
  * replaces array (same argc len) and return 0 on success */ 
-static int 
+static int EXPORTDLL 
 docx_find_and_replace_text(
 		const char *filename, 
 		int argc,
@@ -29,7 +29,7 @@ docx_find_and_replace_text(
  * container 
  * with and height are in twips (inches * 20) - 
  * for A4 13011x16838 */
-static char *
+static char EXPORTDLL *
 docx_add_image_and_get_xml(
 		const char *filename,
 		const char *title,
@@ -39,23 +39,23 @@ docx_add_image_and_get_xml(
 		int width, int height);
 
 /* get table start docx xml with columns width in twips (inches * 20) */
-static char *
+static char EXPORTDLL *
 docx_table_start_xml(int ncols, int *sizes);
 
 /* get table end docx xml */
-static const char *
+static const char EXPORTDLL *
 docx_table_end_xml();
 
 /* get table row start docx xml */
-static const char *
+static const char EXPORTDLL *
 docx_table_row_start_xml();
 
 /* get table row end docx xml */
-static const char *
+static const char EXPORTDLL *
 docx_table_row_end_xml();
 
 /* get table end docx xml */
-static char *
+static char EXPORTDLL *
 docx_table_cell_xml(const char *data);
 
 /* IMPLIMATION */
@@ -68,7 +68,7 @@ docx_table_cell_xml(const char *data);
 #include "stb_image_write.h"
 
 // extract document xml from docx
-static char *_docx_get_xml_document(const char *file){
+static char EXPORTDLL *_docx_get_xml_document(const char *file){
 	int err = 0;
 	zip_t *zip = zip_open(file, ZIP_RDONLY, &err);
 	if (err)
@@ -88,7 +88,7 @@ static char *_docx_get_xml_document(const char *file){
 }
 
 // write document xml to docx and return 0 on success
-static int _docx_set_xml_document(
+static int EXPORTDLL _docx_set_xml_document(
 		const char *file, const char *xml)
 {
 	int err = 0;
@@ -117,7 +117,7 @@ static int _docx_set_xml_document(
 	return err;
 }
 
-int 
+int EXPORTDLL
 docx_find_and_replace_text(
 		const char *filename, 
 		int argc,
@@ -187,7 +187,7 @@ static const char image_template[] =
 				"</w:drawing>\n"
 			"</w:r>\n";
 
-static void 
+static void
 _docx_stbi_write_func(
 		void *context, void *data, int size)
 {
@@ -256,7 +256,7 @@ static int _docx_add_image(
 	return err;
 }
 
-char *
+char EXPORTDLL *
 docx_add_image_and_get_xml(
 		const char *filename,
 		const char *title,
@@ -283,7 +283,7 @@ docx_add_image_and_get_xml(
 	return xml;
 }
 
-char *
+char EXPORTDLL *
 docx_table_start_xml(int ncols, int *sizes)
 {
 	char *str = malloc(BUFSIZ);
@@ -321,7 +321,7 @@ docx_table_row_end_xml()
 }
 	
 
-char *
+char EXPORTDLL *
 docx_table_cell_xml(const char *data)
 {
 	const char *cell_start = 

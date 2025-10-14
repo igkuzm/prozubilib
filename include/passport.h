@@ -59,11 +59,11 @@ BEGIN_ENUM_STRING(PASSPORT)
 #undef PASSPORT_COLUMN_TEXT	
 END_ENUM_STRING(PASSPORT)	
 
-extern void	
+extern void EXPORTDLL	
 prozubi_passport_table_init(struct kdata2_table **passport); 
 
 /* do callback for each patient in database */
-extern void 
+extern void EXPORTDLL
 prozubi_passport_foreach(
 		kdata2_t *kdata,
 		const char *predicate,
@@ -72,7 +72,7 @@ prozubi_passport_foreach(
 		);
 
 /* allocate, init and add new passport */
-extern struct passport_t *
+extern struct passport_t EXPORTDLL *
 prozubi_passport_new(
 		kdata2_t *kdata,
 
@@ -86,50 +86,50 @@ prozubi_passport_new(
 		const char *id
 		);
 
-extern void
+extern void EXPORTDLL
 prozubi_passport_free(struct passport_t *d);
 
 #define PASSPORT_COLUMN_DATE(member, number, title)\
-	extern time_t prozubi_passport_get_##number(struct passport_t *c);
+	extern time_t EXPORTDLL prozubi_passport_get_##number(struct passport_t *c);
 
 #define PASSPORT_COLUMN_TEXT(member, number, title)\
-	extern char * prozubi_passport_get_##number(struct passport_t *c);\
-	extern size_t prozubi_passport_get_len_##number(struct passport_t *c);	
+	extern char EXPORTDLL * prozubi_passport_get_##number(struct passport_t *c);\
+	extern size_t EXPORTDLL prozubi_passport_get_len_##number(struct passport_t *c);	
    	
 	PASSPORT_COLUMNS
 #undef PASSPORT_COLUMN_DATE
 #undef PASSPORT_COLUMN_TEXT
 
 
-extern void * 
+extern void EXPORTDLL * 
 prozubi_passport_get(struct passport_t *c, PASSPORT key);
 
-extern size_t 
+extern size_t EXPORTDLL
 prozubi_passport_get_len(struct passport_t *c, const char *name);
 
 #define PASSPORT_COLUMN_DATE(member, number, title)\
-extern int prozubi_passport_set_##number (kdata2_t *p, struct passport_t *c,\
+extern int EXPORTDLL prozubi_passport_set_##number (kdata2_t *p, struct passport_t *c,\
 		time_t t, bool update);
 
 #define PASSPORT_COLUMN_TEXT(member, number, title)\
-extern int prozubi_passport_set_##number (kdata2_t *p, struct passport_t *c,\
+extern int EXPORTDLL prozubi_passport_set_##number (kdata2_t *p, struct passport_t *c,\
 		const char *text, bool update);
 
 		PASSPORT_COLUMNS
 #undef PASSPORT_COLUMN_DATE
 #undef PASSPORT_COLUMN_TEXT			
 
-extern int prozubi_passport_set_text(
+extern int EXPORTDLL prozubi_passport_set_text(
 		PASSPORT key, kdata2_t *p, struct passport_t *c, const char *text, bool update);
 
-extern int prozubi_passport_set_date(
+extern int EXPORTDLL prozubi_passport_set_date(
 		PASSPORT key, kdata2_t *p, struct passport_t *c, time_t t, bool update);
 
-extern int prozubi_passport_update(
+extern int EXPORTDLL prozubi_passport_update(
 		kdata2_t *p, struct passport_t *c
 		);
 
-extern int prozubi_passport_remove(
+extern int EXPORTDLL prozubi_passport_remove(
 		kdata2_t *p, struct passport_t *c
 		);
 

@@ -40,10 +40,10 @@ _bill_new(
 		char * count,
 		char * total);
 
-extern void
+extern void EXPORTDLL
 prozubi_bill_free(struct bill_t *t);
 
-extern void
+extern void EXPORTDLL
 prozubi_bill_foreach(
 		prozubi_t *p,
 		cJSON *bill,
@@ -53,7 +53,7 @@ prozubi_bill_foreach(
 			struct bill_t *t)
 		);
 
-extern cJSON *
+extern cJSON EXPORTDLL *
 prozubi_bill_add_item(
 		prozubi_t *kdata,
 		cJSON *bill,
@@ -63,14 +63,14 @@ prozubi_bill_add_item(
 		int count
 		);
 
-extern void
+extern void EXPORTDLL
 prozubi_bill_remove_item(
 		prozubi_t *kdata,
 		cJSON *bill,
 		int item_index
 		);
 
-extern cJSON_bool
+extern cJSON_bool EXPORTDLL
 prozubi_bill_set_item_title(
 		prozubi_t *kdata,
 		cJSON *bill,
@@ -78,7 +78,7 @@ prozubi_bill_set_item_title(
 		const char *title
 		);
 
-extern cJSON_bool
+extern cJSON_bool EXPORTDLL
 prozubi_bill_set_item_kod(
 		prozubi_t *kdata,
 		cJSON *bill,
@@ -86,7 +86,7 @@ prozubi_bill_set_item_kod(
 		const char *kod
 		);
 
-extern cJSON_bool
+extern cJSON_bool EXPORTDLL
 prozubi_bill_set_item_price(
 		prozubi_t *kdata,
 		cJSON *bill,
@@ -94,7 +94,7 @@ prozubi_bill_set_item_price(
 		int price
 		);
 
-extern cJSON_bool
+extern cJSON_bool EXPORTDLL
 prozubi_bill_set_item_count(
 		prozubi_t *kdata,
 		cJSON *bill,
@@ -102,10 +102,12 @@ prozubi_bill_set_item_count(
 		int count
 		);
 
-extern void _prozubi_bill_to_rtf_cb(
+extern void EXPORTDLL 
+_prozubi_bill_to_rtf_cb(
 		void *d, struct bill_t *t);
 
-extern size_t prozubi_bill_to_rtf(
+extern size_t  EXPORTDLL
+prozubi_bill_to_rtf(
 		prozubi_t *p, cJSON *bill, char **rtf);
 
 #endif /* ifndef BILL_H */

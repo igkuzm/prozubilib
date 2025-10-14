@@ -10,12 +10,12 @@
 #include "prozubilib_conf.h"
 #include "cases.h"
 
-extern int 
+extern int EXPORTDLL 
 _prozubi_diagnosis_poteria_zhevatelnoy_effectivnosti(
 		struct case_t *c
 		);
 
-extern char *
+extern char EXPORTDLL *
 prozubi_diagnosis_get(
 			prozubi_t *p,
 			struct case_t *c

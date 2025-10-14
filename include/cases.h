@@ -41,7 +41,7 @@ BEGIN_ENUM_STRING(CASES_LIST_TYPE)
 END_ENUM_STRING(CASES_LIST_TYPE)	
 
 /* case_list */
-static const char *
+static const char EXPORTDLL *
 _prozubi_cases_list_string =
 "["
 	"["
@@ -307,55 +307,56 @@ static const char *gn_CASES[] = {
    NULL
 };											   
 
-extern const char* getNameCASES(enum tagCASES index);
+extern const char EXPORTDLL * 
+getNameCASES(enum tagCASES index);
 
-extern void	
+extern void	EXPORTDLL
 prozubi_cases_table_init(struct kdata2_table **cases); 
 
-extern cJSON *
+extern cJSON EXPORTDLL *
 _prozubi_cases_list_new(
 		struct case_t *c,
 		cJSON *cases_list_children
 		);
 
 /* allocate and init new case */
-extern struct case_t *
+extern struct case_t EXPORTDLL *
 _prozubi_case_new();
 
-extern cJSON *
+extern cJSON EXPORTDLL *
 prozubi_planlecheniya_new(struct case_t *c);
 
-extern cJSON *
+extern cJSON EXPORTDLL *
 prozubi_bill_new(struct case_t *c);
 
 #define CASES_COLUMN_DATE(member, number, title)\
-extern int prozubi_case_set_##number(\
+extern int EXPORTDLL prozubi_case_set_##number(\
 		prozubi_t *p, struct case_t *c, time_t t);
 
 #define CASES_COLUMN_DATA(member, number, title, type)\
-extern int prozubi_case_set_##number(\
+extern int EXPORTDLL prozubi_case_set_##number(\
 		prozubi_t *p, struct case_t *c,\
 	   	type *data, size_t len);
 
 #define CASES_COLUMN_TEXT(member, number, title)\
-extern int prozubi_case_set_##number(\
+extern int EXPORTDLL prozubi_case_set_##number(\
 		prozubi_t *p, struct case_t *c, const char *text);
 		CASES_COLUMNS
 #undef CASES_COLUMN_DATE
 #undef CASES_COLUMN_TEXT			
 #undef CASES_COLUMN_DATA			
 
-extern struct case_t *
+extern struct case_t EXPORTDLL *
 prozubi_case_new_for_patient(prozubi_t *p, char patientid[37]);
 
-extern struct case_t *
+extern struct case_t EXPORTDLL *
 prozubi_cases_from_sql(
 		prozubi_t *p,
 		sqlite3_stmt *stmt);
 
 /* callback all cases with patientid (set patient id to 
  * NULL to get all cases from database) */
-extern void 
+extern EXPORTDLL void 
 prozubi_cases_foreach(
 		prozubi_t  *p,
 		const char *patient_id,
@@ -364,23 +365,23 @@ prozubi_cases_foreach(
 		int       (*callback)(void *user_data, struct case_t *c)
 		);
 
-extern void
+extern EXPORTDLL void
 prozubi_case_free(struct case_t *c);
 
 #define CASES_COLUMN_DATE(member, number, title)\
-	extern time_t prozubi_case_get_##number(\
+	extern time_t EXPORTDLL prozubi_case_get_##number(\
 			struct case_t *c);
 	
 #define CASES_COLUMN_TEXT(member, number, title)\
-	extern char * prozubi_case_get_##number(\
+	extern char EXPORTDLL * prozubi_case_get_##number(\
 			struct case_t *c);\
-	extern size_t prozubi_case_get_len_##number(\
+	extern size_t EXPORTDLL prozubi_case_get_len_##number(\
 			struct case_t *c);
 
 #define CASES_COLUMN_DATA(member, number, title, type)\
-	extern void * prozubi_case_get_##number(\
+	extern void EXPORTDLL * prozubi_case_get_##number(\
 			struct case_t *c);\
-	extern size_t prozubi_case_get_len_##number(\
+	extern size_t EXPORTDLL prozubi_case_get_len_##number(\
 			struct case_t *c);
 		
 	CASES_COLUMNS
@@ -389,10 +390,10 @@ prozubi_case_free(struct case_t *c);
 #undef CASES_COLUMN_DATA
 
 
-extern void * 
+extern void EXPORTDLL * 
 prozubi_case_get_for_key(struct case_t *c, CASES key);
 
-extern size_t 
+extern size_t EXPORTDLL
 prozubi_case_get_len(struct case_t *c, const char *name);
 
 struct case_list_node {
@@ -404,7 +405,7 @@ struct case_list_node {
 	char ** array;
 };
 
-extern struct case_list_node * 
+extern struct case_list_node  EXPORTDLL * 
 _case_list_node_new(
 			prozubi_t *p,
 			struct case_t *c,
@@ -423,11 +424,11 @@ _case_list_node_new(
 		   *__ptr__; \
 			 *__ptr__++, element = *__ptr__)
 
-extern void 
+extern void EXPORTDLL
 prozubi_case_list_node_free(\
 		prozubi_t *p, struct case_list_node *n);
 
-extern void
+extern void EXPORTDLL
 prozubi_cases_list_foreach(
 		prozubi_t     *p,
 		struct case_t *c,
@@ -439,32 +440,32 @@ prozubi_cases_list_foreach(
 			)	
 		);
 
-extern int prozubi_case_set_text(
+extern int EXPORTDLL prozubi_case_set_text(
 		CASES key, prozubi_t *p, struct case_t *c, 
 		const char *text);
 
-extern int prozubi_case_set_date(
+extern int EXPORTDLL prozubi_case_set_date(
 		CASES key, prozubi_t *p, struct case_t *c, time_t t);
 
-extern int prozubi_case_set_data(
+extern int EXPORTDLL prozubi_case_set_data(
 		CASES key, prozubi_t *p, struct case_t *c, 
 		void *data, size_t len);
 
-extern struct case_t * prozubi_case_get(
+extern struct case_t EXPORTDLL * prozubi_case_get(
 		prozubi_t *p, const char *uuid);
 
-extern int prozubi_case_update(
+extern int EXPORTDLL prozubi_case_update(
 		prozubi_t *p, struct case_t *c
 		);
 
-extern int prozubi_case_remove(
+extern int EXPORTDLL prozubi_case_remove(
 		prozubi_t *p, struct case_t *c);
 
-extern void prozubi_case_list_node_free_with_case(
+extern void EXPORTDLL prozubi_case_list_node_free_with_case(
 		prozubi_t *p, struct case_list_node *n);
 
 /* convert zubformula to RTF string */
-extern size_t prozubi_case_zubformula_to_rtf(
+extern size_t EXPORTDLL prozubi_case_zubformula_to_rtf(
 	prozubi_t *p, struct case_t *c, char **rtf);
 
 #endif /* ifndef CASES_H */

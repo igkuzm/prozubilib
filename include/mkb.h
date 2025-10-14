@@ -45,7 +45,7 @@ BEGIN_ENUM_STRING(MKB)
 	#undef MKB_COLUMN_TEX
 END_ENUM_STRING(MKB)
 
-extern void
+extern void EXPORTDLL
 prozubi_mkb_foreach(
 		prozubi_t *p,
 		const char *predicate,
@@ -58,7 +58,7 @@ prozubi_mkb_foreach(
 		);
 
 
-extern void
+extern void EXPORTDLL
 prozubi_mkb_free(mkb_t *c);
 
 #endif // PROZUBILIB_MKB_H	

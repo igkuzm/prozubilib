@@ -49,7 +49,7 @@ extern void
 prozubi_templates_table_init(struct kdata2_table **templates); 
 
 /* allocate and init new template */
-extern struct template_t *
+extern struct template_t EXPORTDLL *
 prozubi_template_new(
 		kdata2_t *kdata,
 #define TEMPLATES_COLUMN_TEXT(member, number, title) const char * member, 
@@ -59,7 +59,7 @@ prozubi_template_new(
 		);
 
 /* callback all templates for template name; set template name to NULL to list all templates*/
-extern void 
+extern void EXPORTDLL
 prozubi_template_foreach(
 		kdata2_t   *kdata,
 		const char *templatename,
@@ -69,20 +69,20 @@ prozubi_template_foreach(
 		);
 
 #define TEMPLATES_COLUMN_TEXT(member, number, title)\
-extern int prozubi_template_set_##number (kdata2_t *p, struct template_t *t,\
+extern int EXPORTDLL prozubi_template_set_##number (kdata2_t *p, struct template_t *t,\
 		const char *text, bool update);
 
 		TEMPLATES_COLUMNS
 #undef TEMPLATES_COLUMN_TEXT			
 
-extern int prozubi_template_set(
+extern int EXPORTDLL prozubi_template_set(
 		TEMPLATES key, kdata2_t *p, struct template_t *t, const char *text, bool update);
 
 
-extern void
+extern void EXPORTDLL
 prozubi_template_free(struct template_t *d);
 
-extern int prozubi_template_remove(
+extern int EXPORTDLL prozubi_template_remove(
 		kdata2_t *p, struct template_t *t
 		);
 

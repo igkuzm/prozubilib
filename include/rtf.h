@@ -17,7 +17,7 @@
 /* rtf_from_utf8
  * return string with rtf code from utf8 multibite 
  * sting or NULL on error */
-extern char *
+extern char EXPORTDLL *
 rtf_from_utf8(const char *s);
 
 /* rtf_table_row
@@ -26,14 +26,14 @@ rtf_from_utf8(const char *s);
  * %colc   - number of columns
  * %colv - columns values
  * %width  - array of columns width in twips*/
-extern char *
+extern char EXPORTDLL *
 rtf_table_row(int colc, const char *colv[], int *width);
 
 /* convert image to RTF string 
  * valid formats: emf, png, jpeg
  * with and height are in twips (inches * 20) - 
  * for A4 13011x16838 */
-extern char *
+extern char EXPORTDLL *
 rtf_from_image(
 		const char *format, void *data, size_t len,
 		int width, int height);

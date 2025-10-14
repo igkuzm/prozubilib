@@ -64,11 +64,11 @@ BEGIN_ENUM_STRING(DOCTORS)
 #undef DOCTORS_COLUMN_DATA
 END_ENUM_STRING(DOCTORS)	
 
-extern void	
+extern void EXPORTDLL	
 prozubi_doctors_table_init(struct kdata2_table **doctors); 
 
 /* allocate and init new case */
-extern struct doctor_t *
+extern struct doctor_t EXPORTDLL *
 prozubi_doctor_new(
 		kdata2_t *kdata,
 #define DOCTORS_COLUMN_TEXT(member, number, title      ) const char * member, 
@@ -80,7 +80,7 @@ prozubi_doctor_new(
 		);
 
 /* callback all images with case id; set caseid to NULL to get all images in database */
-extern void 
+extern void EXPORTDLL
 prozubi_doctor_foreach(
 		kdata2_t   *kdata,
 		const char *predicate,
@@ -88,10 +88,10 @@ prozubi_doctor_foreach(
 		int        (*callback)(void *user_data, struct doctor_t *d)
 		);
 
-extern void
+extern void EXPORTDLL
 prozubi_doctor_free(struct doctor_t *d);
 
-extern int prozubi_doctor_remove(
+extern int EXPORTDLL prozubi_doctor_remove(
 		kdata2_t *p, struct doctor_t *c
 		);
 

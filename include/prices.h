@@ -46,11 +46,11 @@ BEGIN_ENUM_STRING(PRICES)
 #undef PRICES_COLUMN_TEXT
 END_ENUM_STRING(PRICES)	
 
-extern void	
+extern void EXPORTDLL	
 prozubi_prices_table_init(struct kdata2_table **prices); 
 
 /* allocate and init new price */
-extern struct price_t *
+extern struct price_t EXPORTDLL *
 prozubi_price_new(
 		kdata2_t *kdata,
 #define PRICES_COLUMN_TEXT(member, number, title) const char * member, 
@@ -60,7 +60,7 @@ prozubi_price_new(
 		);
 
 /* callback all prices */
-extern void 
+extern void EXPORTDLL
 prozubi_price_foreach(
 		kdata2_t   *kdata,
 		const char *predicate,
@@ -69,19 +69,19 @@ prozubi_price_foreach(
 		);
 
 #define PRICES_COLUMN_TEXT(member, number, title)\
-extern int prozubi_prices_set_##number (kdata2_t *p, struct price_t *c,\
+extern int EXPORTDLL prozubi_prices_set_##number (kdata2_t *p, struct price_t *c,\
 		const char *text, bool update);
 
 		PRICES_COLUMNS
 #undef PRICES_COLUMN_TEXT			
 
-extern int prozubi_prices_set_text(
+extern int EXPORTDLL prozubi_prices_set_text(
 		PRICES key, kdata2_t *p, struct price_t *c, const char *text, bool update);
 
-extern void
+extern void EXPORTDLL
 prozubi_prices_free(struct price_t *d);
 
-extern int prozubi_price_remove(
+extern int EXPORTDLL prozubi_price_remove(
 		kdata2_t *p, struct price_t *c
 		);
 

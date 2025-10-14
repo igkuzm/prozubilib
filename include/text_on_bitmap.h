@@ -1,6 +1,6 @@
 #ifndef TEXT_ON_BITMAP_H
 #define TEXT_ON_BITMAP_H
-int text_on_bitmap(
+int EXPORTDLL text_on_bitmap(
 		unsigned char *bitmap,
 		int width, int height, int channels,
 		const char *text, int color,

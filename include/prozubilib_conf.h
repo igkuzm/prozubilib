@@ -9,6 +9,14 @@
 #ifndef PROZUBILIB_CONF_H
 #define PROZUBILIB_CONF_H
 
+#ifdef _MSC_VER
+#undef EXPORTDLL
+#define EXPORTDLL __declspec(dllexport)
+#else
+#undef EXPORTDLL
+#define EXPORTDLL
+#endif
+
 #ifdef _WIN32
 #ifndef bool
 #define bool char
