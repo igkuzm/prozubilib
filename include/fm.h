@@ -216,18 +216,12 @@ for (_hFind = FindFirstFile(_fullpath, &_findData);\
 #ifdef _WIN32
 int EXPORTDLL alphasort(
 		const struct dirent **a, const struct dirent **b);
-int EXPORTDLL versionsort(
-	const struct dirent **a, const struct dirent **b);
 
 int EXPORTDLL scandir(
 		 const char * dirp,
 		 struct dirent *** namelist,
 		 int (*filter)(const struct dirent *),
 		 int (*compar)(const void *, const void *));
-
-int EXPORTDLL win_find_data_to_dirent(
-		WIN32_FIND_DATA *findData,
-		struct dirent *entry);
 
 #endif
 
