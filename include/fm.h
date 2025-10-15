@@ -173,7 +173,6 @@ char EXPORTDLL *execdir(const char *path);
  * %file - pointer to dirent entry 
  * dir_foreach(path, file) */
 #ifdef _WIN32
-int EXPORTDLL win_find_data_to_dirent;
 #define dir_foreach(path, file) \
 char _fullpath[MAX_PATH];\
 WIN32_FIND_DATA _findData;\
@@ -240,6 +239,11 @@ typedef struct dirent {
 #endif
 #endif
 
+#ifdef _WIN32
+int EXPORTDLL win_find_data_to_dirent(
+		WIN32_FIND_DATA *findData,
+		struct dirent *entry);
+#endif
 #ifdef __cplusplus
 }
 #endif
