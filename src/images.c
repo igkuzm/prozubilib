@@ -154,7 +154,7 @@ prozubi_image_set_image_from_file(
 				image = (unsigned char *)_TIFFmalloc(w * h * w);
 				if (image){
 					if (!TIFFReadRGBAImage(
-								tif, w, h, (uint32_t *)image, 0))
+								tif, w, h, (unsigned int *)image, 0))
 					{
 						free(image);
 						image = NULL;
