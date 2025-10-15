@@ -581,7 +581,7 @@ char *execdir(const char *path) {
   if (!path)
     return NULL;
 #ifdef _WIN32
-  return dirname((char *)path);
+  return dname((char *)path);
 #else /* _WIN32 */
 #ifdef __APPLE__
   return dirname((char *)path);
