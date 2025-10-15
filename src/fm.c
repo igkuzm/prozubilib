@@ -412,7 +412,7 @@ int dcopyf(
 
 #ifdef _WIN32
 /* scandir support */
-static int win_find_data_to_dirent(
+int win_find_data_to_dirent(
 		WIN32_FIND_DATA *findData,
 		struct dirent *entry)
 {
