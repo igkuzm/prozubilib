@@ -41,7 +41,7 @@ BEGIN_ENUM_STRING(CASES_LIST_TYPE)
 END_ENUM_STRING(CASES_LIST_TYPE)	
 
 /* case_list */
-static const char EXPORTDLL *
+static const char *
 _prozubi_cases_list_string =
 "["
 	"["
