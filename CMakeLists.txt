@@ -18,9 +18,15 @@ project(
 )
 set (CMAKE_C_STANDARD 99)
 
+if(APPLE)
+	SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -framework Foundation")
+endif()
+
 SET(KDATA2_SOURCE_DIR ${PROZUBI_SOURCE_DIR}/kdata2)
 add_subdirectory(${KDATA2_SOURCE_DIR})
 SET(CYANDEXDISK_SOURCE_DIR ${KDATA2_SOURCE_DIR}/cYandexDisk)
+
+include_directories(${KDATA2_SOURCE_DIR}/sqlite3)
 
 if (NOT WIN32)
 
@@ -34,25 +40,15 @@ list(APPEND ADDLIBS ${SQLite3_LIBRARIES})
 
 endif()
 
-if(APPLE)
-	SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -framework Foundation")
-endif()
-
 if(WIN32)
 #pthread
  add_library(pthread SHARED IMPORTED)
  set_target_properties(pthread PROPERTIES 
-   IMPORTED_LOCATION
-   ${CYANDEXDISK_SOURCE_DIR}/win32/pthreads-win32/lib/pthreadGC1.dll
-    IMPORTED_IMPLIB ${CYANDEXDISK_SOURCE_DIR}/win32/pthreads-win32/lib/libpthreadGC1.a)	
+	 IMPORTED_LOCATION
+	 ${CYANDEXDISK_SOURCE_DIR}/win32/pthreads-win32/lib/pthreadGC1.dll
+		IMPORTED_IMPLIB ${CYANDEXDISK_SOURCE_DIR}/win32/pthreads-win32/lib/libpthreadGC1.a)	
   include_directories(${CYANDEXDISK_SOURCE_DIR}/win32/pthreads-win32/include)
   list(APPEND ADDLIBS pthread)
-#curl
-   add_library(curl STATIC IMPORTED)		
-   set_target_properties(curl PROPERTIES 
-	 IMPORTED_LOCATION
-	 ${CYANDEXDISK_SOURCE_DIR}/win32/curl/lib/libcurl.dll.a)
-   include_directories(${CYANDEXDISK_SOURCE_DIR}/win32/curl/include)	
 #tiff
 	add_library(tiff STATIC IMPORTED)		
 	set_target_properties(tiff PROPERTIES 
@@ -87,9 +83,9 @@ add_library(${TARGET} STATIC
 	${ADDSRC}
 )
 
-target_link_libraries(${TARGET} kdata2 ${ADDLIBS})
+target_link_libraries(${TARGET} kdata2 ${ADDLIBS} tiff)
 
-if(${PROZUBI_BUILD_TEST})
+if(${BUILD_TEST})
 	add_executable(${TARGET}_test test.c)
 	target_link_libraries(${TARGET}_test ${TARGET} ${ADDLIBS})
 endif()
