@@ -40,7 +40,7 @@
 #include "enum.h"
 #include "fm.h"
 #include "../kdata2/kdata2.h"
-#include "../kdata2/sqlite3.h"
+#include <sqlite3.h>
 #include "../kdata2/cYandexDisk/cJSON.h"
 #include "../kdata2/cYandexDisk/uuid4.h"
 #include "../kdata2/cYandexDisk/log.h"
