@@ -308,7 +308,35 @@ _documents_parse_rtf(prozubi_t *p, FILE *in, FILE *out,
 	}	
 }
 
- const char * 
+const char * 
+documents_get_medkarta(
+		const char *template_file_path,
+		prozubi_t *p,
+		struct passport_t *patient,
+		struct case_t *c
+		)
+{
+	// open template
+	FILE *in, *out;
+	char *zformula;
+
+	if (_documents_template_prepare(template_file_path, p, &in, &out))
+		return NULL;
+
+	// get zformula
+	prozubi_case_zubformula_to_rtf(p, c, &zformula);
+
+	// parse RTF
+	_documents_parse_rtf(p, in, out, patient, c, NULL,
+						 NULL, NULL, zformula, NULL);	
+
+	free(zformula);
+
+	return _documents_finish(p, in, out);
+}
+
+
+const char * 
 documents_get_plan_lecheniya(
 		const char *template_file_path,
 		prozubi_t *p,

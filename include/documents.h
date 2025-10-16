@@ -17,6 +17,14 @@
 #include "rtf.h"
 
 extern const char EXPORTDLL * 
+documents_get_medkarta(
+		const char *template_file_path,
+		prozubi_t *p,
+		struct passport_t *patient,
+		struct case_t *c
+		);
+
+extern const char EXPORTDLL * 
 documents_get_plan_lecheniya(
 		const char *template_file_path,
 		prozubi_t *p,
