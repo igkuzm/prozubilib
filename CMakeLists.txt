@@ -41,23 +41,29 @@ list(APPEND ADDLIBS ${SQLite3_LIBRARIES})
 endif()
 
 if(WIN32)
+	if (CMAKE_BUILD_TYPE STREQUAL "WINNT")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DTARGETWINNT")
+		set(WINDIR winnt)
+	else()
+		set(WINDIR win32)
+	endif()
 #pthreads
 	find_package(Threads)
 	if (NOT Threads_FOUND)
 		add_library(pthread SHARED IMPORTED)
 		set_target_properties(pthread PROPERTIES 
 			IMPORTED_LOCATION
-			${CYANDEXDISK_SOURCE_DIR}/win32/pthreads-win32/lib/pthreadGC1.dll
-			IMPORTED_IMPLIB ${CYANDEXDISK_SOURCE_DIR}/win32/pthreads-win32/lib/libpthreadGC1.a)	
-		include_directories(${CYANDEXDISK_SOURCE_DIR}/win32/pthreads-win32/include)	
+			${CYANDEXDISK_SOURCE_DIR}/${WINDIR}/pthreads-win32/lib/pthreadGC1.dll
+			IMPORTED_IMPLIB ${CYANDEXDISK_SOURCE_DIR}/${WINDIR}/pthreads-win32/lib/libpthreadGC1.a)	
+		include_directories(${CYANDEXDISK_SOURCE_DIR}/${WINDIR}/pthreads-win32/include)	
 	endif()
 	list(APPEND ADDLIBS pthread)
 #tiff
 	add_library(tiff STATIC IMPORTED)		
 	set_target_properties(tiff PROPERTIES 
 		IMPORTED_LOCATION
-		${PROZUBI_SOURCE_DIR}/win32/tiff/lib/libtiff.dll.a)
-	include_directories(${PROZUBI_SOURCE_DIR}/win32/tiff/include)
+		${PROZUBI_SOURCE_DIR}/${WINDIR}/tiff/lib/libtiff.dll.a)
+	include_directories(${PROZUBI_SOURCE_DIR}/${WINDIR}/tiff/include)
 elseif(APPLE)
 else()
 	if (NOT ANDROID)
@@ -98,7 +104,7 @@ if (WIN32)
 	#curl libs
 	#Copy DLLs
 	file(GLOB files 
-		"${PROZUBI_SOURCE_DIR}/win32/tiff/bin/*.dll"
+		"${PROZUBI_SOURCE_DIR}/${WINDIR}/tiff/bin/*.dll"
 		"${PROZUBI_SOURCE_DIR}/*.sqlite"
 		"${PROZUBI_SOURCE_DIR}/*.ttf"
 		"${PROZUBI_SOURCE_DIR}/*.png"
