@@ -41,14 +41,17 @@ list(APPEND ADDLIBS ${SQLite3_LIBRARIES})
 endif()
 
 if(WIN32)
-#pthread
- add_library(pthread SHARED IMPORTED)
- set_target_properties(pthread PROPERTIES 
-	 IMPORTED_LOCATION
-	 ${CYANDEXDISK_SOURCE_DIR}/win32/pthreads-win32/lib/pthreadGC1.dll
-		IMPORTED_IMPLIB ${CYANDEXDISK_SOURCE_DIR}/win32/pthreads-win32/lib/libpthreadGC1.a)	
-  include_directories(${CYANDEXDISK_SOURCE_DIR}/win32/pthreads-win32/include)
-  list(APPEND ADDLIBS pthread)
+#pthreads
+	find_package(Threads)
+	if (NOT Threads_FOUND)
+		add_library(pthread SHARED IMPORTED)
+		set_target_properties(pthread PROPERTIES 
+			IMPORTED_LOCATION
+			${CYANDEXDISK_SOURCE_DIR}/win32/pthreads-win32/lib/pthreadGC1.dll
+			IMPORTED_IMPLIB ${CYANDEXDISK_SOURCE_DIR}/win32/pthreads-win32/lib/libpthreadGC1.a)	
+		include_directories(${CYANDEXDISK_SOURCE_DIR}/win32/pthreads-win32/include)	
+	endif()
+	list(APPEND ADDLIBS pthread)
 #tiff
 	add_library(tiff STATIC IMPORTED)		
 	set_target_properties(tiff PROPERTIES 
