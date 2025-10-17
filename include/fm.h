@@ -181,7 +181,7 @@ HANDLE _hFind;\
 int _r = 1;\
 sprintf(_fullpath, "%s\\*", path);\
 for (_hFind = FindFirstFile(_fullpath, &_findData);\
-		 _hFind != INVALID_HANDLE_VALUE && win_find_data_to_dirent(&_findData, file) && _r != 0 || ({FindClose(_hFind); 0;})\
+		 _hFind != INVALID_HANDLE_VALUE && win_find_data_to_dirent(&_findData, file) && _r != 0 || ({FindClose(_hFind); 0;});\
 		 _r = FindNextFile(_hFind, &_findData))
 #else
 #define dir_foreach(path, file)\
