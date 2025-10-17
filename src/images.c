@@ -1,8 +1,8 @@
 /**
- * File              : images.h
+ * File              : images.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 24.08.2024
+ * Last Modified Date: 17.10.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -153,8 +153,13 @@ prozubi_image_set_image_from_file(
 			if (w > 1 && h > 1){
 				image = (unsigned char *)_TIFFmalloc(w * h * w);
 				if (image){
+#ifdef TARGETWINNT
+					if (!TIFFReadRGBAImage(
+								tif, w, h, (long unsigned int *)image, 0))
+#else
 					if (!TIFFReadRGBAImage(
 								tif, w, h, (unsigned int *)image, 0))
+#endif
 					{
 						free(image);
 						image = NULL;
