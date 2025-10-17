@@ -66,13 +66,12 @@ prozubi_diagnosis_get(
 {
 	int i, pze;
 	char *pt[] = {"R", "Pt"};		
-	char *str = (char*)MALLOC(BUFSIZ);
-	if (str == NULL){
+	struct str str;
+	if (str_init(&str)){
 		if (p->on_error)
 			p->on_error(p->on_error_data, "can't allocate memory"); 
 		return NULL;
 	}	
-	str[0] = 0;
 
 #define DIAGNOSIS_TEETH\
 	DIAGNOSIS_TOOTH(z11, "1.1")\
@@ -111,9 +110,7 @@ prozubi_diagnosis_get(
 	#define DIAGNOSIS_TOOTH(n, t)\
 		for (i = 0; i < 2; ++i) {\
 			if (strcmp(c->n, pt[i]) == 0){\
-				char s[256];\
-				sprintf(s, "K04.5. Хронический апикальный периодонтит, зуб %s.\n", t);\
-				strcat(str, s);\
+				str_appendf(&str, "K04.5. Хронический апикальный периодонтит, зуб %s.\n", t);\
 				break;\
 			}\
 		}
@@ -122,28 +119,22 @@ prozubi_diagnosis_get(
 
 	#define DIAGNOSIS_TOOTH(n, t)\
 		if (strcmp(c->n, "P") == 0){\
-			char s[256];\
-			sprintf(s, "K04.0. Пульпит, зуб %s.\n", t);\
-			strcat(str, s);\
+			str_appendf(&str, "K04.0. Пульпит, зуб %s.\n", t);\
 		}
 	DIAGNOSIS_TEETH
 	#undef DIAGNOSIS_TOOTH
 
 	#define DIAGNOSIS_TOOTH(n, t)\
 		if (strcmp(c->n, "C") == 0){\
-			char s[256];\
-			sprintf(s, "K02.2. Кариес цемента, зуб %s.\n", t);\
-			strcat(str, s);\
+			str_appendf(&str, "K02.2. Кариес цемента, зуб %s.\n", t);\
 		}
 	DIAGNOSIS_TEETH
 	#undef DIAGNOSIS_TOOTH
 
 	pze = _prozubi_diagnosis_poteria_zhevatelnoy_effectivnosti(c);
 	if (pze){
-			char s[256];
-			sprintf(s, "K08.1 Потеря зубов. Потеря жевательной эффективности на %d%%.", pze);
-			strcat(str, s);
+			str_appendf(&str, "K08.1 Потеря зубов. Потеря жевательной эффективности на %d%%.", pze);
 	}
-	return str;
+	return str.str;
 }
 

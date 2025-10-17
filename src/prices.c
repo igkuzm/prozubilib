@@ -71,7 +71,7 @@ prozubi_price_foreach(
 		int        (*callback)(void *user_data, struct price_t *p)
 		)
 {
-	char SQL[BUFSIZ] = "SELECT ";
+	char SQL[2*BUFSIZ] = "SELECT ";
 	int res;
 	sqlite3_stmt *stmt;
 	const unsigned char *value;

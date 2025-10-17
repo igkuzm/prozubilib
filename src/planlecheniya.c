@@ -784,8 +784,8 @@ static void * _prozubi_planlecheniya_to_rtf_cb(
 				{400, 6854, 1000, 1000, 1000};
 				char *tbl; 
 				
-				sprintf(title,"\\b %s \\b0", t->title);
-				sprintf(total,"\\b %s руб. \\b0", t->total);
+				snprintf(title,BUFSIZ-1,"\\b %s \\b0", t->title);
+				snprintf(total,BUFSIZ-1,"\\b %s руб. \\b0", t->total);
 				
 				row[0] = "";
 				row[1] = title;
@@ -807,8 +807,8 @@ static void * _prozubi_planlecheniya_to_rtf_cb(
 				{400, 6854, 1000, 1000, 1000};
 				char *tbl; 
 				
-				sprintf(title,"\\b %s \\b0", t->title);
-				sprintf(count,"\\b %s мес. \\b0", t->count);
+				snprintf(title,BUFSIZ-1,"\\b %s \\b0", t->title);
+				snprintf(count,BUFSIZ-1,"\\b %s мес. \\b0", t->count);
 				
 				row[0] = "";
 				row[1] = title;

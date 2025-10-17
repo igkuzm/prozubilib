@@ -26,7 +26,7 @@ _prozubi_cases_list_new(
 		)
 {
 	struct tm *tm;
-	char date[11], title[BUFSIZ] = "";
+	char date[11], title[2*BUFSIZ] = "";
 	cJSON *json = cJSON_CreateObject();
 
 	if (!c){
@@ -159,7 +159,7 @@ prozubi_case_new_for_patient(prozubi_t *p, char patientid[37]){
 	
 	int res, i;
 	const unsigned char *value;
-	char SQL[BUFSIZ] = "";
+	char SQL[2*BUFSIZ] = "";
 	cJSON *cases_list_children;
 	/* allocate case_t */
 	struct case_t *c = _prozubi_case_new();
@@ -454,7 +454,7 @@ prozubi_cases_foreach(
 		int       (*callback)(void *user_data, struct case_t *c)
 		)
 {
-	char SQL[BUFSIZ] = "SELECT ";
+	char SQL[2*BUFSIZ] = "SELECT ";
 	int res;
 	sqlite3_stmt *stmt;
 
@@ -928,7 +928,7 @@ prozubi_cases_list_foreach(
 	int res;
 	sqlite3_stmt *stmt;
 	/* create SQL string */
-	char SQL[BUFSIZ] = "SELECT ";
+	char SQL[2*BUFSIZ] = "SELECT ";
 	struct case_t *c = NULL;
 
 #define CASES_COLUMN_DATE(member, number, title      )\
@@ -1063,7 +1063,7 @@ prozubi_cases_list_foreach(
 	ZUBFORMULA_TEETH_DOWN
 #undef ZUBFORMULA_TOOTH_DOWN
 
-	char down[BUFSIZ], up[BUFSIZ], *tbl_header =
+	char down[2*BUFSIZ], up[2*BUFSIZ], *tbl_header =
 		"\\pard\\par\\qc \\b Зубная формула \\b0 \\ \n" 
 		"\\pard\\par\\trowd\\qc\n"
 		"\\clbrdrt\\brdrs\\clbrdrl\\brdrs\\clbrdrb"

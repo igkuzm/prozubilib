@@ -34,7 +34,7 @@ prozubi_passport_foreach(
 	size_t len;
 	sqlite3_stmt *stmt;
 	const unsigned char *value;
-	char SQL[BUFSIZ] = "SELECT ";
+	char SQL[2*BUFSIZ] = "SELECT ";
 	
 	/* check kdata */
 	if (!kdata){

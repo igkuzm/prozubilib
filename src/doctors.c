@@ -75,7 +75,7 @@ prozubi_doctor_foreach(
 	const unsigned char *value;
 	int res, i;
 	sqlite3_stmt *stmt;
-	char SQL[BUFSIZ] = "SELECT ";
+	char SQL[2*BUFSIZ] = "SELECT ";
 	
 	/* check kdata */
 	if (!kdata){

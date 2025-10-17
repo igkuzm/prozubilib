@@ -396,8 +396,8 @@ prozubi_bill_set_item_count(
 		{400, 6854, 1000, 1000, 1000};
 		char *tbl;
 
-		sprintf(title,"\\b %s \\b0", t->title);
-		sprintf(total,"\\b %s руб. \\b0", t->total);
+		snprintf(title,BUFSIZ-1, "\\b %s \\b0", t->title);
+		snprintf(total,BUFSIZ-1,"\\b %s руб. \\b0", t->total);
 
 		row[0] = "";
 		row[1] = title;

@@ -42,9 +42,7 @@ prozubi_nomenklatura_foreach(
 {
 	sqlite3 *db;
 	sqlite3_stmt *stmt_p;
-	char *SQL = (char *)malloc(BUFSIZ);
-	if (SQL == NULL)
-		return;
+	char SQL[2*BUFSIZ] = "SELECT ";
 	
 	if (!p)
 		return;
@@ -67,9 +65,7 @@ prozubi_nomenklatura_foreach(
 	}
 	
 	/* create SQL string */
-	strcpy(SQL, "");
 	if (predicate){
-		strcat(SQL, "SELECT ");
 		#define NOMENKLATURA_COLUMN_INT(title) strcat(SQL, #title); strcat(SQL, ", "); 
 		#define NOMENKLATURA_COLUMN_TEX(title) strcat(SQL, #title); strcat(SQL, ", "); 
 		NOMENKLATURA_COLUMNS
@@ -80,7 +76,7 @@ prozubi_nomenklatura_foreach(
 		strcat(SQL, " ");
 		strcat(SQL, predicate);
 	}else{
-		strcat(SQL, "SELECT headName FROM ");
+		strcat(SQL, "headName FROM ");
 		strcat(SQL, NOMENKLATURA_TABL);
 		strcat(SQL, " WHERE parent = 0 ");
 	}
@@ -135,7 +131,7 @@ prozubi_nomenklatura_foreach(
 
 		} else {
 			/* handle values */
-			char SQL_c[BUFSIZ] = "SELECT ";
+			char SQL_c[2*BUFSIZ] = "SELECT ";
 			sqlite3_stmt *stmt_c;
 			void *parent;
 			size_t len = sqlite3_column_bytes(stmt_p, 0);
@@ -218,7 +214,6 @@ prozubi_nomenklatura_foreach(
 			sqlite3_finalize(stmt_c);
 		}
 	}
-	free(SQL);
 	sqlite3_finalize(stmt_p);
 	sqlite3_close(db);
 }

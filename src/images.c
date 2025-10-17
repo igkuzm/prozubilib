@@ -433,7 +433,7 @@ prozubi_image_foreach(
 {
 	int res;
 	sqlite3_stmt *stmt;
-	char SQL[BUFSIZ] = "SELECT ";
+	char SQL[2*BUFSIZ] = "SELECT ";
 
 	/* check kdata */
 	if (!p){

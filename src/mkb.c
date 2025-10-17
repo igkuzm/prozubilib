@@ -48,7 +48,7 @@ _prozubi_mkb_get_child(
 	sqlite3_stmt *stmt_c;
 	
 	/* create SQL string */
-	char SQL_c[BUFSIZ] = "SELECT ";
+	char SQL_c[2*BUFSIZ] = "SELECT ";
 	
 	#define MKB_COLUMN_INT(title) strcat(SQL_c, #title); strcat(SQL_c, ", "); 
 	#define MKB_COLUMN_TEX(title) strcat(SQL_c, #title); strcat(SQL_c, ", "); 
@@ -129,7 +129,7 @@ prozubi_mkb_foreach(
 {
 	sqlite3 *db;
 	sqlite3_stmt *stmt_p;
-	char *SQL;
+	char SQL[2*BUFSIZ] = "SELECT ";
 	
 	if (!p)
 		return;
@@ -152,11 +152,6 @@ prozubi_mkb_foreach(
 	}
 	
 	/* create SQL string */
-	SQL = (char *)malloc(BUFSIZ);
-	if (SQL == NULL)
-		return;
-	strcpy(SQL, "");
-	strcat(SQL, "SELECT ");
 #define MKB_COLUMN_INT(title) strcat(SQL, #title); strcat(SQL, ", "); 
 #define MKB_COLUMN_TEX(title) strcat(SQL, #title); strcat(SQL, ", "); 
 	MKB_COLUMNS
@@ -224,7 +219,6 @@ prozubi_mkb_foreach(
 		_prozubi_mkb_get_child(p, db, c->iD, user_data, parent, callback);
 	}
 	
-	free(SQL);
 	sqlite3_finalize(stmt_p);
 	sqlite3_close(db);
 }
