@@ -48,15 +48,15 @@ if(WIN32)
 		set(WINDIR win32)
 	endif()
 #pthreads
-	find_package(Threads)
-	if (NOT Threads_FOUND)
+#	find_package(Threads)
+#	if (NOT Threads_FOUND)
 		add_library(pthread SHARED IMPORTED)
 		set_target_properties(pthread PROPERTIES 
 			IMPORTED_LOCATION
 			${CYANDEXDISK_SOURCE_DIR}/${WINDIR}/pthreads-win32/lib/pthreadGC1.dll
 			IMPORTED_IMPLIB ${CYANDEXDISK_SOURCE_DIR}/${WINDIR}/pthreads-win32/lib/libpthreadGC1.a)	
 		include_directories(${CYANDEXDISK_SOURCE_DIR}/${WINDIR}/pthreads-win32/include)	
-	endif()
+#	endif()
 	list(APPEND ADDLIBS pthread)
 #tiff
 	add_library(tiff STATIC IMPORTED)		
