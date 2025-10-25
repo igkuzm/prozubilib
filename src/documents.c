@@ -92,6 +92,9 @@ pl_images_get(
 
 #define PL_REPS\
 	PL_REP("$date", c->date, PL_DATE)\
+    PL_REP("$dateOfBirth", c->date, PL_DATE)\
+    PL_REP("$address", patient->familiya, PL_TEXT)\
+    PL_REP("$fio", patient, PL_FIO)\
 	PL_REP("$familiya", patient->familiya, PL_TEXT)\
 	PL_REP("$imia", patient->imia, PL_TEXT)\
 	PL_REP("$otchestvo", patient->otchestvo, PL_TEXT)\
@@ -155,6 +158,7 @@ enum {
 	PL_NONE,
 	PL_DATE,
 	PL_TEXT,
+	PL_FIO,
 };
 
 static const char *pl_needle_array[] = 
@@ -183,6 +187,13 @@ static char *pl_replace(
 		if (type == PL_TEXT){\
 			char *ccc = rtf_from_utf8((char *)rep);\
 			return ccc;\
+		}\
+        else if (type == PL_FIO){\
+            struct passport_t *p = (struct passport_t *)rep; \
+            char fio[BUFSIZ]; \
+			sprintf(fio, "%s %c%c. %c%c.", p->familiya, p->imia[0],p->imia[1], p->otchestvo[0], p->otchestvo[1]); \
+	        char *ccc = rtf_from_utf8(fio);\
+            return ccc;\
 		}\
 		else if (type == PL_NONE){\
 			return strdup((char *)rep);\
