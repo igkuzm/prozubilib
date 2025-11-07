@@ -1,8 +1,8 @@
 /**
- * File              : rtf.h
+ * File              : rtf.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 04.12.2023
- * Last Modified Date: 03.10.2024
+ * Last Modified Date: 07.11.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -10,6 +10,7 @@
 
 /* IMPLIMATION */
 #include "../include/rtf.h"
+#include <string.h>
 
 char *
 rtf_from_utf8(const char *s)
@@ -95,10 +96,8 @@ static void _rtf_table_add_row_column(
 				"\\clwWidth%d\\clftsWidth3"
 				"\\cellx%d\n", 
 				width_current, width_total);		
-
-		str_appendf(s, 
-				"\\intbl %s \\cell\n",
-				rtf_from_utf8(value));	
+		str_append(s, value, strlen(value));
+		str_appendf(s, " \\cell\n");
 }
 
 char *
