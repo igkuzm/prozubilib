@@ -97,7 +97,7 @@ prozubi_bill_foreach(
 					cJSON_GetObjectItem(item, "title"));
 		if (!title) title = strdup("");
 
-		price_str_item = cJSON_GetStringValue(
+		price_str = cJSON_GetStringValue(
 					cJSON_GetObjectItem(item, "price"));
 		if (!price_str) price_str = strdup("");
 
@@ -115,7 +115,7 @@ prozubi_bill_foreach(
 		callback(
 			userdata, _bill_new(
 				p, bill, BILL_TYPE_ITEM, item_i, 
-				title, kod, price_str_item, count_str, total_str));
+				title, kod, price_str, count_str, total_str));
 		
 		total_price += total;
 
