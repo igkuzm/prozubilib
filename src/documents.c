@@ -410,7 +410,9 @@ documents_get_plan_lecheniya(
 				if (stbir_resize_uint8(image, x, y, 0, resized, to_x, to_y, 0, c)){
 					stbi_write_png(path, to_x, to_y, c, resized, 0);
 				}
+#ifdef __APPLE__
 				str_appendf(&s, "\\f0\\fs24 \\cf0 {{\\*\\NeXTGraphic "ZFORMULAIMG" \\width%d \\height%d}}\n", to_x, to_y);
+#endif
 				stbi_image_free(resized);
 			}
 			stbi_image_free(image);
