@@ -2,7 +2,7 @@
  * File              : documents.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 25.07.2023
- * Last Modified Date: 09.10.2025
+ * Last Modified Date: 14.11.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -77,7 +77,9 @@ pl_images_cb(void *d, struct image_t *image){
 	str_appendf(&img->str, "}\n");
 	
 	// add macos support
+#ifdef __APPLE__
 	str_appendf(&img->str, "\\f0\\fs24 \\cf0 {{\\*\\NeXTGraphic %s.jpeg \\width10250 \\height6000}}\n", image->id);
+#endif
 
 	return 0;
 }
