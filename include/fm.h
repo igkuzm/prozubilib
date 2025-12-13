@@ -2,7 +2,7 @@
  * File              : fm.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 04.09.2021
- * Last Modified Date: 09.10.2025
+ * Last Modified Date: 13.12.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -57,6 +57,7 @@ extern "C" {
 
 #ifdef _MSC_VER
 #else
+#include <unistd.h> // rmdir
 #include <dirent.h>
 #include <libgen.h>   /* basename, basedir */
 #endif
