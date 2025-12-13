@@ -8,6 +8,7 @@
 
 #include "../include/documents.h"
 #include "../include/rtfutf8tocp1251.h"
+#include "../include/fm.h"
 
 #define OUTDIR "out.rtfd"
 #define OUTFILE OUTDIR "/TXT.rtf"
