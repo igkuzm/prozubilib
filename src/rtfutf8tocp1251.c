@@ -37,7 +37,8 @@ static void parse_buffer(const char *buf, FILE *out)
 		if (translit){
 			// put to out
 			char str[5];
-			sprintf(str, "\\\'%x", translit->cp1251);
+			sprintf(str, "\\\'%0.2x", translit->cp1251);
+			printf("STR: %s\n", str);
 			fputs(str, out);
 		} else {
 			// no cp1251 simbol
