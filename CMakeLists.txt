@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.0)
 
 set(TARGET prozubilib)
 
@@ -13,7 +13,6 @@ endif ()
 project(
 	${TARGET} VERSION 1.2 
 	DESCRIPTION "C library to handle dental clinic"
-	HOMEPAGE_URL ""
 	LANGUAGES C 
 )
 set (CMAKE_C_STANDARD 99)
