@@ -22,6 +22,7 @@ libprozubilib_la_SOURCES = \
 	src/template.c \
 	src/rtf.c \
 	src/prozubilib.c \
+	src/rtfutf8tocp1251.c \
 	src/fm.c \
 	src/text_on_bitmap.c text_on_bitmap.h
 

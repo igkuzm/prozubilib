@@ -89,6 +89,7 @@ add_library(${TARGET} STATIC
 	src/text_on_bitmap.c
 	src/fm.c
 	src/stb_image.c
+	src/rtfutf8tocp1251.c
 	${ADDSRC}
 )
 
