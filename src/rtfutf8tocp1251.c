@@ -1,5 +1,7 @@
 #include "../include/rtfutf8tocp1251.h"
 #include "../include/translit.h"
+#include "../include/fstrrep.h"
+#include "../include/fm.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -51,14 +53,39 @@ static void parse_buffer(const char *buf, FILE *out)
 
 int rtfutf8tocp1251(const char *from, const char *to)
 {
-	char buf[BLEN];
+	char buf[BLEN], tmp[BUFSIZ],
+		  *find[] = {"Times New Roman;", "TimesNewRomanPS-BoldMT;", "TimesNewRomanPSMT;", "TimesNewRoman;"};
 	int i, ch, blen, err = 1, ifbuf = 0;
 	FILE *in, *out;
 
 	assert(from);
 	assert(to);
 
-	in = fopen(from, "r");
+	sprintf(tmp, "%s_tmp", to);
+	fcopy(from, tmp);
+	
+	// replace Times New Roman
+	for (i = 0; i < 4; ++i) {
+		in = fopen(tmp, "r");
+		if (in == NULL)
+			goto on_end;
+
+		out = fopen(to, "w");
+		if (out == NULL)
+			goto on_end;
+
+		fstrrep(in, out, find[i], "Times New Roman Cyr;");
+
+		fclose(in);
+		in = NULL;
+		fclose(out);
+		out = NULL;
+
+		fcopy(to, tmp);	
+	}
+
+	// replace service words
+	in = fopen(tmp, "r");
 	if (in == NULL)
 		goto on_end;
 
@@ -107,6 +134,26 @@ int rtfutf8tocp1251(const char *from, const char *to)
 		ifbuf = 0;
 		fputc(ch, out);
 	}
+
+	/*fclose(out);*/
+	/*out = fopen(to, "w");*/
+
+	// replace Times New Roman with cyr
+	/*rewind(in);*/
+	/*rewind(out);*/
+	/*fstrrep(in, out, "Times New Roman;", "Times New Roman Cyr;");*/
+	/*fclose(out);*/
+	/*out = NULL;*/
+
+	//rewind(in);
+	//rewind(out);
+	//fstrrep(in, out, "TimesNewRomanPS-BoldMT;", "Times New Roman Cyr;");
+	//rewind(in);
+	//rewind(out);
+	//fstrrep(in, out, "TimesNewRomanPSMT;", "Times New Roman Cyr;");
+	//rewind(in);
+	//rewind(out);
+	//fstrrep(in, out, "TimesNewRoman;", "Times New Roman Cyr;");
 
 on_end:
 	if (err)
