@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define BLEN 7
+#define BLEN 32
 
 static void parse_buffer(const char *buf, FILE *out)
 {
@@ -13,6 +13,12 @@ static void parse_buffer(const char *buf, FILE *out)
 	int translit_table_size = 
 		sizeof(cprecode_table) / sizeof(cprecode_t);
 
+	// change ansi to ansigp1252
+	if (strstr(buf, "ansi")){
+		fputs("\\ansicpg1251", out);
+		return;
+	}
+		
 	if (bufp[1] == 'u' && bufp[2] > 0x2F && bufp[2] < 0x3A)
 	{
 		// this is unicode char
@@ -31,17 +37,16 @@ static void parse_buffer(const char *buf, FILE *out)
 			char str[5];
 			sprintf(str, "\\\'%x", translit->cp1251);
 			fputs(str, out);
-			printf("STR: %s\n", str);
 		} else {
 			// no cp1251 simbol
 			fprintf(stderr, 
 					"no cp1251 symbol for unicode: 0x%0.4x\n", key.utf_code);
 		}
+		return;
+	} 
 
-	} else {
-		// put buffer to out 
-		fputs(buf, out);
-	}
+	// put buffer to out 
+	fputs(buf, out);
 }
 
 int rtfutf8tocp1251(const char *from, const char *to)
@@ -62,26 +67,41 @@ int rtfutf8tocp1251(const char *from, const char *to)
 		goto on_end;
 
 	while ((ch = fgetc(in)) != EOF) {
-		if (ch == '\\'){ // start service word
-			// start buffer
-			ifbuf = 1;
+		if (ifbuf && blen >= BLEN){
+			// buffer overload
+			fputs(buf, out);
+			ifbuf = 0;
 			blen = 0;
-			memset(buf, 0, 7);
+			continue;
+		}
+		if (ifbuf && (
+					(ch > 0x2F && ch < 0x3A) || 
+					(ch > 0x40 && ch < 0x5B) ||
+					(ch > 0x60 && ch < 0x7B)))
+		{ // chars and numbers only
 			buf[blen++] = ch;
 			continue;
 		}
-		if (ifbuf && ch == 'u'){ // start of unicode
+		if (ifbuf && ch == ' '){
+			// space at end is a part of service word
 			buf[blen++] = ch;
-			continue;
-		}
-		if (ifbuf && ch > 0x2F && ch < 0x3A){ // numbers
-			buf[blen++] = ch;
+			ifbuf = 0;
+			parse_buffer(buf, out);
 			continue;
 		}
 
 		if (ifbuf){ // end of service word
 			ifbuf = 0;
 			parse_buffer(buf, out);
+		}
+
+		if (ch == '\\'){ // catche service word
+			// start new buffer
+			ifbuf = 1;
+			blen = 0;
+			memset(buf, 0, BLEN);
+			buf[blen++] = ch;
+			continue;
 		}
 
 		ifbuf = 0;

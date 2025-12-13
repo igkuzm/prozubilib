@@ -2,11 +2,12 @@
  * File              : documents.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 25.07.2023
- * Last Modified Date: 14.11.2025
+ * Last Modified Date: 13.12.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
 #include "../include/documents.h"
+#include "../include/rtfutf8tocp1251.h"
 
 #define OUTDIR "out.rtfd"
 #define OUTFILE OUTDIR "/TXT.rtf"
@@ -249,13 +250,16 @@ _documents_template_prepare(const char *template_file_path,
 static const char*
 _documents_finish(prozubi_t *p, FILE *in, FILE *out)
 {
+	char *cp1251 = OUTFILE "_cp1251.rtf";
 	fclose(in);
 	fclose(out);
 	
 #ifdef	__APPLE__
 	return OUTDIR;
 #else
-	return OUTFILE;
+	// change codepage
+	rtfutf8tocp1251(OUTFILE, cp1251);
+	return cp1251;
 #endif
 
 }
