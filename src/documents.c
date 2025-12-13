@@ -257,12 +257,13 @@ _documents_finish(prozubi_t *p, FILE *in, FILE *out)
 	
 #ifdef	__APPLE__
 	return OUTDIR;
-#else
+#endif
+#ifdef _WIN32
 	// change codepage
 	rtfutf8tocp1251(OUTFILE, cp1251);
 	return cp1251;
 #endif
-
+	return OUTFILE;
 }
 
 static void
