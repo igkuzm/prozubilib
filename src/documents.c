@@ -258,7 +258,7 @@ _documents_finish(prozubi_t *p, FILE *in, FILE *out)
 #ifdef	__APPLE__
 	return OUTDIR;
 #endif
-#ifdef WINNT
+#ifdef TARGETWINNT
 	// change codepage
 	rtfutf8tocp1251(OUTFILE, cp1251);
 	return cp1251;
@@ -385,7 +385,7 @@ documents_get_plan_lecheniya(
 	sprintf(summa,"%d ", total);
 
 	// get zformula
-#ifdef WINNT
+#ifdef TARGETWINNT
     prozubi_case_zubformula_to_rtf(p, c, &zformula);
 #else
 	if (prozubi_planlecheniya_zformula_image(p, c,
