@@ -258,7 +258,7 @@ _documents_finish(prozubi_t *p, FILE *in, FILE *out)
 #ifdef	__APPLE__
 	return OUTDIR;
 #endif
-#ifdef _WIN32
+#ifdef WINNT
 	// change codepage
 	rtfutf8tocp1251(OUTFILE, cp1251);
 	return cp1251;
@@ -385,6 +385,9 @@ documents_get_plan_lecheniya(
 	sprintf(summa,"%d ", total);
 
 	// get zformula
+#ifdef WINNT
+    prozubi_case_zubformula_to_rtf(p, c, &zformula);
+#else
 	if (prozubi_planlecheniya_zformula_image(p, c,
 			 	ZFORMULAIMG,
 			 	&zdata, &zlen))
@@ -427,6 +430,7 @@ documents_get_plan_lecheniya(
 		free(zdata);
 		zformula = s.str;
 	}
+#endif // WINNT
 
 	// load images
 	if (str_init(&img.str)){
