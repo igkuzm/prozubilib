@@ -26,6 +26,7 @@
 #include "include/prices.h"
 #include "include/template.h"
 #include "include/rtf.h"
+#include "cYclients/cYclients.h"
 
 /* init prozubi database and start yandex disk sync */
 prozubi_t *
@@ -62,7 +63,9 @@ int
 prozubi_yclients_sync(
 		prozubi_t *p,
 		const char *login,
-		const char *password
+		const char *password,
+		void *on_code_data,
+		char *on_code(void *on_code_data)
 		);
 
 #endif /* ifndef PROZUBILIB_H */
