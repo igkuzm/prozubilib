@@ -1,7 +1,7 @@
 #config to create static prozubi lib with automake
 #ACLOCAL_AMFLAGS="-I m4"
 AUTOMAKE_OPTIONS = subdir-objects
-SUBDIRS = kdata2
+SUBDIRS = kdata2 cYclients
 
 lib_LTLIBRARIES = libprozubilib.la
 libprozubilib_la_CFLAGS =

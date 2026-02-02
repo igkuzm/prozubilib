@@ -1,3 +1,6 @@
 [submodule "kdata2"]
 	path = kdata2
 	url = https://github.com/igkuzm/kdata2
+[submodule "cYclients"]
+	path = cYclients
+	url = git@github.com:igkuzm/cYclients

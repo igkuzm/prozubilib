@@ -2,7 +2,7 @@
  * File              : prozubilib.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 30.05.2023
+ * Last Modified Date: 02.02.2026
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -55,6 +55,14 @@ prozubi_start_sync(
 int
 prozubi_stop_sync(
 		prozubi_t *p
+		);
+
+/* yclients sync */
+int 
+prozubi_yclients_sync(
+		prozubi_t *p,
+		const char *login,
+		const char *password
 		);
 
 #endif /* ifndef PROZUBILIB_H */
