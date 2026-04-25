@@ -1,15 +1,15 @@
 /**
- * File              : mkb.h
+ * File              : mkb.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 11.05.2023
- * Last Modified Date: 13.09.2024
+ * Last Modified Date: 25.04.2026
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
 #include "../include/mkb.h"
 
 static mkb_t *
-_mkb_new(prozubi_t *p)
+_mkb_new(kdata2_t *p)
 {
 	mkb_t *c = NEW(mkb_t);
 	if (c == NULL){
@@ -30,7 +30,7 @@ _mkb_new(prozubi_t *p)
 
 static void
 _prozubi_mkb_get_child(
-		prozubi_t *p,
+		kdata2_t *p,
 		sqlite3 *db,	
 		int parent_id,
 		void *user_data,
@@ -65,7 +65,7 @@ _prozubi_mkb_get_child(
 	if(sqlite3_prepare_v2(db, SQL_c, -1, &stmt_c, NULL)){
 		if (p->on_error)
 			p->on_error(p->on_error_data,			
-			STR_ERR("sqlite3_prepare_v2: %s: %s", SQL_c, sqlite3_errmsg(db)));	
+			STR("sqlite3_prepare_v2: %s: %s", SQL_c, sqlite3_errmsg(db)));	
 		sqlite3_close(db);
 		return;
 	};
@@ -117,7 +117,7 @@ _prozubi_mkb_get_child(
 
  void
 prozubi_mkb_foreach(
-		prozubi_t *p,
+		kdata2_t *p,
 		const char *predicate,
 		void * user_data,
 		void * (*callback)(
@@ -137,7 +137,7 @@ prozubi_mkb_foreach(
 	if (!callback){
 		if (p->on_error)
 			p->on_error(p->on_error_data,		
-		STR_ERR("%s", "callback is NULL"));
+		STR("%s", "callback is NULL"));
 		return;
 	}
 
@@ -146,7 +146,7 @@ prozubi_mkb_foreach(
 	{
 		if (p->on_error)
 			p->on_error(p->on_error_data,		
-			STR_ERR("SQLite: Failed to create '%s': %s", 
+			STR("SQLite: Failed to create '%s': %s", 
 				MKB_BASE, sqlite3_errmsg(db)));
 		return;	
 	}
@@ -170,7 +170,7 @@ prozubi_mkb_foreach(
 	if(sqlite3_prepare_v2(db, SQL, -1, &stmt_p, NULL)){
 		if (p->on_error)
 			p->on_error(p->on_error_data,				
-			STR_ERR("sqlite3_prepare_v2: %s: %s", SQL, sqlite3_errmsg(db)));	
+			STR("sqlite3_prepare_v2: %s: %s", SQL, sqlite3_errmsg(db)));	
 		sqlite3_close(db);
 		return;
 	};

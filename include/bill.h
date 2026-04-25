@@ -2,7 +2,7 @@
  * File              : bill.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.12.2023
- * Last Modified Date: 13.09.2024
+ * Last Modified Date: 25.04.2026
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -30,7 +30,7 @@ struct bill_t {
 
 struct bill_t *
 _bill_new(
-		prozubi_t *p,
+		kdata2_t *p,
 		cJSON *bill,
 		BILL_TYPE type,
 		int itemIndex,
@@ -45,7 +45,7 @@ prozubi_bill_free(struct bill_t *t);
 
 extern void EXPORTDLL
 prozubi_bill_foreach(
-		prozubi_t *p,
+		kdata2_t *p,
 		cJSON *bill,
 		void * userdata,
 		void (*callback)(
@@ -55,7 +55,7 @@ prozubi_bill_foreach(
 
 extern cJSON EXPORTDLL *
 prozubi_bill_add_item(
-		prozubi_t *kdata,
+		kdata2_t *kdata,
 		cJSON *bill,
 		const char *title,
 		const char *kod,
@@ -65,14 +65,14 @@ prozubi_bill_add_item(
 
 extern void EXPORTDLL
 prozubi_bill_remove_item(
-		prozubi_t *kdata,
+		kdata2_t *kdata,
 		cJSON *bill,
 		int item_index
 		);
 
 extern cJSON_bool EXPORTDLL
 prozubi_bill_set_item_title(
-		prozubi_t *kdata,
+		kdata2_t *kdata,
 		cJSON *bill,
 		int item_index,
 		const char *title
@@ -80,7 +80,7 @@ prozubi_bill_set_item_title(
 
 extern cJSON_bool EXPORTDLL
 prozubi_bill_set_item_kod(
-		prozubi_t *kdata,
+		kdata2_t *kdata,
 		cJSON *bill,
 		int item_index,
 		const char *kod
@@ -88,7 +88,7 @@ prozubi_bill_set_item_kod(
 
 extern cJSON_bool EXPORTDLL
 prozubi_bill_set_item_price(
-		prozubi_t *kdata,
+		kdata2_t *kdata,
 		cJSON *bill,
 		int item_index,
 		int price
@@ -96,7 +96,7 @@ prozubi_bill_set_item_price(
 
 extern cJSON_bool EXPORTDLL
 prozubi_bill_set_item_count(
-		prozubi_t *kdata,
+		kdata2_t *kdata,
 		cJSON *bill,
 		int item_index,
 		int count
@@ -108,6 +108,6 @@ _prozubi_bill_to_rtf_cb(
 
 extern size_t  EXPORTDLL
 prozubi_bill_to_rtf(
-		prozubi_t *p, cJSON *bill, char **rtf);
+		kdata2_t *p, cJSON *bill, char **rtf);
 
 #endif /* ifndef BILL_H */

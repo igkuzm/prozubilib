@@ -1,8 +1,8 @@
 /**
- * File              : passport.h
+ * File              : passport.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 07.09.2024
+ * Last Modified Date: 25.04.2026
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -43,7 +43,7 @@ prozubi_passport_foreach(
 	if (!kdata->db){
 			if (kdata->on_error)
 				kdata->on_error(kdata->on_error_data,		
-		STR_ERR("%s", "kdata->db is NULL"));
+		STR("%s", "kdata->db is NULL"));
 		return;
 	}
 
@@ -66,7 +66,7 @@ PASSPORT_COLUMNS
 	if (res != SQLITE_OK) {
 		if (kdata->on_error)
 			kdata->on_error(kdata->on_error_data,		
-		STR_ERR("sqlite3_prepare_v2: %s: %s", SQL, sqlite3_errmsg(kdata->db)));	
+		STR("sqlite3_prepare_v2: %s: %s", SQL, sqlite3_errmsg(kdata->db)));	
 		return;
 	}	
 
@@ -76,7 +76,7 @@ PASSPORT_COLUMNS
 		if (p == NULL){
 			if (kdata->on_error)
 				kdata->on_error(kdata->on_error_data,				
-					STR_ERR("%s", "can't allocate struct passport_t")); 
+					STR("%s", "can't allocate struct passport_t")); 
 			return;
 		}	
 
@@ -159,7 +159,7 @@ prozubi_passport_new(
 	if (p == NULL){
 			if (kdata->on_error)
 				kdata->on_error(kdata->on_error_data,			
-			STR_ERR("%s", "can't allocate struct passport_t")); 
+			STR("%s", "can't allocate struct passport_t")); 
 			return NULL;
 	}
 

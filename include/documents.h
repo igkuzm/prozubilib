@@ -2,7 +2,7 @@
  * File              : documents.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 25.07.2023
- * Last Modified Date: 05.10.2024
+ * Last Modified Date: 25.04.2026
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef DOCUMENTS_H
@@ -19,7 +19,7 @@
 extern const char EXPORTDLL * 
 documents_get_medkarta(
 		const char *template_file_path,
-		prozubi_t *p,
+		kdata2_t *p,
 		struct passport_t *patient,
 		struct case_t *c
 		);
@@ -27,7 +27,7 @@ documents_get_medkarta(
 extern const char EXPORTDLL * 
 documents_get_plan_lecheniya(
 		const char *template_file_path,
-		prozubi_t *p,
+		kdata2_t *p,
 		struct passport_t *patient,
 		struct case_t *c
 		);
@@ -35,7 +35,7 @@ documents_get_plan_lecheniya(
 extern const char EXPORTDLL * 
 documents_get_case(
 		const char *template_file_path,
-		prozubi_t *p,
+		kdata2_t *p,
 		struct passport_t *patient,
 		struct case_t *c
 		);
@@ -43,7 +43,7 @@ documents_get_case(
 extern const char EXPORTDLL * 
 documents_get_akt(
 		const char *template_file_path,
-		prozubi_t *p,
+		kdata2_t *p,
 		struct passport_t *patient,
 		struct case_t *c
 		);
@@ -51,7 +51,7 @@ documents_get_akt(
 extern const char EXPORTDLL * 
 documents_get_dogovor(
 		const char *template_file_path,
-		prozubi_t *p,
+		kdata2_t *p,
 		struct passport_t *patient
 		);
 

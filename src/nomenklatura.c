@@ -1,15 +1,15 @@
 /**
- * File              : nomenklatura.h
+ * File              : nomenklatura.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 11.05.2023
- * Last Modified Date: 13.09.2024
+ * Last Modified Date: 25.04.2026
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
 #include "../include/nomenklatura.h"
 
 static nomenklatura_t *
-_nomenklatura_new(prozubi_t *p)
+_nomenklatura_new(kdata2_t *p)
 {
 	nomenklatura_t *c = NEW(nomenklatura_t);
 	if (c == NULL){
@@ -30,7 +30,7 @@ _nomenklatura_new(prozubi_t *p)
 
  void
 prozubi_nomenklatura_foreach(
-		prozubi_t *p,
+		kdata2_t *p,
 		const char *predicate,
 		void * user_data,
 		void * (*callback)(
@@ -50,7 +50,7 @@ prozubi_nomenklatura_foreach(
 	if (!callback){
 		if (p->on_error)
 			p->on_error(p->on_error_data,		
-		STR_ERR("%s", "callback is NULL"));
+		STR("%s", "callback is NULL"));
 		return;
 	}
 
@@ -59,7 +59,7 @@ prozubi_nomenklatura_foreach(
 	{
 		if (p->on_error)
 			p->on_error(p->on_error_data,		
-			STR_ERR("SQLite: Failed to create '%s': %s", 
+			STR("SQLite: Failed to create '%s': %s", 
 				NOMENKLATURA_BASE, sqlite3_errmsg(db)));
 		return;	
 	}
@@ -85,7 +85,7 @@ prozubi_nomenklatura_foreach(
 	if(sqlite3_prepare_v2(db, SQL, -1, &stmt_p, NULL)){
 		if (p->on_error)
 			p->on_error(p->on_error_data,				
-			STR_ERR("sqlite3_prepare_v2: %s: %s", SQL, sqlite3_errmsg(db)));	
+			STR("sqlite3_prepare_v2: %s: %s", SQL, sqlite3_errmsg(db)));	
 		sqlite3_close(db);
 		return;
 	};
@@ -166,7 +166,7 @@ prozubi_nomenklatura_foreach(
 			if(sqlite3_prepare_v2(db, SQL_c, -1, &stmt_c, NULL)){
 				if (p->on_error)
 					p->on_error(p->on_error_data,			
-					STR_ERR("sqlite3_prepare_v2: %s: %s", SQL_c, sqlite3_errmsg(db)));	
+					STR("sqlite3_prepare_v2: %s: %s", SQL_c, sqlite3_errmsg(db)));	
 				sqlite3_close(db);
 				return;
 			};

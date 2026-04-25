@@ -1,8 +1,8 @@
 /**
- * File              : bill.h
+ * File              : bill.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.12.2023
- * Last Modified Date: 13.09.2024
+ * Last Modified Date: 25.04.2026
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -11,7 +11,7 @@
 
  struct bill_t *
 _bill_new(
-		prozubi_t *p,
+		kdata2_t *p,
 		cJSON *bill,
 		BILL_TYPE type,
 		int itemIndex,
@@ -61,7 +61,7 @@ prozubi_bill_free(struct bill_t *t)
 
  void
 prozubi_bill_foreach(
-		prozubi_t *p,
+		kdata2_t *p,
 		cJSON *bill,
 		void * userdata,
 		void (*callback)(
@@ -134,7 +134,7 @@ prozubi_bill_foreach(
 
  cJSON *
 prozubi_bill_add_item(
-		prozubi_t *kdata,
+		kdata2_t *kdata,
 		cJSON *bill,
 		const char *title,
 		const char *kod,
@@ -192,7 +192,7 @@ prozubi_bill_add_item(
 
  void
 prozubi_bill_remove_item(
-		prozubi_t *kdata,
+		kdata2_t *kdata,
 		cJSON *bill,
 		int item_index
 		)
@@ -218,7 +218,7 @@ prozubi_bill_remove_item(
 
  cJSON_bool
 prozubi_bill_set_item_title(
-		prozubi_t *kdata,
+		kdata2_t *kdata,
 		cJSON *bill,
 		int item_index,
 		const char *title
@@ -247,7 +247,7 @@ prozubi_bill_set_item_title(
 
  cJSON_bool
 prozubi_bill_set_item_kod(
-		prozubi_t *kdata,
+		kdata2_t *kdata,
 		cJSON *bill,
 		int item_index,
 		const char *kod
@@ -276,7 +276,7 @@ prozubi_bill_set_item_kod(
 
  cJSON_bool
 prozubi_bill_set_item_price(
-		prozubi_t *kdata,
+		kdata2_t *kdata,
 		cJSON *bill,
 		int item_index,
 		int price
@@ -322,7 +322,7 @@ prozubi_bill_set_item_price(
 
  cJSON_bool
 prozubi_bill_set_item_count(
-		prozubi_t *kdata,
+		kdata2_t *kdata,
 		cJSON *bill,
 		int item_index,
 		int count
@@ -414,7 +414,7 @@ prozubi_bill_set_item_count(
 }
 
  size_t prozubi_bill_to_rtf(
-		prozubi_t *p, cJSON *bill, char **rtf)
+		kdata2_t *p, cJSON *bill, char **rtf)
 {
 	struct str s;
 	// create RTF table

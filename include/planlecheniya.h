@@ -2,7 +2,7 @@
  * File              : planlecheniya.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.04.2023
- * Last Modified Date: 09.10.2025
+ * Last Modified Date: 25.04.2026
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -39,7 +39,7 @@ prozubi_planlecheniya_free(struct planlecheniya_t *t);
 
 extern void EXPORTDLL
 prozubi_planlecheniya_foreach(
-		prozubi_t *p,
+		kdata2_t *p,
 		cJSON *planlecheniya,
 		void * userdata,
 		void * (*callback)(
@@ -50,26 +50,26 @@ prozubi_planlecheniya_foreach(
 
 extern cJSON EXPORTDLL *
 prozubi_planlecheniya_add_stage(
-		prozubi_t *p,
+		kdata2_t *p,
 		cJSON *planlecheniya
 		);
 
 extern void EXPORTDLL
 prozubi_planlecheniya_remove_stage(
-		prozubi_t *p,
+		kdata2_t *p,
 		cJSON *planlecheniya,
 		int stage_index
 		);
 
 extern cJSON EXPORTDLL *
 _planlecheniya_get_stage(
-		prozubi_t *p,
+		kdata2_t *p,
 		cJSON *planlecheniya,
 		int stage_index);
 
 extern cJSON EXPORTDLL *
 prozubi_planlecheniya_insert_item(
-		prozubi_t *p,
+		kdata2_t *p,
 		cJSON *planlecheniya,
 		int stage_index,
 		int item_index,
@@ -81,7 +81,7 @@ prozubi_planlecheniya_insert_item(
 
 extern cJSON EXPORTDLL *
 prozubi_planlecheniya_add_item(
-		prozubi_t *p,
+		kdata2_t *p,
 		cJSON *planlecheniya,
 		int stage_index,
 		const char *title,
@@ -92,7 +92,7 @@ prozubi_planlecheniya_add_item(
 
 extern void EXPORTDLL
 prozubi_planlecheniya_remove_item(
-		prozubi_t *p,
+		kdata2_t *p,
 		cJSON *planlecheniya,
 		int stage_index,
 		int item_index
@@ -100,7 +100,7 @@ prozubi_planlecheniya_remove_item(
 
 extern cJSON_bool EXPORTDLL
 prozubi_planlecheniya_set_item_title(
-		prozubi_t *p,
+		kdata2_t *p,
 		cJSON *planlecheniya,
 		int stage_index,
 		int item_index,
@@ -109,7 +109,7 @@ prozubi_planlecheniya_set_item_title(
 
 extern cJSON_bool EXPORTDLL
 prozubi_planlecheniya_set_item_kod(
-		prozubi_t *p,
+		kdata2_t *p,
 		cJSON *planlecheniya,
 		int stage_index,
 		int item_index,
@@ -118,7 +118,7 @@ prozubi_planlecheniya_set_item_kod(
 
 extern cJSON_bool EXPORTDLL
 prozubi_planlecheniya_set_item_price(
-		prozubi_t *p,
+		kdata2_t *p,
 		cJSON *planlecheniya,
 		int stage_index,
 		int item_index,
@@ -127,7 +127,7 @@ prozubi_planlecheniya_set_item_price(
 
 extern cJSON_bool EXPORTDLL
 prozubi_planlecheniya_set_item_count(
-		prozubi_t *p,
+		kdata2_t *p,
 		cJSON *planlecheniya,
 		int stage_index,
 		int item_index,
@@ -136,24 +136,24 @@ prozubi_planlecheniya_set_item_count(
 
 extern cJSON_bool EXPORTDLL
 prozubi_planlecheniya_set_stage_duration(
-		prozubi_t *p,
+		kdata2_t *p,
 		cJSON *planlecheniya,
 		int stage_index,
 		int duration
 		);
 
 extern size_t EXPORTDLL prozubi_planlecheniya_to_rtf(
-		prozubi_t *p, cJSON *planlecheniya, char **rtf);
+		kdata2_t *p, cJSON *planlecheniya, char **rtf);
 
 extern int EXPORTDLL prozubi_planlecheniya_get_price_total(
-		prozubi_t *p, cJSON *planlecheniya);
+		kdata2_t *p, cJSON *planlecheniya);
 
 extern int EXPORTDLL prozubi_planlecheniya_get_duration_total(
-		prozubi_t *p, cJSON *planlecheniya);
+		kdata2_t *p, cJSON *planlecheniya);
 
 extern int EXPORTDLL
 prozubi_planlecheniya_zformula_image(
-		prozubi_t *p, struct case_t *c, 
+		kdata2_t *p, struct case_t *c, 
 		const char *imagepath, 
 		void **data, size_t *len);
 #endif /* ifndef PLANLECHENIYA_H */

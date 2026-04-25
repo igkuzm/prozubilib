@@ -2,7 +2,7 @@
  * File              : nomenklatura.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 11.05.2023
- * Last Modified Date: 13.09.2024
+ * Last Modified Date: 25.04.2026
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -48,7 +48,7 @@ END_ENUM_STRING(NOMENKLATURA)
 
 extern void EXPORTDLL
 prozubi_nomenklatura_foreach(
-		prozubi_t *p,
+		kdata2_t *p,
 		const char *predicate,
 		void * user_data,
 		void * (*callback)(

@@ -25,7 +25,7 @@ SET(KDATA2_SOURCE_DIR ${PROZUBI_SOURCE_DIR}/kdata2)
 add_subdirectory(${KDATA2_SOURCE_DIR})
 SET(CYANDEXDISK_SOURCE_DIR ${KDATA2_SOURCE_DIR}/cYandexDisk)
 
-add_subdirectory(cYclients)
+#add_subdirectory(cYclients)
 
 include_directories(${KDATA2_SOURCE_DIR}/sqlite3)
 
@@ -94,9 +94,9 @@ add_library(${TARGET} STATIC
 	${ADDSRC}
 )
 
-target_link_libraries(${TARGET} kdata2 ${ADDLIBS} tiff cYclients)
+target_link_libraries(${TARGET} kdata2 ${ADDLIBS} tiff m)
 
-if(${BUILD_TEST})
+if(${WITH_TEST})
 	add_executable(${TARGET}_test test.c)
 	target_link_libraries(${TARGET}_test ${TARGET} ${ADDLIBS})
 endif()

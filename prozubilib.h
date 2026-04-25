@@ -2,7 +2,7 @@
  * File              : prozubilib.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 02.02.2026
+ * Last Modified Date: 25.04.2026
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -39,22 +39,18 @@ prozubi_init(
 		void      (*on_log)        (void *on_log_data, const char *message)
 		);
 
-/* set Yandex Disk token */
-int
-prozubi_set_token(
-		prozubi_t *p,
-		const char *token
-		);
-
 /* start Yandex Disk sync */
 int
-prozubi_start_sync(
-		prozubi_t *p
+prozubi_start_yandex_disk_sync(
+		prozubi_t *p,
+		const char *token,
+		void *progressp,
+		int (*progress)(void *progressp, pphase, int current, int total)
 		);
 
 /* stop Yandex Disk sync */
 int
-prozubi_stop_sync(
+prozubi_stop_yandex_disk_sync(
 		prozubi_t *p
 		);
 

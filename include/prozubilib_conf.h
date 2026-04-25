@@ -2,7 +2,7 @@
  * File              : prozubilib_conf.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 17.04.2023
- * Last Modified Date: 09.10.2025
+ * Last Modified Date: 25.04.2026
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -41,13 +41,17 @@
 #include "fm.h"
 #include "../kdata2/kdata2.h"
 #include <sqlite3.h>
-#include "../kdata2/cYandexDisk/cJSON.h"
-#include "../kdata2/cYandexDisk/uuid4.h"
-#include "../kdata2/cYandexDisk/log.h"
-#include "../kdata2/cYandexDisk/alloc.h"
-#include "../kdata2/cYandexDisk/str.h"
+#include "../kdata2/modules/yandexdisk/cYandexDisk/cJSON.h"
+#include "../kdata2/uuid4.h"
+#include "../kdata2/log.h"
+#include "../kdata2/alloc.h"
+#include "../kdata2/str.h"
+#include "../kdata2/modules/yandexdisk/yandexdisk.h"
 
-typedef kdata2_t prozubi_t;
+typedef struct prozubi {
+	kdata2_t kdata2;	
+	kdydm_t *ydm;	   // yandex disk module
+} prozubi_t;
 
 #ifndef UUID4_STR
 #define UUID4_STR

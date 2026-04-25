@@ -2,7 +2,7 @@
  * File              : documents.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 25.07.2023
- * Last Modified Date: 13.12.2025
+ * Last Modified Date: 25.04.2026
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -33,7 +33,7 @@ static void free_out_dir(){
 
 struct pl_images{
 	struct str str;
-	prozubi_t *p;
+	kdata2_t *p;
 };
 
 static int
@@ -88,7 +88,7 @@ pl_images_cb(void *d, struct image_t *image){
 
 static void 
 pl_images_get(
-		prozubi_t *p, struct case_t *c, struct pl_images *img)
+		kdata2_t *p, struct case_t *c, struct pl_images *img)
 {
 	prozubi_image_foreach(p, c->id, NULL, 
 			img, pl_images_cb);
@@ -175,7 +175,7 @@ PL_REPS
 
 static char *pl_replace(
 		int index,
-		prozubi_t *p,
+		kdata2_t *p,
 		struct passport_t *patient,
 		struct case_t *c,
 		char *table,
@@ -219,7 +219,7 @@ PL_REPS
 
 static int
 _documents_template_prepare(const char *template_file_path, 
-							prozubi_t *p,
+							kdata2_t *p,
 							FILE **in, FILE **out)
 {
 	// open template
@@ -227,7 +227,7 @@ _documents_template_prepare(const char *template_file_path,
 	if (*in == NULL){
 		if (p->on_error)
 			p->on_error(p->on_error_data,			
-						STR_ERR("can't read file: %s", 
+						STR("can't read file: %s", 
 								template_file_path));
 		return 1;	
 	}
@@ -240,7 +240,7 @@ _documents_template_prepare(const char *template_file_path,
 	if (*out == NULL){
 		if (p->on_error)
 			p->on_error(p->on_error_data,			
-						STR_ERR("can't wtite file: %s", OUTFILE));
+						STR("can't wtite file: %s", OUTFILE));
 		fclose(*in);
 		return 1;	
 	}
@@ -249,7 +249,7 @@ _documents_template_prepare(const char *template_file_path,
 }
 
 static const char*
-_documents_finish(prozubi_t *p, FILE *in, FILE *out)
+_documents_finish(kdata2_t *p, FILE *in, FILE *out)
 {
 	char *cp1251 = OUTFILE "_cp1251.rtf";
 	fclose(in);
@@ -267,7 +267,7 @@ _documents_finish(prozubi_t *p, FILE *in, FILE *out)
 }
 
 static void
-_documents_parse_rtf(prozubi_t *p, FILE *in, FILE *out,
+_documents_parse_rtf(kdata2_t *p, FILE *in, FILE *out,
 					 struct passport_t *patient, 		
 					 struct case_t *c,
 					 char *table,
@@ -330,7 +330,7 @@ _documents_parse_rtf(prozubi_t *p, FILE *in, FILE *out,
 const char * 
 documents_get_medkarta(
 		const char *template_file_path,
-		prozubi_t *p,
+		kdata2_t *p,
 		struct passport_t *patient,
 		struct case_t *c
 		)
@@ -358,7 +358,7 @@ documents_get_medkarta(
 const char * 
 documents_get_plan_lecheniya(
 		const char *template_file_path,
-		prozubi_t *p,
+		kdata2_t *p,
 		struct passport_t *patient,
 		struct case_t *c
 		)
@@ -452,7 +452,7 @@ documents_get_plan_lecheniya(
  const char * 
 documents_get_case(
 		const char *template_file_path,
-		prozubi_t *p,
+		kdata2_t *p,
 		struct passport_t *patient,
 		struct case_t *c
 		)
@@ -472,7 +472,7 @@ documents_get_case(
  const char * 
 documents_get_akt(
 		const char *template_file_path,
-		prozubi_t *p,
+		kdata2_t *p,
 		struct passport_t *patient,
 		struct case_t *c
 		)
@@ -501,7 +501,7 @@ documents_get_akt(
  const char * 
 documents_get_dogovor(
 		const char *template_file_path,
-		prozubi_t *p,
+		kdata2_t *p,
 		struct passport_t *patient
 		)
 {

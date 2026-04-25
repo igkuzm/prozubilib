@@ -2,7 +2,7 @@
  * File              : images.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 17.10.2025
+ * Last Modified Date: 25.04.2026
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -51,7 +51,7 @@ _prozubi_image_jpg_write_func(
 
  int
 prozubi_image_set_image_raw(
-		prozubi_t *p,
+		kdata2_t *p,
 		struct image_t *i,
 		unsigned char * raw_image, 
 		int width, int height, int channels)
@@ -75,7 +75,7 @@ prozubi_image_set_image_raw(
 	if (res == 0){
 		if (p->on_error)
 			p->on_error(p->on_error_data,			
-		STR_ERR("%s", "can't open image"));
+		STR("%s", "can't open image"));
 		return -1;
 	}
 
@@ -99,7 +99,7 @@ prozubi_image_set_image_raw(
 
  int
 prozubi_image_set_image_from_mem(
-		prozubi_t *p,
+		kdata2_t *p,
 		struct image_t *i,
 		void * data, int len)
 {
@@ -119,7 +119,7 @@ prozubi_image_set_image_from_mem(
 	if (!image){
 		if (p->on_error)
 			p->on_error(p->on_error_data,			
-		STR_ERR("%s", "can't open image"));
+		STR("%s", "can't open image"));
 		return -1;
 	}
 	
@@ -132,7 +132,7 @@ prozubi_image_set_image_from_mem(
 
  int
 prozubi_image_set_image_from_file(
-		prozubi_t *p,
+		kdata2_t *p,
 		struct image_t *i,
 		const char *filename)
 {
@@ -172,7 +172,7 @@ prozubi_image_set_image_from_file(
 	if (!image){
 		if (p->on_error)
 			p->on_error(p->on_error_data,			
-				STR_ERR("%s", "can't open image"));
+				STR("%s", "can't open image"));
 		return -1;
 	}
 
@@ -184,14 +184,14 @@ prozubi_image_set_image_from_file(
 }
 
 static struct image_t *_prozubi_image_new(
-		prozubi_t *p)
+		kdata2_t *p)
 {
 	/* allocate image_t */
 	struct image_t *i = NEW(struct image_t);
 	if (i == NULL){
 		if (p->on_error)
 				p->on_error(p->on_error_data,			
-			STR_ERR("%s", 
+			STR("%s", 
 				"can't allocate struct image_t")); 
 		return NULL;
 	} 
@@ -234,7 +234,7 @@ static struct image_t *_prozubi_image_new(
 		if (c->member == NULL){ \
 			if (p->on_error)\
 				p->on_error(p->on_error_data,\
-				STR_ERR(\
+				STR(\
 					"can't allocate size: %ld"\
 					, len)); \
 			return -1;\
@@ -258,7 +258,7 @@ static struct image_t *_prozubi_image_new(
 	if (c->member == NULL){ \
 		if (p->on_error)\
 				p->on_error(p->on_error_data,\
-			STR_ERR(\
+			STR(\
 				"can't allocate size: %ld"\
 				, len + 1)); \
 		return -1; \
@@ -275,7 +275,7 @@ static struct image_t *_prozubi_image_new(
 /* allocate and init new image */
  struct image_t *
 prozubi_image_new(
-		prozubi_t *p,
+		kdata2_t *p,
 #define IMAGES_COLUMN_DATE(member, number, title      )\
 	 	time_t member, 
 #define IMAGES_COLUMN_TEXT(member, number, title      )\
@@ -326,7 +326,7 @@ prozubi_image_new(
 
  struct image_t *
 prozubi_image_from_sql(
-		prozubi_t *p,
+		kdata2_t *p,
 		sqlite3_stmt *stmt)
 {
 	int i;
@@ -367,7 +367,7 @@ prozubi_image_from_sql(
 					if (str == NULL){ \
 					if (p->on_error)\
 							p->on_error(p->on_error_data,\
-						STR_ERR(\
+						STR(\
 							"can't allocate string with len: %ld",\
 						 	len+1)); break;\
 					}	\
@@ -393,7 +393,7 @@ prozubi_image_from_sql(
 					if (data == NULL){ \
 						if (p->on_error)\
 							p->on_error(p->on_error_data,\
-						STR_ERR(\
+						STR(\
 							"can't allocate data with len: %ld",\
 						 	len)); break;\
 					} \
@@ -429,7 +429,7 @@ prozubi_image_from_sql(
  * to get all images in database */
  void 
 prozubi_image_foreach(
-		prozubi_t  *p,
+		kdata2_t  *p,
 		const char *caseid,
 		const char *predicate,
 		void       *user_data,
@@ -447,7 +447,7 @@ prozubi_image_foreach(
 	if (!p->db){
 		if (p->on_error)
 			p->on_error(p->on_error_data,		
-		STR_ERR("%s", "kdata->db is NULL"));
+		STR("%s", "kdata->db is NULL"));
 		return;
 	}
 
@@ -476,7 +476,7 @@ prozubi_image_foreach(
 	if (res != SQLITE_OK) {
 		if (p->on_error)
 			p->on_error(p->on_error_data,		
-		STR_ERR("sqlite3_prepare_v2: %s: %s", 
+		STR("sqlite3_prepare_v2: %s: %s", 
 			SQL, sqlite3_errmsg(p->db)));	
 		return;
 	}	
@@ -630,7 +630,7 @@ static unsigned char * _prozubi_image_bin_to_strhex(
 
 /* convert image to RTF string */
  size_t prozubi_image_to_rtf(
-		prozubi_t *p, struct image_t *image, char **rtf)
+		kdata2_t *p, struct image_t *image, char **rtf)
 {
 	int x, y, c;
 	unsigned char *str;

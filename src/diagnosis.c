@@ -1,8 +1,8 @@
 /**
- * File              : diagnosis.h
+ * File              : diagnosis.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 30.05.2023
- * Last Modified Date: 24.08.2024
+ * Last Modified Date: 25.04.2026
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -60,7 +60,7 @@ _prozubi_diagnosis_poteria_zhevatelnoy_effectivnosti(
 
  char *
 prozubi_diagnosis_get(
-			prozubi_t *p,
+			kdata2_t *p,
 			struct case_t *c
 		)
 {

@@ -2,7 +2,7 @@
  * File              : cases.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 06.05.2023
- * Last Modified Date: 01.10.2024
+ * Last Modified Date: 25.04.2026
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef CASES_H
@@ -331,34 +331,34 @@ prozubi_bill_new(struct case_t *c);
 
 #define CASES_COLUMN_DATE(member, number, title)\
 extern int EXPORTDLL prozubi_case_set_##number(\
-		prozubi_t *p, struct case_t *c, time_t t);
+		kdata2_t *p, struct case_t *c, time_t t);
 
 #define CASES_COLUMN_DATA(member, number, title, type)\
 extern int EXPORTDLL prozubi_case_set_##number(\
-		prozubi_t *p, struct case_t *c,\
+		kdata2_t *p, struct case_t *c,\
 	   	type *data, size_t len);
 
 #define CASES_COLUMN_TEXT(member, number, title)\
 extern int EXPORTDLL prozubi_case_set_##number(\
-		prozubi_t *p, struct case_t *c, const char *text);
+		kdata2_t *p, struct case_t *c, const char *text);
 		CASES_COLUMNS
 #undef CASES_COLUMN_DATE
 #undef CASES_COLUMN_TEXT			
 #undef CASES_COLUMN_DATA			
 
 extern struct case_t EXPORTDLL *
-prozubi_case_new_for_patient(prozubi_t *p, char patientid[37]);
+prozubi_case_new_for_patient(kdata2_t *p, char patientid[37]);
 
 extern struct case_t EXPORTDLL *
 prozubi_cases_from_sql(
-		prozubi_t *p,
+		kdata2_t *p,
 		sqlite3_stmt *stmt);
 
 /* callback all cases with patientid (set patient id to 
  * NULL to get all cases from database) */
 extern EXPORTDLL void 
 prozubi_cases_foreach(
-		prozubi_t  *p,
+		kdata2_t  *p,
 		const char *patient_id,
 		const char *predicate,
 		void       *user_data,
@@ -407,7 +407,7 @@ struct case_list_node {
 
 extern struct case_list_node  EXPORTDLL * 
 _case_list_node_new(
-			prozubi_t *p,
+			kdata2_t *p,
 			struct case_t *c,
 			void *allocated_ptr,
 			char * title,
@@ -426,11 +426,11 @@ _case_list_node_new(
 
 extern void EXPORTDLL
 prozubi_case_list_node_free(\
-		prozubi_t *p, struct case_list_node *n);
+		kdata2_t *p, struct case_list_node *n);
 
 extern void EXPORTDLL
 prozubi_cases_list_foreach(
-		prozubi_t     *p,
+		kdata2_t     *p,
 		struct case_t *c,
 		void * user_data,
 		void * (*item_callback)(
@@ -441,31 +441,31 @@ prozubi_cases_list_foreach(
 		);
 
 extern int EXPORTDLL prozubi_case_set_text(
-		CASES key, prozubi_t *p, struct case_t *c, 
+		CASES key, kdata2_t *p, struct case_t *c, 
 		const char *text);
 
 extern int EXPORTDLL prozubi_case_set_date(
-		CASES key, prozubi_t *p, struct case_t *c, time_t t);
+		CASES key, kdata2_t *p, struct case_t *c, time_t t);
 
 extern int EXPORTDLL prozubi_case_set_data(
-		CASES key, prozubi_t *p, struct case_t *c, 
+		CASES key, kdata2_t *p, struct case_t *c, 
 		void *data, size_t len);
 
 extern struct case_t EXPORTDLL * prozubi_case_get(
-		prozubi_t *p, const char *uuid);
+		kdata2_t *p, const char *uuid);
 
 extern int EXPORTDLL prozubi_case_update(
-		prozubi_t *p, struct case_t *c
+		kdata2_t *p, struct case_t *c
 		);
 
 extern int EXPORTDLL prozubi_case_remove(
-		prozubi_t *p, struct case_t *c);
+		kdata2_t *p, struct case_t *c);
 
 extern void EXPORTDLL prozubi_case_list_node_free_with_case(
-		prozubi_t *p, struct case_list_node *n);
+		kdata2_t *p, struct case_list_node *n);
 
 /* convert zubformula to RTF string */
 extern size_t EXPORTDLL prozubi_case_zubformula_to_rtf(
-	prozubi_t *p, struct case_t *c, char **rtf);
+	kdata2_t *p, struct case_t *c, char **rtf);
 
 #endif /* ifndef CASES_H */

@@ -1,8 +1,8 @@
 /**
- * File              : prices.h
+ * File              : prices.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 24.08.2024
+ * Last Modified Date: 25.04.2026
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -39,7 +39,7 @@ prozubi_price_new(
 	if (p == NULL){
 		if (kdata->on_error)
 			kdata->on_error(kdata->on_error_data,			
-			STR_ERR("%s", "can't allocate struct price_t")); 
+			STR("%s", "can't allocate struct price_t")); 
 		return NULL;
 	}	
 
@@ -83,7 +83,7 @@ prozubi_price_foreach(
 	if (!kdata->db){
 		if (kdata->on_error)
 			kdata->on_error(kdata->on_error_data,		
-			STR_ERR("%s", "kdata->db is NULL"));
+			STR("%s", "kdata->db is NULL"));
 		return;
 	}
 
@@ -103,7 +103,7 @@ prozubi_price_foreach(
 	if (res != SQLITE_OK) {
 		if (kdata->on_error)
 			kdata->on_error(kdata->on_error_data,		
-			STR_ERR("sqlite3_prepare_v2: %s: %s", SQL, sqlite3_errmsg(kdata->db)));	
+			STR("sqlite3_prepare_v2: %s: %s", SQL, sqlite3_errmsg(kdata->db)));	
 		return;
 	}	
 
@@ -113,7 +113,7 @@ prozubi_price_foreach(
 		if (p == NULL){
 			if (kdata->on_error)
 				kdata->on_error(kdata->on_error_data,				
-				STR_ERR("%s", "can't allocate struct price_t")); 
+				STR("%s", "can't allocate struct price_t")); 
 			return;
 		}	
 

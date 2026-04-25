@@ -2,7 +2,7 @@
  * File              : planlecheniya.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.04.2023
- * Last Modified Date: 09.10.2025
+ * Last Modified Date: 25.04.2026
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -22,7 +22,7 @@ do {\
 
  struct planlecheniya_t *
 _planlecheniya_new(
-		prozubi_t *p,
+		kdata2_t *p,
 		cJSON *planlecheniya,
 		PLANLECHENIYA_TYPE type,
 		int stageIndex,
@@ -38,7 +38,7 @@ _planlecheniya_new(
 	if (t == NULL){
 			if (p->on_error)
 				p->on_error(p->on_error_data,
-				STR_ERR(
+				STR(
 					"can't allocate planlecheniya_t")); 
 			return NULL;
 	}
@@ -76,7 +76,7 @@ prozubi_planlecheniya_free(struct planlecheniya_t *t)
 }
 
 static int _planlecheniya_check(
-		prozubi_t *p,
+		kdata2_t *p,
 		cJSON *planlecheniya)
 {
 	if (!p)
@@ -90,7 +90,7 @@ static int _planlecheniya_check(
 
  void
 prozubi_planlecheniya_foreach(
-		prozubi_t *p,
+		kdata2_t *p,
 		cJSON *planlecheniya,
 		void * userdata,
 		void * (*callback)(
@@ -271,7 +271,7 @@ prozubi_planlecheniya_foreach(
 
  cJSON *
 prozubi_planlecheniya_add_stage(
-		prozubi_t *p,
+		kdata2_t *p,
 		cJSON *planlecheniya
 		)
 {
@@ -296,7 +296,7 @@ prozubi_planlecheniya_add_stage(
 
  void
 prozubi_planlecheniya_remove_stage(
-		prozubi_t *p,
+		kdata2_t *p,
 		cJSON *planlecheniya,
 		int stage_index
 		)
@@ -310,7 +310,7 @@ prozubi_planlecheniya_remove_stage(
 
 cJSON *
 _planlecheniya_get_stage(
-		prozubi_t *p,
+		kdata2_t *p,
 		cJSON *planlecheniya,
 		int stage_index)
 {
@@ -330,7 +330,7 @@ _planlecheniya_get_stage(
 
 static cJSON *
 _planlecheniya_get_stage_items_array(
-		prozubi_t *p,
+		kdata2_t *p,
 		cJSON *planlecheniya,
 		int stage_index)
 {
@@ -350,7 +350,7 @@ _planlecheniya_get_stage_items_array(
 
 static cJSON *
 _planlecheniya_get_item(
-		prozubi_t *p,
+		kdata2_t *p,
 		cJSON *planlecheniya,
 		int stage_index,
 		int item_index)
@@ -372,7 +372,7 @@ _planlecheniya_get_item(
 
  cJSON *
 prozubi_planlecheniya_insert_item(
-		prozubi_t *p,
+		kdata2_t *p,
 		cJSON *planlecheniya,
 		int stage_index,
 		int item_index,
@@ -447,7 +447,7 @@ prozubi_planlecheniya_insert_item(
 
  cJSON *
 prozubi_planlecheniya_add_item(
-		prozubi_t *p,
+		kdata2_t *p,
 		cJSON *planlecheniya,
 		int stage_index,
 		const char *title,
@@ -463,7 +463,7 @@ prozubi_planlecheniya_add_item(
 
  void
 prozubi_planlecheniya_remove_item(
-		prozubi_t *p,
+		kdata2_t *p,
 		cJSON *planlecheniya,
 		int stage_index,
 		int item_index
@@ -482,7 +482,7 @@ prozubi_planlecheniya_remove_item(
 
  cJSON_bool
 prozubi_planlecheniya_set_item_title(
-		prozubi_t *p,
+		kdata2_t *p,
 		cJSON *planlecheniya,
 		int stage_index,
 		int item_index,
@@ -502,7 +502,7 @@ prozubi_planlecheniya_set_item_title(
 
  cJSON_bool
 prozubi_planlecheniya_set_item_kod(
-		prozubi_t *p,
+		kdata2_t *p,
 		cJSON *planlecheniya,
 		int stage_index,
 		int item_index,
@@ -522,7 +522,7 @@ prozubi_planlecheniya_set_item_kod(
 
  cJSON_bool
 prozubi_planlecheniya_set_item_price(
-		prozubi_t *p,
+		kdata2_t *p,
 		cJSON *planlecheniya,
 		int stage_index,
 		int item_index,
@@ -565,7 +565,7 @@ prozubi_planlecheniya_set_item_price(
 
  cJSON_bool
 prozubi_planlecheniya_set_item_count(
-		prozubi_t *p,
+		kdata2_t *p,
 		cJSON *planlecheniya,
 		int stage_index,
 		int item_index,
@@ -604,7 +604,7 @@ prozubi_planlecheniya_set_item_count(
 
  cJSON_bool
 prozubi_planlecheniya_set_stage_duration(
-		prozubi_t *p,
+		kdata2_t *p,
 		cJSON *planlecheniya,
 		int stage_index,
 		int duration
@@ -663,7 +663,7 @@ prozubi_planlecheniya_set_stage_duration(
 
 int
 prozubi_planlecheniya_zformula_image(
-		prozubi_t *p, struct case_t *c, 
+		kdata2_t *p, struct case_t *c, 
 		const char *imagepath, 
 		void **data, size_t *len)
 {
@@ -863,7 +863,7 @@ static void * _prozubi_planlecheniya_to_rtf_cb(
 }
 
  size_t prozubi_planlecheniya_to_rtf(
-		prozubi_t *p, cJSON *planlecheniya, char **rtf)
+		kdata2_t *p, cJSON *planlecheniya, char **rtf)
 {
 	struct str s;
 	if (str_init(&s))
@@ -884,7 +884,7 @@ static void * _prozubi_planlecheniya_to_rtf_cb(
 }
 
  int prozubi_planlecheniya_get_price_total(
-		prozubi_t *p, cJSON *planlecheniya)
+		kdata2_t *p, cJSON *planlecheniya)
 {
 	int total_price = 0;
 	int stage_i = 0;
@@ -943,7 +943,7 @@ static void * _prozubi_planlecheniya_to_rtf_cb(
 }
 
  int prozubi_planlecheniya_get_duration_total(
-		prozubi_t *p, cJSON *planlecheniya)
+		kdata2_t *p, cJSON *planlecheniya)
 {
 	int total_duration = 0;
 	int stage_i = 0;

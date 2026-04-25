@@ -2,7 +2,7 @@
  * File              : images.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.04.2023
- * Last Modified Date: 24.08.2024
+ * Last Modified Date: 25.04.2026
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -88,7 +88,7 @@ END_ENUM_STRING(IMAGES)
 struct prozubi_image_jpg_write_s {
 	void *data;
 	size_t len;
-	prozubi_t *p;
+	kdata2_t *p;
 };
 	
 extern void	EXPORTDLL
@@ -96,20 +96,20 @@ prozubi_images_table_init(struct kdata2_table **images);
 
 extern int EXPORTDLL
 prozubi_image_set_image_raw(
-		prozubi_t *p,
+		kdata2_t *p,
 		struct image_t *i,
 		unsigned char * raw_image, 
 		int width, int height, int channels);
 
 extern int EXPORTDLL
 prozubi_image_set_image_from_mem(
-		prozubi_t *p,
+		kdata2_t *p,
 		struct image_t *i,
 		void * data, int len);
 
 extern int EXPORTDLL
 prozubi_image_set_image_from_file(
-		prozubi_t *p,
+		kdata2_t *p,
 		struct image_t *i,
 		const char *filename);
 
@@ -133,7 +133,7 @@ extern int EXPORTDLL prozubi_image_set_##number(\
 /* allocate and init new image */
 extern struct image_t EXPORTDLL *
 prozubi_image_new(
-		prozubi_t *p,
+		kdata2_t *p,
 #define IMAGES_COLUMN_DATE(member, number, title      )\
 	 	time_t member, 
 #define IMAGES_COLUMN_TEXT(member, number, title      )\
@@ -149,14 +149,14 @@ prozubi_image_new(
 
 extern struct image_t EXPORTDLL *
 prozubi_image_from_sql(
-		prozubi_t *p,
+		kdata2_t *p,
 		sqlite3_stmt *stmt);
 
 /* callback all images with case id; set caseid to NULL 
  * to get all images in database */
 extern void EXPORTDLL
 prozubi_image_foreach(
-		prozubi_t  *p,
+		kdata2_t  *p,
 		const char *caseid,
 		const char *predicate,
 		void       *user_data,
@@ -187,7 +187,7 @@ extern int EXPORTDLL prozubi_image_remove(
 
 /* convert image to RTF string */
 extern size_t EXPORTDLL prozubi_image_to_rtf(
-		prozubi_t *p, struct image_t *image, char **rtf);
+		kdata2_t *p, struct image_t *image, char **rtf);
 
 extern void EXPORTDLL
 _prozubi_image_jpg_write_func(
