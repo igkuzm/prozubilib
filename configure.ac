@@ -42,13 +42,30 @@ esac
 AM_CONDITIONAL([WIN32], [test "$build_windows" = "yes" -a "$build_i386" == "yes"])
 AM_CONDITIONAL([WIN64], [test "$build_windows" = "yes" -a "$build_x86_64" == "yes"])
 
+AC_ARG_ENABLE([withtest], 
+							[AS_HELP_STRING([--with-test], [Build
+							 'test' executable @<:@no@:>@])],
+							 [with_test=yes],
+							 [with_test=no])
+
+AM_CONDITIONAL([WITH_TEST], [test "$with_test" = "yes"])
+
+AC_ARG_ENABLE([winnt], 
+							[AS_HELP_STRING([--enable-winnt], [Enable
+							 Windows NT 4.0 support @<:@no@:>@])],
+							 [enable_winnt=yes],
+							 [enable_winnt=no])
+
+AM_CONDITIONAL([WINNT], [test "$enable_winnt" = "yes"])
+
+
 #set Yandex Disk support
 AM_CONDITIONAL([WITH_YANDEX_DISK], 1)
 
 AC_CONFIG_FILES([
 Makefile
 kdata2/Makefile
-kdata2/cYandexDisk/Makefile
+kdata2/modules/yandexdisk/cYandexDisk/Makefile
 ])
 AC_OUTPUT
 
