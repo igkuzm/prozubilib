@@ -11,7 +11,7 @@ if (NOT DEFINED PROZUBI_SOURCE_DIR)
 endif ()
 
 project(
-	${TARGET} VERSION 1.2 
+	${TARGET} VERSION 1.3 
 	DESCRIPTION "C library to handle dental clinic"
 	LANGUAGES C 
 )
@@ -30,15 +30,9 @@ SET(CYANDEXDISK_SOURCE_DIR ${KDATA2_SOURCE_DIR}/cYandexDisk)
 include_directories(${KDATA2_SOURCE_DIR}/sqlite3)
 
 if (NOT WIN32)
-
 find_package(TIFF)
 include_directories(${TIFF_INCLUDE_DIR})
 list(APPEND ADDLIBS ${TIFF_LIBRARIES})
-
-find_package(SQLite3)
-include_directories(${SQLite3_INCLUDE_DIRS})
-list(APPEND ADDLIBS ${SQLite3_LIBRARIES})
-
 endif()
 
 if(WIN32)
@@ -59,7 +53,7 @@ if(WIN32)
 		include_directories(${CYANDEXDISK_SOURCE_DIR}/${WINDIR}/pthreads-win32/include)	
 #	endif()
 	list(APPEND ADDLIBS pthread)
-#tiff
+#TIFF
 	add_library(tiff STATIC IMPORTED)		
 	set_target_properties(tiff PROPERTIES 
 		IMPORTED_LOCATION
@@ -91,9 +85,12 @@ add_library(${TARGET} STATIC
 	src/fm.c
 	src/stb_image.c
 	src/rtfutf8tocp1251.c
+	src/cJSON.c
 	${ADDSRC}
 )
 
+# with YandexDisk support
+set(WITH_YANDEX_DISK 1)
 target_link_libraries(${TARGET} kdata2 ${ADDLIBS} tiff m)
 
 if(${WITH_TEST})

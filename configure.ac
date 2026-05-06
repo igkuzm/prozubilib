@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([prozubilib], [1.2])
+AC_INIT([prozubilib], [1.3])
 AM_INIT_AUTOMAKE
 AM_MAINTAINER_MODE
 
@@ -41,6 +41,9 @@ case "${host_cpu}" in
 esac
 AM_CONDITIONAL([WIN32], [test "$build_windows" = "yes" -a "$build_i386" == "yes"])
 AM_CONDITIONAL([WIN64], [test "$build_windows" = "yes" -a "$build_x86_64" == "yes"])
+
+#set Yandex Disk support
+AM_CONDITIONAL([WITH_YANDEX_DISK], 1)
 
 AC_CONFIG_FILES([
 Makefile

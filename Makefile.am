@@ -24,6 +24,7 @@ libprozubilib_la_SOURCES = \
 	src/prozubilib.c \
 	src/rtfutf8tocp1251.c \
 	src/fm.c \
+	src/cJSON.c \
 	src/text_on_bitmap.c text_on_bitmap.h
 
 if WIN64
