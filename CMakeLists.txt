@@ -90,7 +90,7 @@ add_library(${TARGET} STATIC
 )
 
 # with YandexDisk support
-set(WITH_YANDEX_DISK 1)
+set(WITH_YANDEX_DISK)
 target_link_libraries(${TARGET} kdata2 ${ADDLIBS} tiff m)
 
 if(${WITH_TEST})
