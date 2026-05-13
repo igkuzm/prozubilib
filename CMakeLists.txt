@@ -7,7 +7,11 @@ set(TARGET prozubilib)
 #add_subdirectory(${PROZUBI_SOURCE_DIR})
 
 if (NOT DEFINED PROZUBI_SOURCE_DIR)
-	SET(PROZUBI_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+	set(PROZUBI_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+endif ()
+
+if (NOT DEFINED WITH_YANDEX_DISK)
+	set(WITH_YANDEX_DISK 1)
 endif ()
 
 project(
@@ -90,7 +94,6 @@ add_library(${TARGET} STATIC
 )
 
 # with YandexDisk support
-set(WITH_YANDEX_DISK)
 target_link_libraries(${TARGET} kdata2 ${ADDLIBS} tiff m)
 
 if(${WITH_TEST})
