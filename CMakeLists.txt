@@ -96,27 +96,26 @@ add_library(${TARGET} STATIC
 # with YandexDisk support
 target_link_libraries(${TARGET} kdata2 ${ADDLIBS} tiff m)
 
+file(GLOB files 
+	"${PROZUBI_SOURCE_DIR}/${WINDIR}/tiff/bin/*.dll"
+	"${PROZUBI_SOURCE_DIR}/*.sqlite"
+	"${PROZUBI_SOURCE_DIR}/*.ttf"
+	"${PROZUBI_SOURCE_DIR}/*.png"
+	"${PROZUBI_SOURCE_DIR}/Templates"
+	)
+
 if(${WITH_TEST})
 	add_executable(${TARGET}_test test.c)
 	target_link_libraries(${TARGET}_test ${TARGET} ${ADDLIBS})
 endif()
 
 #copy files
-if (WIN32)
-	#curl libs
-	#Copy DLLs
-	file(GLOB files 
-		"${PROZUBI_SOURCE_DIR}/${WINDIR}/tiff/bin/*.dll"
-		"${PROZUBI_SOURCE_DIR}/*.sqlite"
-		"${PROZUBI_SOURCE_DIR}/*.ttf"
-		"${PROZUBI_SOURCE_DIR}/*.png"
-		"${PROZUBI_SOURCE_DIR}/Templates"
-		)	
-	#Copy
-	foreach(_file ${files})
-			file(INSTALL
-				DESTINATION "${CMAKE_BINARY_DIR}"
-				FILES "${_file}"
-			)
-	endforeach()	
-endif()
+#curl libs
+#Copy DLLs
+#Copy
+foreach(_file ${files})
+		file(INSTALL
+			DESTINATION "${CMAKE_BINARY_DIR}"
+			FILES "${_file}"
+		)
+endforeach()	
