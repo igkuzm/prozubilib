@@ -493,8 +493,8 @@ char *execdir(const char *path) {
 #ifdef __APPLE__
   return dirname((char *)path);
 #else /* __APPLE__ */
-  char selfpath[128];
-  if (readlink("/proc/self/exe", selfpath, sizeof(selfpath) - 1) < 0) {
+  char *selfpath = malloc(128);
+  if (readlink("/proc/self/exe", selfpath, 127) < 0) {
     return NULL;
   }
   return dirname(selfpath);
