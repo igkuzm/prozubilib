@@ -2,7 +2,7 @@
  * File              : prozubilib.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 25.04.2026
+ * Last Modified Date: 04.06.2026
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -26,7 +26,7 @@
 #include "include/prices.h"
 #include "include/template.h"
 #include "include/rtf.h"
-#include "cYclients/cYclients.h"
+#include "kdata2/modules/yclients/cYclients/cYclients.h"
 
 /* init prozubi database and start yandex disk sync */
 prozubi_t *
