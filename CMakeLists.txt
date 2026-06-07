@@ -14,6 +14,14 @@ if (NOT DEFINED WITH_YANDEX_DISK)
 	set(WITH_YANDEX_DISK 1)
 endif ()
 
+if (NOT DEFINED WITH_YCLIENTS)
+	set(WITH_YCLIENTS 1)
+endif ()
+
+#if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  #list(APPEND CMAKE_C_FLAGS "-DDEBUG")
+#endif()
+
 project(
 	${TARGET} VERSION 1.3 
 	DESCRIPTION "C library to handle dental clinic"
@@ -27,11 +35,11 @@ endif()
 
 SET(KDATA2_SOURCE_DIR ${PROZUBI_SOURCE_DIR}/kdata2)
 add_subdirectory(${KDATA2_SOURCE_DIR})
-SET(CYANDEXDISK_SOURCE_DIR ${KDATA2_SOURCE_DIR}/cYandexDisk)
 
-#add_subdirectory(cYclients)
-
-include_directories(${KDATA2_SOURCE_DIR}/sqlite3)
+include_directories(${CMAKE_SOURCE_DIR})
+#include_directories(${PROZUBI_SOURCE_DIR})
+#include_directories(${KDATA2_SOURCE_DIR})
+#include_directories(${KDATA2_SOURCE_DIR}/sqlite3)
 
 if (NOT WIN32)
 find_package(TIFF)

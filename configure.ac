@@ -65,7 +65,6 @@ AM_CONDITIONAL([WITH_YANDEX_DISK], 1)
 AC_CONFIG_FILES([
 Makefile
 kdata2/Makefile
-kdata2/modules/yandexdisk/cYandexDisk/Makefile
 ])
 AC_OUTPUT
 

@@ -34,8 +34,42 @@ int progress(
 	return 0;
 }
 
+int companies_cb(void *userdata, const CYCCompany *company)
+{
+	printf("COMPANY: %s\n", company->title);
+	return 0;
+}
+
 int main(int argc, char *argv[])
 { 
+	char secret[16], login[32], password[32];
+	int company_id;
+	
+	if (argc < 2){
+		//printf("usage: %s login password\n", argv[0]);
+		//return 0;
+		printf("enter login\n");
+		scanf("%31s", login);
+		printf("enter password\n");
+		scanf("%31s", password);
+	} else {
+		strncat(login,argv[1],31);
+		strncat(password,argv[2],31);
+	}
+	
+	const CYCUser *user = NULL;
+	const CYC2fa  *user2fa = NULL;
+	CYCLIENTS_AUTH auth = CYCLIENTS_AUTH_ERROR;
+
+	auth = cyclients_login(login, password,
+		 	&user, &user2fa);
+	
+	cyclients_companies(user->user_token,
+			NULL,
+		 	NULL, companies_cb);
+
+	return 0;
+
 	prozubi_t *p = prozubi_init(
 			"database.db", 
 			NULL, 
