@@ -37,9 +37,7 @@ SET(KDATA2_SOURCE_DIR ${PROZUBI_SOURCE_DIR}/kdata2)
 add_subdirectory(${KDATA2_SOURCE_DIR})
 
 include_directories(${CMAKE_SOURCE_DIR})
-#include_directories(${PROZUBI_SOURCE_DIR})
-#include_directories(${KDATA2_SOURCE_DIR})
-#include_directories(${KDATA2_SOURCE_DIR}/sqlite3)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/kdata2/sqlite3)
 
 if (NOT WIN32)
 find_package(TIFF)
@@ -54,17 +52,6 @@ if(WIN32)
 	else()
 		set(WINDIR win32)
 	endif()
-#pthreads
-#	find_package(Threads)
-#	if (NOT Threads_FOUND)
-		add_library(pthread SHARED IMPORTED)
-		set_target_properties(pthread PROPERTIES 
-			IMPORTED_LOCATION
-			${CYANDEXDISK_SOURCE_DIR}/${WINDIR}/pthreads-win32/lib/pthreadGC1.dll
-			IMPORTED_IMPLIB ${CYANDEXDISK_SOURCE_DIR}/${WINDIR}/pthreads-win32/lib/libpthreadGC1.a)	
-		include_directories(${CYANDEXDISK_SOURCE_DIR}/${WINDIR}/pthreads-win32/include)	
-#	endif()
-	list(APPEND ADDLIBS pthread)
 #TIFF
 	add_library(tiff STATIC IMPORTED)		
 	set_target_properties(tiff PROPERTIES 
